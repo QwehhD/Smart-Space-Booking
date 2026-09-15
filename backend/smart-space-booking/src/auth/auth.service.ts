@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Prisma, Role } from '@prisma/client';
@@ -7,11 +11,20 @@ import { BCRYPT_SALT_ROUNDS } from '../common/constants/validation.constant';
 import { MakerContext } from '../maker/interfaces/maker-context.interface';
 import { PrismaService } from '../prisma/prisma.service';
 import { serializeMember, serializeSpaceOwner } from './auth.serializer';
+import { LoginDto } from './dto/login.dto';
 import { RegisterAdminSpaceDto } from './dto/register-admin-space.dto';
 import { RegisterMemberDto } from './dto/register-member.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 
 const USERNAME_TERPAKAI = 'Username sudah digunakan oleh akun lain!';
+const KREDENSIAL_SALAH = 'Username atau Password salah!';
+
+/**
+ * Hash tak bermakna untuk dibandingkan ketika akun tidak ditemukan, agar biaya
+ * bcrypt tetap dikeluarkan dan lama respons login tidak dapat dipakai menebak
+ * username mana yang terdaftar.
+ */
+const PASSWORD_UMPAN = '$2b$10$' + 'x'.repeat(53);
 
 @Injectable()
 export class AuthService {
@@ -60,6 +73,7 @@ export class AuthService {
         sub: user.id,
         username: user.username,
         role: user.role,
+        maker_id: maker.id,
         member_id: member.id,
       }),
     };
@@ -105,7 +119,53 @@ export class AuthService {
         sub: user.id,
         username: user.username,
         role: user.role,
+        maker_id: maker.id,
         owner_id: owner.id,
+      }),
+    };
+  }
+
+  /**
+   * Login dicari di dalam tenant yang aktif, karena username hanya unik per
+   * maker sehingga username yang sama bisa dimiliki akun di tenant lain.
+   */
+  async login(dto: LoginDto, maker: MakerContext) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id_maker_username: { id_maker: maker.id, username: dto.username },
+      },
+      include: { member: true, space_owner: true },
+    });
+
+    const cocok = await bcrypt.compare(
+      dto.password,
+      user?.password ?? PASSWORD_UMPAN,
+    );
+
+    // Member yang sudah di-soft-delete diperlakukan seperti akun yang tidak ada,
+    // supaya admin yang menghapus member benar-benar mencabut aksesnya.
+    if (!user || !cocok || user.member?.deleted_at) {
+      throw new UnauthorizedException(KREDENSIAL_SALAH);
+    }
+
+    return {
+      id: user.id,
+      username: user.username,
+      role: user.role,
+      maker_id: user.id_maker,
+      // Soal mencontohkan kedua kunci selalu ada pada response login, yang tidak
+      // relevan bernilai null, sehingga frontend tidak perlu memeriksa role dulu.
+      member: user.member ? serializeMember(user.member, this.appUrl) : null,
+      space_owner: user.space_owner
+        ? serializeSpaceOwner(user.space_owner, this.appUrl)
+        : null,
+      access_token: this.terbitkanToken({
+        sub: user.id,
+        username: user.username,
+        role: user.role,
+        maker_id: user.id_maker,
+        member_id: user.member?.id,
+        owner_id: user.space_owner?.id,
       }),
     };
   }

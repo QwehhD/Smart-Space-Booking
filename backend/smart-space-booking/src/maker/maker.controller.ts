@@ -14,6 +14,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { CurrentMaker } from '../common/decorators/current-maker.decorator';
+import { Public } from '../common/decorators/public.decorator';
 import { ResponseMessage } from '../common/decorators/response-message.decorator';
 import { SkipMakerContext } from '../common/decorators/skip-maker-context.decorator';
 import { CurrentMakerAccount } from './decorators/current-maker-account.decorator';
@@ -36,6 +37,7 @@ import { MakerService } from './maker.service';
  */
 @ApiTags('App Maker')
 @SkipMakerContext()
+@Public()
 @Controller('maker')
 export class MakerController {
   constructor(private readonly makerService: MakerService) {}

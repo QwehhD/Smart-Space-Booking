@@ -5,6 +5,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { MakerModule } from './maker/maker.module';
 import { MakerContextGuard } from './common/guards/maker-context.guard';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { TransformResponseInterceptor } from './common/interceptors/transform-response.interceptor';
 import { validationExceptionFactory } from './common/pipes/validation-exception.factory';
@@ -26,9 +27,15 @@ import { AppService } from './app.service';
         exceptionFactory: validationExceptionFactory,
       }),
     },
+    // Urutan penting: tenant harus sudah menempel pada request sebelum
+    // JwtStrategy mencocokkan token dengan tenant tersebut.
     {
       provide: APP_GUARD,
       useClass: MakerContextGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
     },
     {
       provide: APP_INTERCEPTOR,

@@ -154,3 +154,30 @@ transaksi yang pernah terjadi.
 NestJS memberi status 201 pada setiap handler `@Post`. Untuk endpoint login hal itu keliru
 karena tidak ada sumber daya yang dibuat, dan soal memang mencontohkan 200, sehingga login
 memakai `@HttpCode(HttpStatus.OK)`.
+
+## 14. JwtAuthGuard dipasang global, endpoint tertutup secara bawaan
+
+Guard autentikasi dipasang sebagai `APP_GUARD`, lalu endpoint yang memang publik
+ditandai `@Public()`. Pilihan ini diambil agar kesalahan yang paling mudah terjadi, yaitu
+lupa memasang guard pada endpoint baru, berakibat endpoint tertutup dan langsung terlihat
+saat dicoba, bukan endpoint terbuka yang diam-diam dapat diakses siapa saja.
+
+Urutan pendaftaran guard penting: `MakerContextGuard` didaftarkan lebih dulu agar tenant
+sudah menempel pada request sebelum `JwtStrategy` mencocokkan token dengan tenant tersebut.
+
+## 15. Token diperiksa terhadap tenant yang aktif pada request
+
+`JwtStrategy` menolak token bila `id_maker` pemilik token berbeda dengan tenant yang sedang
+aktif. Tanpa pemeriksaan ini, token yang sah dari satu app key masih dapat dipakai sambil
+mengirim header app key milik tenant lain, sehingga isolasi data dapat ditembus tanpa perlu
+menebak password siapa pun.
+
+Akun juga dibaca ulang dari database pada setiap request, bukan dipercaya dari isi token,
+supaya akun yang sudah dihapus berhenti berlaku seketika dan tidak menunggu masa berlaku
+token habis. Member yang sudah di-soft-delete diperlakukan sebagai akun yang tidak ada, baik
+saat login maupun saat memakai token yang sudah terbit, karena bagi admin yang menghapusnya
+akses member tersebut memang sudah dicabut.
+
+Pemeriksaan ini tidak terlihat dari bentuk response mana pun, sehingga diuji langsung di
+tingkat unit pada `src/auth/strategies/jwt.strategy.spec.ts`, tidak menunggu tahap pengujian
+di akhir.
