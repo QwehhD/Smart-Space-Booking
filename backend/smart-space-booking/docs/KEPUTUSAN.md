@@ -544,3 +544,44 @@ contoh, dan pemindaiannya dilakukan admin sebagai cara menemukan reservasi yang 
 di-check-in lewat `POST /api/admin/reservasi/{id}/check-in` yang memang ada. Keduanya karena
 itu tidak dibuat, sejalan dengan `status_berlaku` dan `availability/slots` yang juga tidak
 ada di soal.
+
+## 48. Seeder bersifat idempoten dan mengisi maker bawaan
+
+`prisma/seed.ts` mencari setiap baris berdasarkan kunci alaminya lebih dulu, lalu membuatnya
+bila belum ada dan menyesuaikannya bila sudah. Reservasi dikenali dari kombinasi space,
+tanggal, dan jam mulainya. Dengan begitu `npm run seed` dapat dijalankan berkali-kali tanpa
+menggandakan data maupun menghapus data yang sudah ada, yang penting karena seed dijalankan
+pada database yang sama dengan yang dipakai mengembangkan.
+
+Datanya dimasukkan ke maker bawaan `mk_default_ukk_2026`, yaitu tenant yang dipakai ketika
+request tidak menyertakan header `x-maker-key`, sehingga hasil seed langsung terlihat tanpa
+konfigurasi apa pun di frontend.
+
+Isinya 2 pengelola, 5 member, 6 space, 4 kode promo, dan 25 reservasi yang tersebar dari dua
+bulan lalu sampai bulan depan dengan status bermacam-macam, supaya laporan bulanan dan histori
+member langsung memiliki angka yang dapat dilihat.
+
+## 49. Pengujian e2e berjalan di dalam tenantnya sendiri
+
+Setiap kali dijalankan, `test/alur-utama.e2e-spec.ts` mendaftarkan akun App Maker baru dan
+bekerja sepenuhnya di dalam tenant tersebut. Mekanisme multi-tenancy yang memang sudah ada
+dipakai sekaligus sebagai pemisah data pengujian, sehingga pengujian tidak pernah bercampur
+dengan data seed maupun sisa pengujian sebelumnya, dan dapat dijalankan berulang kali tanpa
+menyiapkan database khusus.
+
+Pembersihannya dilakukan berurutan dari anak ke induk, bukan mengandalkan cascade dari
+`maker`, karena `reservasi` merujuk `member` tanpa cascade sehingga urutan penghapusan yang
+dipilih database sendiri dapat melanggar foreign key tersebut.
+
+Urutan pengujiannya sengaja berurutan karena yang diperiksa memang alurnya: space harus ada
+sebelum dapat dipesan, dan reservasi harus disetujui sebelum dapat di-check-in.
+
+## 50. Masa berlaku promo dinilai saat pemesanan, bukan pada tanggal sewa
+
+Sempat keliru saat menyusun data pengujian: promo dibuat berlaku pada tahun tanggal sewanya,
+padahal `POST /api/diskon/check` dan pembuatan reservasi sama-sama memeriksa apakah promo
+berlaku **saat ini**, bukan pada tanggal reservasinya.
+
+Perilaku itu dipertahankan karena sejalan dengan `GET /api/diskon/active` yang menurut soal
+menampilkan "promo yang sedang aktif", dan sesuai kebiasaan promo pada umumnya: yang menentukan
+adalah kapan pemesanan dilakukan, bukan kapan jasanya dipakai.
