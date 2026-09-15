@@ -57,11 +57,33 @@ yang sudah di-soft-delete tidak dapat dibuat ulang dengan nama yang sama oleh pe
 sama. Ini dianggap wajar karena riwayat reservasi lama masih merujuk ke kode tersebut,
 sehingga memakai ulang nama yang sama berpotensi membingungkan saat penelusuran laporan.
 
-## 7. Migrasi awal dibuat secara offline
+## 7. Migrasi awal dibuat secara offline, lalu diterapkan dan diverifikasi
 
-Mesin pengembangan belum memiliki server MySQL/MariaDB aktif, sehingga `prisma migrate dev`
-belum dapat dijalankan. File `prisma/migrations/20260915000000_init/migration.sql`
-dihasilkan dengan `prisma migrate diff --from-empty --to-schema-datamodel`, yang
-menghasilkan SQL identik dengan migrasi normal. Setelah database tersedia, migrasi
-diterapkan dengan `npx prisma migrate deploy` (atau `migrate dev` untuk pengembangan
-selanjutnya).
+Saat skema disusun, mesin pengembangan belum memiliki database yang dapat diakses sehingga
+`prisma migrate dev` tidak dapat dijalankan. File
+`prisma/migrations/20260915000000_init/migration.sql` dihasilkan dengan
+`prisma migrate diff --from-empty --to-schema-datamodel`, yang menghasilkan SQL identik
+dengan migrasi normal.
+
+Migrasi tersebut kini sudah diterapkan dengan `npx prisma migrate deploy` dan menghasilkan
+ketujuh tabel sesuai skema. Endpoint `/health`, registrasi member, dan registrasi
+admin space sudah diuji terhadap database sungguhan: password tersimpan sebagai hash
+bcrypt 60 karakter berawalan `$2b$10$`, dan username ganda ditolak dengan pesan yang
+sesuai kontrak.
+
+## 8. Database pengembangan lokal memakai akun anonim dan awalan `test_`
+
+`.env.example` tetap memakai `mysql://root:@localhost:3306/ukk_coworking` sesuai
+spesifikasi, karena di komputer penguji MySQL biasanya dijalankan lewat XAMPP dengan root
+tanpa password.
+
+Mesin pengembangan ini memakai MariaDB bawaan Arch Linux, yang mengautentikasi root dengan
+plugin `unix_socket` sehingga root hanya dapat dipakai lewat `sudo` dan tidak dapat diakses
+Prisma melalui TCP. Membuat user database khusus memerlukan akses `sudo` yang tidak selalu
+tersedia di sesi non-interaktif.
+
+Karena itu `.env` lokal diarahkan ke `mysql://@127.0.0.1:3306/test_ukk_coworking`. MariaDB
+memberikan hak penuh kepada akun anonim atas database yang namanya berawalan `test_`,
+sehingga database pengembangan dapat dibuat dan dimigrasikan tanpa `sudo` sama sekali dan
+tanpa melemahkan autentikasi root. Nama database hanya berlaku lokal, tidak memengaruhi
+kode maupun berkas yang dikumpulkan.
