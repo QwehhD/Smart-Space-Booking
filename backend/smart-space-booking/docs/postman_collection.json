@@ -1,0 +1,1718 @@
+{
+  "info": {
+    "name": "Smart Space Booking API",
+    "description": "REST API sistem reservasi coworking space untuk UKK RPL 2026/2027 Paket B. Mencakup autentikasi multi-role, katalog space, kode promo, reservasi, e-ticket ber-QR, check-in/check-out, serta rekapitulasi pendapatan bulanan.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "maker_key",
+      "value": "mk_default_ukk_2026"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Root & Health Check",
+      "item": [
+        {
+          "name": "Informasi API dan tautan dokumentasi",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": []
+            }
+          }
+        },
+        {
+          "name": "Status server beserta koneksi database",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "App Maker",
+      "item": [
+        {
+          "name": "Registrasi akun siswa dan penerbitan app key",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/maker/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "maker",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Budi Santoso\",\n  \"username\": \"budisantoso\",\n  \"email\": \"budi@smk.sch.id\",\n  \"password\": \"Password123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Login akun siswa dengan username atau email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/maker/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "maker",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usernameOrEmail\": \"budisantoso\",\n  \"password\": \"Password123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Profil dan app key siswa yang sedang login",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/maker/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "maker",
+                "me"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Rekap jumlah data milik siswa",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/maker/stats",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "maker",
+                "stats"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Daftar seluruh siswa terdaftar (panel guru)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/maker/list",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "maker",
+                "list"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Autentikasi",
+      "item": [
+        {
+          "name": "Registrasi akun member / pelanggan baru",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/register/member",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register",
+                "member"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"johndoe\",\n  \"password\": \"Secret123!\",\n  \"nama_member\": \"John Doe\",\n  \"instansi\": \"Universitas Indonesia / PT Maju Mundur\",\n  \"alamat\": \"Jl. Sudirman No. 123, Jakarta Selatan\",\n  \"telp\": \"081234567890\",\n  \"foto\": \"member_john.jpg\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Registrasi pengelola lokasi coworking space",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/register/admin-space",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register",
+                "admin-space"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin_space1\",\n  \"password\": \"Admin123!\",\n  \"nama_coworking\": \"Moklet Hub Coworking\",\n  \"nama_pemilik\": \"Ahmad Bidin\",\n  \"telp\": \"081298765432\",\n  \"alamat\": \"Jl. Danau Ranau No. 1, Malang\",\n  \"deskripsi\": \"Coworking space 3 lantai dengan WiFi 100 Mbps dan area parkir luas.\",\n  \"foto\": \"moklet_hub.jpg\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Login akun member atau admin space",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"johndoe\",\n  \"password\": \"Secret123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Profil dan hak akses pengguna yang sedang login",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "profile"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Upload Berkas",
+      "item": [
+        {
+          "name": "Unggah berkas gambar umum",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/upload/image",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "upload",
+                "image"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Unggah foto ruangan atau meja space",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/upload/spaces",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "upload",
+                "spaces"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Unggah foto profil member",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/upload/members",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "upload",
+                "members"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Profil Lokasi",
+      "item": [
+        {
+          "name": "Lihat profil lokasi coworking space",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "profile"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Perbarui profil lokasi coworking space",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "profile"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama_coworking\": \"Moklet Hub Coworking Space\",\n  \"nama_pemilik\": \"Ahmad Bidin, S.Kom\",\n  \"telp\": \"081298765432\",\n  \"alamat\": \"Jl. Danau Ranau No. 1, Malang\",\n  \"deskripsi\": \"Coworking space nyaman di pusat kota.\",\n  \"foto\": \"1787799592972-544446318.jpeg\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Space",
+      "item": [
+        {
+          "name": "Daftar seluruh space milik admin",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/spaces",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "spaces"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Tambah space baru beserta fasilitas dan foto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/spaces",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "spaces"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama_space\": \"Personal Desk Alpha 01\",\n  \"harga_per_jam\": 25000,\n  \"tipe\": \"desk\",\n  \"kapasitas\": 1,\n  \"deskripsi\": \"WiFi 100Mbps, stopkontak, monitor 24 inch.\",\n  \"foto\": \"desk_alpha_01.jpg\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Detail space berdasarkan ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/spaces/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "spaces",
+                ":id"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Perbarui data ruangan dan fasilitas space",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/spaces/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "spaces",
+                ":id"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama_space\": \"Personal Desk Alpha 01\",\n  \"harga_per_jam\": 25000,\n  \"tipe\": \"desk\",\n  \"kapasitas\": 1,\n  \"deskripsi\": \"WiFi 100Mbps, stopkontak, monitor 24 inch.\",\n  \"foto\": \"desk_alpha_01.jpg\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Hapus space (soft delete)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/spaces/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "spaces",
+                ":id"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Kode Promo",
+      "item": [
+        {
+          "name": "Daftar seluruh kode promo milik admin",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/diskon",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "diskon"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Tambah kode promo atau event diskon baru",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/diskon",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "diskon"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama_diskon\": \"PROMOAGUSTUS\",\n  \"persentase_diskon\": 20,\n  \"tanggal_awal\": \"2026-08-01T00:00:00Z\",\n  \"tanggal_akhir\": \"2026-08-31T23:59:59Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Detail kode promo berdasarkan ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/diskon/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "diskon",
+                ":id"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Perbarui kode promo dan periode berlakunya",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/diskon/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "diskon",
+                ":id"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama_diskon\": \"PROMOAGUSTUS\",\n  \"persentase_diskon\": 20,\n  \"tanggal_awal\": \"2026-08-01T00:00:00Z\",\n  \"tanggal_akhir\": \"2026-08-31T23:59:59Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Hapus kode promo (soft delete)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/diskon/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "diskon",
+                ":id"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Member",
+      "item": [
+        {
+          "name": "Daftar seluruh member pada tenant ini",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/members",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "members"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Tambah data member baru beserta akun loginnya",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/members",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "members"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"user_budi\",\n  \"password\": \"Secret123!\",\n  \"nama_member\": \"Budi Raharjo\",\n  \"instansi\": \"SMK Telkom Malang\",\n  \"alamat\": \"Jl. Danau Ranau No. 1, Sawojajar, Malang\",\n  \"telp\": \"085712345678\",\n  \"foto\": \"budi_raharjo.jpg\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Detail member berdasarkan ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/members/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "members",
+                ":id"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Perbarui data member, termasuk reset password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/members/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "members",
+                ":id"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"Secret123!\",\n  \"nama_member\": \"Budi Raharjo\",\n  \"instansi\": \"SMK Telkom Malang\",\n  \"alamat\": \"Jl. Danau Ranau No. 1, Sawojajar, Malang\",\n  \"telp\": \"085712345678\",\n  \"foto\": \"budi_raharjo.jpg\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Hapus data member (soft delete)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/members/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "members",
+                ":id"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Reservasi",
+      "item": [
+        {
+          "name": "Seluruh reservasi pada lokasi ini, dengan filter",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/reservasi",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "reservasi"
+              ],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "year",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "id_space",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "tanggal",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Konfirmasi atau ubah status pemesanan",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/reservasi/:id/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "reservasi",
+                ":id",
+                "status"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"disetujui\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Check-in pelanggan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/reservasi/:id/check-in",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "reservasi",
+                ":id",
+                "check-in"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Check-out pelanggan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/reservasi/:id/check-out",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "reservasi",
+                ":id",
+                "check-out"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Laporan",
+      "item": [
+        {
+          "name": "Rekap estimasi dan realisasi pendapatan per bulan",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/reports/monthly",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "reports",
+                "monthly"
+              ],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "year",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Alias ringkas rekap pendapatan bulanan",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/reports/income",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "reports",
+                "income"
+              ],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "year",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Katalog Space",
+      "item": [
+        {
+          "name": "Cek ketersediaan space pada tanggal dan jam",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/spaces/availability",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "spaces",
+                "availability"
+              ],
+              "query": [
+                {
+                  "key": "id_space",
+                  "value": "",
+                  "disabled": false
+                },
+                {
+                  "key": "tanggal",
+                  "value": "",
+                  "disabled": false
+                },
+                {
+                  "key": "jam_mulai",
+                  "value": "",
+                  "disabled": false
+                },
+                {
+                  "key": "durasi_jam",
+                  "value": "",
+                  "disabled": false
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Daftar tipe space beserta keterangannya",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/spaces/types",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "spaces",
+                "types"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Katalog seluruh space, dengan filter tipe dan pencarian",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/spaces",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "spaces"
+              ],
+              "query": [
+                {
+                  "key": "tipe",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Detail space berdasarkan ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/spaces/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "spaces",
+                ":id"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Katalog Diskon",
+      "item": [
+        {
+          "name": "Daftar promo yang sedang aktif",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/diskon/active",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "diskon",
+                "active"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Periksa validitas kode promo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/diskon/check",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "diskon",
+                "check"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama_diskon\": \"DISKONHEMAT20\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Detail diskon berdasarkan ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/diskon/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "diskon",
+                ":id"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reservasi Member",
+      "item": [
+        {
+          "name": "Buat pemesanan space baru",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/reservasi",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "reservasi"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_space\": 1,\n  \"tanggal_reservasi\": \"2026-08-30\",\n  \"jam_mulai\": \"09:00\",\n  \"durasi_jam\": 3,\n  \"id_diskon\": 1,\n  \"kode_promo\": \"DISKONHEMAT20\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Seluruh pemesanan milik sendiri",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/reservasi/my",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "reservasi",
+                "my"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Histori pemesanan per bulan beserta rekapnya",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/reservasi/my/history",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "reservasi",
+                "my",
+                "history"
+              ],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "year",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "E-Ticket reservasi beserta QR code check-in",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/reservasi/:id/e-ticket",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "reservasi",
+                ":id",
+                "e-ticket"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Detail reservasi berdasarkan ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/reservasi/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "reservasi",
+                ":id"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Batalkan pemesanan sendiri",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "x-maker-key",
+                "value": "{{maker_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/reservasi/:id/cancel",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "reservasi",
+                ":id",
+                "cancel"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
+import { pasangGlobalPrefix } from './../src/common/app-prefix';
 import { PrismaService } from './../src/prisma/prisma.service';
 
 /**
@@ -44,7 +45,7 @@ describe('Alur utama (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.setGlobalPrefix('api', { exclude: ['/', 'health'] });
+    pasangGlobalPrefix(app);
     await app.init();
     prisma = app.get(PrismaService);
   });

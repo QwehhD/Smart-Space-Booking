@@ -585,3 +585,36 @@ berlaku **saat ini**, bukan pada tanggal reservasinya.
 Perilaku itu dipertahankan karena sejalan dengan `GET /api/diskon/active` yang menurut soal
 menampilkan "promo yang sedang aktif", dan sesuai kebiasaan promo pada umumnya: yang menentukan
 adalah kapan pemesanan dilakukan, bukan kapan jasanya dipakai.
+
+## 51. Koleksi Postman diturunkan dari dokumen Swagger
+
+`docs/postman_collection.json` tidak ditulis tangan, melainkan disusun dari dokumen OpenAPI
+yang sudah dihasilkan NestJS, lewat `scripts/build-postman.ts`. Dengan begitu kedua berkas
+tidak pernah berbeda isi: endpoint, parameter query, dan contoh body yang baru cukup
+ditambahkan sekali pada controller dan DTO-nya.
+
+Koleksinya memakai variabel `base_url`, `maker_key`, dan `access_token`, sehingga alamat
+server dan kredensial cukup diisi sekali lalu berlaku untuk seluruh request. Contoh body
+diambil dari nilai `example` pada DTO, sehingga request di Postman langsung dapat dijalankan.
+
+## 52. Awalan `/api` dipusatkan di satu fungsi
+
+Awalan global sempat ditulis ulang di `main.ts`, skrip ekspor dokumentasi, dan dua berkas
+pengujian e2e. Akibatnya koleksi Postman pertama kali terbit tanpa `/api` karena skrip
+ekspornya tidak ikut memasang awalan itu.
+
+Pengaturannya karena itu dipindahkan ke `pasangGlobalPrefix` di `src/common/app-prefix.ts` dan
+dipakai keempatnya, supaya path yang terdokumentasi, yang diuji, dan yang benar-benar dilayani
+tidak dapat berbeda.
+
+## 53. Hasil review akhir terhadap Gambar Kerja
+
+Seluruh 50 endpoint pada tabel ringkasan soal terimplementasi, tanpa kekurangan dan tanpa
+endpoint tambahan di luar daftar. Ketujuh kebutuhan Member dan kesembilan kebutuhan Admin pada
+Gambar Kerja juga diperiksa satu per satu terhadap aplikasi yang berjalan dan seluruhnya
+terpenuhi.
+
+Pemeriksaan itu sekaligus membenarkan keputusan nomor 23: Gambar Kerja butir Admin nomor 3
+mewajibkan admin dapat memperbarui alamat dan deskripsi fasilitas lokasinya, padahal contoh
+payload `PUT /api/admin/profile` pada Kontrak API hanya memuat tiga field. Menerima keduanya
+sebagai field opsional membuat kedua bagian soal terpenuhi sekaligus.

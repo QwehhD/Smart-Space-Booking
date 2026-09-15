@@ -1,0 +1,2297 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "AppController_getApiInfo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Informasi API dan tautan dokumentasi",
+        "tags": [
+          "Root & Health Check"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "AppController_getHealth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Status server beserta koneksi database",
+        "tags": [
+          "Root & Health Check"
+        ]
+      }
+    },
+    "/api/maker/register": {
+      "post": {
+        "operationId": "MakerController_register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterMakerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Registrasi akun siswa dan penerbitan app key",
+        "tags": [
+          "App Maker"
+        ]
+      }
+    },
+    "/api/maker/login": {
+      "post": {
+        "operationId": "MakerController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginMakerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Login akun siswa dengan username atau email",
+        "tags": [
+          "App Maker"
+        ]
+      }
+    },
+    "/api/maker/me": {
+      "get": {
+        "operationId": "MakerController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Profil dan app key siswa yang sedang login",
+        "tags": [
+          "App Maker"
+        ]
+      }
+    },
+    "/api/maker/stats": {
+      "get": {
+        "operationId": "MakerController_stats",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "description": "Alternatif autentikasi bila tidak memakai bearer token.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Rekap jumlah data milik siswa",
+        "tags": [
+          "App Maker"
+        ]
+      }
+    },
+    "/api/maker/list": {
+      "get": {
+        "operationId": "MakerController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Daftar seluruh siswa terdaftar (panel guru)",
+        "tags": [
+          "App Maker"
+        ]
+      }
+    },
+    "/api/auth/register/member": {
+      "post": {
+        "operationId": "AuthController_registerMember",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "description": "App key pemilik data. Bila dikosongkan, data masuk ke maker bawaan.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterMemberDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Registrasi akun member / pelanggan baru",
+        "tags": [
+          "Autentikasi"
+        ]
+      }
+    },
+    "/api/auth/register/admin-space": {
+      "post": {
+        "operationId": "AuthController_registerAdminSpace",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "description": "App key pemilik data. Bila dikosongkan, data masuk ke maker bawaan.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterAdminSpaceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Registrasi pengelola lokasi coworking space",
+        "tags": [
+          "Autentikasi"
+        ]
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "description": "App key pemilik data. Bila dikosongkan, data masuk ke maker bawaan.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Login akun member atau admin space",
+        "tags": [
+          "Autentikasi"
+        ]
+      }
+    },
+    "/api/auth/profile": {
+      "get": {
+        "operationId": "AuthController_profile",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "description": "App key pemilik data. Bila dikosongkan, data masuk ke maker bawaan.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Profil dan hak akses pengguna yang sedang login",
+        "tags": [
+          "Autentikasi"
+        ]
+      }
+    },
+    "/api/upload/image": {
+      "post": {
+        "operationId": "UploadController_image",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Unggah berkas gambar umum",
+        "tags": [
+          "Upload Berkas"
+        ]
+      }
+    },
+    "/api/upload/spaces": {
+      "post": {
+        "operationId": "UploadController_spaces",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Unggah foto ruangan atau meja space",
+        "tags": [
+          "Upload Berkas"
+        ]
+      }
+    },
+    "/api/upload/members": {
+      "post": {
+        "operationId": "UploadController_members",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Unggah foto profil member",
+        "tags": [
+          "Upload Berkas"
+        ]
+      }
+    },
+    "/api/admin/profile": {
+      "get": {
+        "operationId": "AdminProfileController_lihat",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Lihat profil lokasi coworking space",
+        "tags": [
+          "Admin - Profil Lokasi"
+        ]
+      },
+      "put": {
+        "operationId": "AdminProfileController_perbarui",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Perbarui profil lokasi coworking space",
+        "tags": [
+          "Admin - Profil Lokasi"
+        ]
+      }
+    },
+    "/api/admin/spaces": {
+      "get": {
+        "operationId": "AdminSpacesController_daftar",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Daftar seluruh space milik admin",
+        "tags": [
+          "Admin - Space"
+        ]
+      },
+      "post": {
+        "operationId": "AdminSpacesController_buat",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSpaceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Tambah space baru beserta fasilitas dan foto",
+        "tags": [
+          "Admin - Space"
+        ]
+      }
+    },
+    "/api/admin/spaces/{id}": {
+      "get": {
+        "operationId": "AdminSpacesController_detail",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Detail space berdasarkan ID",
+        "tags": [
+          "Admin - Space"
+        ]
+      },
+      "put": {
+        "operationId": "AdminSpacesController_perbarui",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSpaceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Perbarui data ruangan dan fasilitas space",
+        "tags": [
+          "Admin - Space"
+        ]
+      },
+      "delete": {
+        "operationId": "AdminSpacesController_hapus",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Hapus space (soft delete)",
+        "tags": [
+          "Admin - Space"
+        ]
+      }
+    },
+    "/api/admin/diskon": {
+      "get": {
+        "operationId": "AdminDiskonController_daftar",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Daftar seluruh kode promo milik admin",
+        "tags": [
+          "Admin - Kode Promo"
+        ]
+      },
+      "post": {
+        "operationId": "AdminDiskonController_buat",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDiskonDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Tambah kode promo atau event diskon baru",
+        "tags": [
+          "Admin - Kode Promo"
+        ]
+      }
+    },
+    "/api/admin/diskon/{id}": {
+      "get": {
+        "operationId": "AdminDiskonController_detail",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Detail kode promo berdasarkan ID",
+        "tags": [
+          "Admin - Kode Promo"
+        ]
+      },
+      "put": {
+        "operationId": "AdminDiskonController_perbarui",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDiskonDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Perbarui kode promo dan periode berlakunya",
+        "tags": [
+          "Admin - Kode Promo"
+        ]
+      },
+      "delete": {
+        "operationId": "AdminDiskonController_hapus",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Hapus kode promo (soft delete)",
+        "tags": [
+          "Admin - Kode Promo"
+        ]
+      }
+    },
+    "/api/admin/members": {
+      "get": {
+        "operationId": "AdminMembersController_daftar",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Cari berdasarkan nama, instansi, atau nomor telepon",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Daftar seluruh member pada tenant ini",
+        "tags": [
+          "Admin - Member"
+        ]
+      },
+      "post": {
+        "operationId": "AdminMembersController_buat",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMemberAdminDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Tambah data member baru beserta akun loginnya",
+        "tags": [
+          "Admin - Member"
+        ]
+      }
+    },
+    "/api/admin/members/{id}": {
+      "get": {
+        "operationId": "AdminMembersController_detail",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Detail member berdasarkan ID",
+        "tags": [
+          "Admin - Member"
+        ]
+      },
+      "put": {
+        "operationId": "AdminMembersController_perbarui",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMemberAdminDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Perbarui data member, termasuk reset password",
+        "tags": [
+          "Admin - Member"
+        ]
+      },
+      "delete": {
+        "operationId": "AdminMembersController_hapus",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Hapus data member (soft delete)",
+        "tags": [
+          "Admin - Member"
+        ]
+      }
+    },
+    "/api/admin/reservasi": {
+      "get": {
+        "operationId": "AdminReservasiController_daftar",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "month",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 12,
+              "example": 8,
+              "type": "number"
+            }
+          },
+          {
+            "name": "year",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 2026,
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "belum_dikonfirm",
+                "disetujui",
+                "aktif",
+                "selesai",
+                "dibatalkan"
+              ]
+            }
+          },
+          {
+            "name": "id_space",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "tanggal",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2026-08-30",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Seluruh reservasi pada lokasi ini, dengan filter",
+        "tags": [
+          "Admin - Reservasi"
+        ]
+      }
+    },
+    "/api/admin/reservasi/{id}/status": {
+      "patch": {
+        "operationId": "AdminReservasiController_ubahStatus",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateReservasiStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Konfirmasi atau ubah status pemesanan",
+        "tags": [
+          "Admin - Reservasi"
+        ]
+      }
+    },
+    "/api/admin/reservasi/{id}/check-in": {
+      "post": {
+        "operationId": "AdminReservasiController_checkIn",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Check-in pelanggan",
+        "tags": [
+          "Admin - Reservasi"
+        ]
+      }
+    },
+    "/api/admin/reservasi/{id}/check-out": {
+      "post": {
+        "operationId": "AdminReservasiController_checkOut",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Check-out pelanggan",
+        "tags": [
+          "Admin - Reservasi"
+        ]
+      }
+    },
+    "/api/admin/reports/monthly": {
+      "get": {
+        "operationId": "AdminReportsController_bulanan",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "month",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 12,
+              "example": 8,
+              "type": "number"
+            }
+          },
+          {
+            "name": "year",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 2026,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Rekap estimasi dan realisasi pendapatan per bulan",
+        "tags": [
+          "Admin - Laporan"
+        ]
+      }
+    },
+    "/api/admin/reports/income": {
+      "get": {
+        "operationId": "AdminReportsController_pendapatan",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "month",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 12,
+              "example": 8,
+              "type": "number"
+            }
+          },
+          {
+            "name": "year",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 2026,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Alias ringkas rekap pendapatan bulanan",
+        "tags": [
+          "Admin - Laporan"
+        ]
+      }
+    },
+    "/api/spaces/availability": {
+      "get": {
+        "operationId": "AvailabilityController_cek",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id_space",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "tanggal",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "example": "2026-08-30",
+              "type": "string"
+            }
+          },
+          {
+            "name": "jam_mulai",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "example": "09:00",
+              "type": "string"
+            }
+          },
+          {
+            "name": "durasi_jam",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "example": 3,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Cek ketersediaan space pada tanggal dan jam",
+        "tags": [
+          "Katalog Space"
+        ]
+      }
+    },
+    "/api/spaces/types": {
+      "get": {
+        "operationId": "SpacesController_tipe",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Daftar tipe space beserta keterangannya",
+        "tags": [
+          "Katalog Space"
+        ]
+      }
+    },
+    "/api/spaces": {
+      "get": {
+        "operationId": "SpacesController_daftar",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tipe",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "desk",
+                "meeting_room",
+                "private_office"
+              ]
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Cari berdasarkan nama space atau fasilitas pada deskripsi",
+            "schema": {
+              "example": "Alpha",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Katalog seluruh space, dengan filter tipe dan pencarian",
+        "tags": [
+          "Katalog Space"
+        ]
+      }
+    },
+    "/api/spaces/{id}": {
+      "get": {
+        "operationId": "SpacesController_detail",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Detail space berdasarkan ID",
+        "tags": [
+          "Katalog Space"
+        ]
+      }
+    },
+    "/api/diskon/active": {
+      "get": {
+        "operationId": "DiskonController_aktif",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Daftar promo yang sedang aktif",
+        "tags": [
+          "Katalog Diskon"
+        ]
+      }
+    },
+    "/api/diskon/check": {
+      "post": {
+        "operationId": "DiskonController_periksa",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckPromoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Periksa validitas kode promo",
+        "tags": [
+          "Katalog Diskon"
+        ]
+      }
+    },
+    "/api/diskon/{id}": {
+      "get": {
+        "operationId": "DiskonController_detail",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Detail diskon berdasarkan ID",
+        "tags": [
+          "Katalog Diskon"
+        ]
+      }
+    },
+    "/api/reservasi": {
+      "post": {
+        "operationId": "ReservasiController_buat",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReservasiDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Buat pemesanan space baru",
+        "tags": [
+          "Reservasi Member"
+        ]
+      }
+    },
+    "/api/reservasi/my": {
+      "get": {
+        "operationId": "ReservasiController_milikSaya",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Seluruh pemesanan milik sendiri",
+        "tags": [
+          "Reservasi Member"
+        ]
+      }
+    },
+    "/api/reservasi/my/history": {
+      "get": {
+        "operationId": "ReservasiController_histori",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "month",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 12,
+              "example": 8,
+              "type": "number"
+            }
+          },
+          {
+            "name": "year",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 2026,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Histori pemesanan per bulan beserta rekapnya",
+        "tags": [
+          "Reservasi Member"
+        ]
+      }
+    },
+    "/api/reservasi/{id}/e-ticket": {
+      "get": {
+        "operationId": "ReservasiController_etiket",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "E-Ticket reservasi beserta QR code check-in",
+        "tags": [
+          "Reservasi Member"
+        ]
+      }
+    },
+    "/api/reservasi/{id}": {
+      "get": {
+        "operationId": "ReservasiController_detail",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Detail reservasi berdasarkan ID",
+        "tags": [
+          "Reservasi Member"
+        ]
+      }
+    },
+    "/api/reservasi/{id}/cancel": {
+      "patch": {
+        "operationId": "ReservasiController_batalkan",
+        "parameters": [
+          {
+            "name": "x-maker-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Batalkan pemesanan sendiri",
+        "tags": [
+          "Reservasi Member"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Smart Space Booking API",
+    "description": "REST API sistem reservasi coworking space untuk UKK RPL 2026/2027 Paket B. Mencakup autentikasi multi-role, katalog space, kode promo, reservasi, e-ticket ber-QR, check-in/check-out, serta rekapitulasi pendapatan bulanan.",
+    "version": "1.0.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "access-token": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "description": "Tempelkan access_token hasil login tanpa awalan \"Bearer\""
+      }
+    },
+    "schemas": {
+      "RegisterMakerDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Budi Santoso"
+          },
+          "username": {
+            "type": "string",
+            "example": "budisantoso"
+          },
+          "email": {
+            "type": "string",
+            "example": "budi@smk.sch.id"
+          },
+          "password": {
+            "type": "string",
+            "example": "Password123!",
+            "minLength": 6
+          }
+        },
+        "required": [
+          "name",
+          "username",
+          "email",
+          "password"
+        ]
+      },
+      "LoginMakerDto": {
+        "type": "object",
+        "properties": {
+          "usernameOrEmail": {
+            "type": "string",
+            "example": "budisantoso",
+            "description": "Username atau alamat email akun App Maker"
+          },
+          "password": {
+            "type": "string",
+            "example": "Password123!"
+          }
+        },
+        "required": [
+          "usernameOrEmail",
+          "password"
+        ]
+      },
+      "RegisterMemberDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "johndoe"
+          },
+          "password": {
+            "type": "string",
+            "example": "Secret123!"
+          },
+          "nama_member": {
+            "type": "string",
+            "example": "John Doe"
+          },
+          "instansi": {
+            "type": "string",
+            "example": "Universitas Indonesia / PT Maju Mundur"
+          },
+          "alamat": {
+            "type": "string",
+            "example": "Jl. Sudirman No. 123, Jakarta Selatan"
+          },
+          "telp": {
+            "type": "string",
+            "example": "081234567890"
+          },
+          "foto": {
+            "type": "string",
+            "example": "member_john.jpg",
+            "description": "Nama file hasil unggah dari POST /api/upload/members"
+          }
+        },
+        "required": [
+          "username",
+          "password",
+          "nama_member",
+          "instansi",
+          "alamat",
+          "telp"
+        ]
+      },
+      "RegisterAdminSpaceDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "admin_space1"
+          },
+          "password": {
+            "type": "string",
+            "example": "Admin123!"
+          },
+          "nama_coworking": {
+            "type": "string",
+            "example": "Moklet Hub Coworking"
+          },
+          "nama_pemilik": {
+            "type": "string",
+            "example": "Ahmad Bidin"
+          },
+          "telp": {
+            "type": "string",
+            "example": "081298765432"
+          },
+          "alamat": {
+            "type": "string",
+            "example": "Jl. Danau Ranau No. 1, Malang"
+          },
+          "deskripsi": {
+            "type": "string",
+            "example": "Coworking space 3 lantai dengan WiFi 100 Mbps dan area parkir luas."
+          },
+          "foto": {
+            "type": "string",
+            "example": "moklet_hub.jpg"
+          }
+        },
+        "required": [
+          "username",
+          "password",
+          "nama_coworking",
+          "nama_pemilik",
+          "telp"
+        ]
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "johndoe",
+            "description": "Username pengguna terdaftar"
+          },
+          "password": {
+            "type": "string",
+            "example": "Secret123!",
+            "description": "Kata sandi akun pengguna"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ]
+      },
+      "UpdateProfileDto": {
+        "type": "object",
+        "properties": {
+          "nama_coworking": {
+            "type": "string",
+            "example": "Moklet Hub Coworking Space"
+          },
+          "nama_pemilik": {
+            "type": "string",
+            "example": "Ahmad Bidin, S.Kom"
+          },
+          "telp": {
+            "type": "string",
+            "example": "081298765432"
+          },
+          "alamat": {
+            "type": "string",
+            "example": "Jl. Danau Ranau No. 1, Malang"
+          },
+          "deskripsi": {
+            "type": "string",
+            "example": "Coworking space nyaman di pusat kota."
+          },
+          "foto": {
+            "type": "string",
+            "example": "1787799592972-544446318.jpeg"
+          }
+        },
+        "required": [
+          "nama_coworking",
+          "nama_pemilik",
+          "telp"
+        ]
+      },
+      "CreateSpaceDto": {
+        "type": "object",
+        "properties": {
+          "nama_space": {
+            "type": "string",
+            "example": "Personal Desk Alpha 01"
+          },
+          "harga_per_jam": {
+            "type": "number",
+            "example": 25000,
+            "description": "Tarif sewa per jam dalam Rupiah"
+          },
+          "tipe": {
+            "type": "string",
+            "enum": [
+              "desk",
+              "meeting_room",
+              "private_office"
+            ],
+            "example": "desk"
+          },
+          "kapasitas": {
+            "type": "number",
+            "example": 1
+          },
+          "deskripsi": {
+            "type": "string",
+            "example": "WiFi 100Mbps, stopkontak, monitor 24 inch."
+          },
+          "foto": {
+            "type": "string",
+            "example": "desk_alpha_01.jpg"
+          }
+        },
+        "required": [
+          "nama_space",
+          "harga_per_jam",
+          "tipe",
+          "kapasitas",
+          "deskripsi"
+        ]
+      },
+      "UpdateSpaceDto": {
+        "type": "object",
+        "properties": {
+          "nama_space": {
+            "type": "string",
+            "example": "Personal Desk Alpha 01"
+          },
+          "harga_per_jam": {
+            "type": "number",
+            "example": 25000,
+            "description": "Tarif sewa per jam dalam Rupiah"
+          },
+          "tipe": {
+            "type": "string",
+            "enum": [
+              "desk",
+              "meeting_room",
+              "private_office"
+            ],
+            "example": "desk"
+          },
+          "kapasitas": {
+            "type": "number",
+            "example": 1
+          },
+          "deskripsi": {
+            "type": "string",
+            "example": "WiFi 100Mbps, stopkontak, monitor 24 inch."
+          },
+          "foto": {
+            "type": "string",
+            "example": "desk_alpha_01.jpg"
+          }
+        }
+      },
+      "CreateDiskonDto": {
+        "type": "object",
+        "properties": {
+          "nama_diskon": {
+            "type": "string",
+            "example": "PROMOAGUSTUS"
+          },
+          "persentase_diskon": {
+            "type": "number",
+            "example": 20,
+            "minimum": 1,
+            "maximum": 100
+          },
+          "tanggal_awal": {
+            "type": "string",
+            "example": "2026-08-01T00:00:00Z"
+          },
+          "tanggal_akhir": {
+            "type": "string",
+            "example": "2026-08-31T23:59:59Z"
+          }
+        },
+        "required": [
+          "nama_diskon",
+          "persentase_diskon",
+          "tanggal_awal",
+          "tanggal_akhir"
+        ]
+      },
+      "UpdateDiskonDto": {
+        "type": "object",
+        "properties": {
+          "nama_diskon": {
+            "type": "string",
+            "example": "PROMOAGUSTUS"
+          },
+          "persentase_diskon": {
+            "type": "number",
+            "example": 20,
+            "minimum": 1,
+            "maximum": 100
+          },
+          "tanggal_awal": {
+            "type": "string",
+            "example": "2026-08-01T00:00:00Z"
+          },
+          "tanggal_akhir": {
+            "type": "string",
+            "example": "2026-08-31T23:59:59Z"
+          }
+        }
+      },
+      "CreateMemberAdminDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "user_budi"
+          },
+          "password": {
+            "type": "string",
+            "example": "Secret123!",
+            "minLength": 6
+          },
+          "nama_member": {
+            "type": "string",
+            "example": "Budi Raharjo"
+          },
+          "instansi": {
+            "type": "string",
+            "example": "SMK Telkom Malang"
+          },
+          "alamat": {
+            "type": "string",
+            "example": "Jl. Danau Ranau No. 1, Sawojajar, Malang"
+          },
+          "telp": {
+            "type": "string",
+            "example": "085712345678"
+          },
+          "foto": {
+            "type": "string",
+            "example": "budi_raharjo.jpg"
+          }
+        },
+        "required": [
+          "username",
+          "password",
+          "nama_member",
+          "instansi",
+          "alamat",
+          "telp"
+        ]
+      },
+      "UpdateMemberAdminDto": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "example": "Secret123!",
+            "minLength": 6
+          },
+          "nama_member": {
+            "type": "string",
+            "example": "Budi Raharjo"
+          },
+          "instansi": {
+            "type": "string",
+            "example": "SMK Telkom Malang"
+          },
+          "alamat": {
+            "type": "string",
+            "example": "Jl. Danau Ranau No. 1, Sawojajar, Malang"
+          },
+          "telp": {
+            "type": "string",
+            "example": "085712345678"
+          },
+          "foto": {
+            "type": "string",
+            "example": "budi_raharjo.jpg"
+          }
+        }
+      },
+      "UpdateReservasiStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "belum_dikonfirm",
+              "disetujui",
+              "aktif",
+              "selesai",
+              "dibatalkan"
+            ],
+            "example": "disetujui"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "CheckPromoDto": {
+        "type": "object",
+        "properties": {
+          "nama_diskon": {
+            "type": "string",
+            "example": "DISKONHEMAT20",
+            "description": "Kode promo yang dimasukkan pengguna pada form checkout"
+          }
+        },
+        "required": [
+          "nama_diskon"
+        ]
+      },
+      "CreateReservasiDto": {
+        "type": "object",
+        "properties": {
+          "id_space": {
+            "type": "number",
+            "example": 1
+          },
+          "tanggal_reservasi": {
+            "type": "string",
+            "example": "2026-08-30"
+          },
+          "jam_mulai": {
+            "type": "string",
+            "example": "09:00"
+          },
+          "durasi_jam": {
+            "type": "number",
+            "example": 3,
+            "minimum": 1
+          },
+          "id_diskon": {
+            "type": "number",
+            "example": 1,
+            "description": "ID promo yang dipilih dari katalog diskon"
+          },
+          "kode_promo": {
+            "type": "string",
+            "example": "DISKONHEMAT20",
+            "description": "Kode promo yang diketik manual; didahulukan bila keduanya dikirim"
+          }
+        },
+        "required": [
+          "id_space",
+          "tanggal_reservasi",
+          "jam_mulai",
+          "durasi_jam"
+        ]
+      }
+    }
+  }
+}

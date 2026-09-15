@@ -13,6 +13,7 @@ import helmet from 'helmet';
 import { join } from 'path';
 import { AppModule } from './app.module';
 import { setupSwagger } from './common/swagger/swagger.setup';
+import { pasangGlobalPrefix } from './common/app-prefix';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -33,7 +34,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  app.setGlobalPrefix('api', { exclude: ['/', 'health'] });
+  pasangGlobalPrefix(app);
 
   app.useStaticAssets(join(process.cwd(), 'uploads'), {
     prefix: '/uploads/',

@@ -1,13 +1,31 @@
 -- CreateTable
+CREATE TABLE `maker` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(100) NOT NULL,
+    `username` VARCHAR(50) NOT NULL,
+    `email` VARCHAR(100) NOT NULL,
+    `password` VARCHAR(255) NOT NULL,
+    `app_key` VARCHAR(64) NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `maker_username_key`(`username`),
+    UNIQUE INDEX `maker_email_key`(`email`),
+    UNIQUE INDEX `maker_app_key_key`(`app_key`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `users` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `username` VARCHAR(50) NOT NULL,
     `password` VARCHAR(255) NOT NULL,
     `role` ENUM('admin_space', 'member') NOT NULL,
+    `id_maker` INTEGER NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 
-    UNIQUE INDEX `users_username_key`(`username`),
+    UNIQUE INDEX `users_id_maker_username_key`(`id_maker`, `username`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -20,12 +38,14 @@ CREATE TABLE `member` (
     `telp` VARCHAR(20) NOT NULL,
     `foto` VARCHAR(255) NULL,
     `id_user` INTEGER NOT NULL,
+    `id_maker` INTEGER NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
     `deleted_at` DATETIME(3) NULL,
 
     UNIQUE INDEX `member_id_user_key`(`id_user`),
     INDEX `member_deleted_at_idx`(`deleted_at`),
+    INDEX `member_id_maker_idx`(`id_maker`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -39,10 +59,12 @@ CREATE TABLE `space_owner` (
     `deskripsi` TEXT NULL,
     `foto` VARCHAR(255) NULL,
     `id_user` INTEGER NOT NULL,
+    `id_maker` INTEGER NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 
     UNIQUE INDEX `space_owner_id_user_key`(`id_user`),
+    INDEX `space_owner_id_maker_idx`(`id_maker`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -56,6 +78,7 @@ CREATE TABLE `space` (
     `foto` VARCHAR(255) NULL,
     `deskripsi` TEXT NOT NULL,
     `id_owner` INTEGER NOT NULL,
+    `id_maker` INTEGER NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
     `deleted_at` DATETIME(3) NULL,
@@ -63,6 +86,7 @@ CREATE TABLE `space` (
     INDEX `space_id_owner_idx`(`id_owner`),
     INDEX `space_tipe_idx`(`tipe`),
     INDEX `space_deleted_at_idx`(`deleted_at`),
+    INDEX `space_id_maker_idx`(`id_maker`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -74,11 +98,13 @@ CREATE TABLE `diskon` (
     `tanggal_awal` DATETIME(3) NOT NULL,
     `tanggal_akhir` DATETIME(3) NOT NULL,
     `id_owner` INTEGER NOT NULL,
+    `id_maker` INTEGER NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
     `deleted_at` DATETIME(3) NULL,
 
     INDEX `diskon_tanggal_awal_tanggal_akhir_idx`(`tanggal_awal`, `tanggal_akhir`),
+    INDEX `diskon_id_maker_idx`(`id_maker`),
     UNIQUE INDEX `diskon_id_owner_nama_diskon_key`(`id_owner`, `nama_diskon`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -93,6 +119,7 @@ CREATE TABLE `reservasi` (
     `durasi_jam` INTEGER NOT NULL,
     `id_owner` INTEGER NOT NULL,
     `id_member` INTEGER NOT NULL,
+    `id_maker` INTEGER NOT NULL,
     `status` ENUM('belum_dikonfirm', 'disetujui', 'aktif', 'selesai', 'dibatalkan') NOT NULL DEFAULT 'belum_dikonfirm',
     `check_in_time` DATETIME(3) NULL,
     `check_out_time` DATETIME(3) NULL,
@@ -100,10 +127,10 @@ CREATE TABLE `reservasi` (
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 
-    UNIQUE INDEX `reservasi_kode_booking_key`(`kode_booking`),
     INDEX `reservasi_tanggal_reservasi_status_idx`(`tanggal_reservasi`, `status`),
     INDEX `reservasi_id_owner_tanggal_reservasi_idx`(`id_owner`, `tanggal_reservasi`),
     INDEX `reservasi_id_member_idx`(`id_member`),
+    UNIQUE INDEX `reservasi_id_maker_kode_booking_key`(`id_maker`, `kode_booking`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -126,22 +153,40 @@ CREATE TABLE `detail_reservasi` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
+ALTER TABLE `users` ADD CONSTRAINT `users_id_maker_fkey` FOREIGN KEY (`id_maker`) REFERENCES `maker`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `member` ADD CONSTRAINT `member_id_user_fkey` FOREIGN KEY (`id_user`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `member` ADD CONSTRAINT `member_id_maker_fkey` FOREIGN KEY (`id_maker`) REFERENCES `maker`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `space_owner` ADD CONSTRAINT `space_owner_id_user_fkey` FOREIGN KEY (`id_user`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `space_owner` ADD CONSTRAINT `space_owner_id_maker_fkey` FOREIGN KEY (`id_maker`) REFERENCES `maker`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `space` ADD CONSTRAINT `space_id_owner_fkey` FOREIGN KEY (`id_owner`) REFERENCES `space_owner`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `space` ADD CONSTRAINT `space_id_maker_fkey` FOREIGN KEY (`id_maker`) REFERENCES `maker`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `diskon` ADD CONSTRAINT `diskon_id_owner_fkey` FOREIGN KEY (`id_owner`) REFERENCES `space_owner`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `diskon` ADD CONSTRAINT `diskon_id_maker_fkey` FOREIGN KEY (`id_maker`) REFERENCES `maker`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `reservasi` ADD CONSTRAINT `reservasi_id_owner_fkey` FOREIGN KEY (`id_owner`) REFERENCES `space_owner`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `reservasi` ADD CONSTRAINT `reservasi_id_member_fkey` FOREIGN KEY (`id_member`) REFERENCES `member`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `reservasi` ADD CONSTRAINT `reservasi_id_maker_fkey` FOREIGN KEY (`id_maker`) REFERENCES `maker`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `detail_reservasi` ADD CONSTRAINT `detail_reservasi_id_reservasi_fkey` FOREIGN KEY (`id_reservasi`) REFERENCES `reservasi`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

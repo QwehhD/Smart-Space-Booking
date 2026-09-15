@@ -1,114 +1,151 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Smart Space Booking — Backend API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+REST API sistem reservasi *coworking space* untuk UKK RPL 2026/2027 Paket B.
+Mencakup autentikasi multi-role, katalog space, kode promo, reservasi beserta
+perhitungan diskon, e-ticket ber-QR, check-in/check-out, dan rekapitulasi
+pendapatan bulanan.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Teknologi
 
-## Description
+| Bagian | Pilihan |
+| --- | --- |
+| Framework | NestJS 11 (CommonJS) |
+| Bahasa | TypeScript 5.9 |
+| ORM | Prisma 6 |
+| Basis data | MySQL / MariaDB |
+| Autentikasi | JWT (Passport) dengan hash bcrypt |
+| Validasi | class-validator dan class-transformer |
+| Dokumentasi | Swagger (OpenAPI 3) |
+| Pengujian | Jest dan Supertest |
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Alasan pemilihan versi dan keputusan teknis lain dicatat di
+[`docs/KEPUTUSAN.md`](docs/KEPUTUSAN.md).
 
-## Project setup
+## Menjalankan aplikasi
+
+Dibutuhkan Node.js 20 atau lebih baru dan server MySQL/MariaDB yang berjalan.
 
 ```bash
-$ npm install
+# 1. pasang dependency
+npm install
+
+# 2. siapkan konfigurasi
+cp .env.example .env          # lalu sesuaikan DATABASE_URL dan JWT_SECRET
+
+# 3. siapkan database
+npx prisma migrate deploy     # membuat kedelapan tabel
+npm run seed                  # mengisi data contoh (opsional, tetapi disarankan)
+
+# 4. jalankan
+npm run start:dev             # mode pengembangan, memuat ulang otomatis
+npm run start:prod            # mode produksi, setelah npm run build
 ```
 
-## Compile and run the project
+Server berjalan di `http://localhost:3000`. Dokumentasi interaktif tersedia di
+`http://localhost:3000/docs`.
+
+### Konfigurasi `.env`
+
+| Variabel | Keterangan |
+| --- | --- |
+| `PORT` | Port server, bawaan `3000` |
+| `APP_URL` | Alamat publik server, dipakai menyusun URL foto |
+| `FRONTEND_URL` | Origin yang diizinkan CORS |
+| `DATABASE_URL` | Koneksi MySQL, misalnya `mysql://root:@localhost:3306/ukk_coworking` |
+| `JWT_SECRET` | Kunci penandatangan token; wajib diganti |
+| `JWT_EXPIRES_IN` | Masa berlaku token, bawaan `1d` |
+| `UPLOAD_MAX_SIZE_MB` | Batas ukuran unggahan berkas, bawaan `2` |
+| `JAM_OPERASIONAL_BUKA` / `JAM_OPERASIONAL_TUTUP` | Rentang jam sewa yang diizinkan |
+| `STRICT_CHECKIN_DATE` | Bila `true`, check-in hanya boleh pada tanggal reservasinya |
+
+## Akun contoh
+
+Tersedia setelah `npm run seed`:
+
+| Peran | Username | Password |
+| --- | --- | --- |
+| Admin space | `admin_moklet` | `Admin123!` |
+| Admin space | `admin_kolaborasi` | `Admin123!` |
+| Member | `budi`, `siti`, `joko`, `dewi`, `agus` | `Secret123!` |
+
+## Multi-tenancy App Maker
+
+Setiap request dari frontend sebaiknya menyertakan header
+`x-maker-key: <app_key>` yang diperoleh dari `POST /api/maker/register`. Seluruh
+data (member, space, diskon, reservasi) terisolasi per app key.
+
+Request tanpa header diarahkan ke maker bawaan `mk_default_ukk_2026`, sehingga
+aplikasi tetap dapat dicoba tanpa mendaftar lebih dulu. Sebaliknya app key yang
+dikirim tetapi tidak dikenal ditolak dengan 401.
+
+## Bentuk response
+
+Seluruh endpoint, sukses maupun gagal, memakai amplop yang sama:
+
+```jsonc
+// sukses
+{ "status": true, "statusCode": 200, "message": "…", "data": {}, "timestamp": "…" }
+
+// gagal
+{ "status": false, "statusCode": 400, "message": "…", "error": "Bad Request", "timestamp": "…" }
+```
+
+Kegagalan validasi menambahkan `errors: [{ field, messages[] }]` agar form di
+frontend dapat menandai field yang salah.
+
+## Perintah yang tersedia
+
+| Perintah | Kegunaan |
+| --- | --- |
+| `npm run start:dev` | Menjalankan server dengan pemuatan ulang otomatis |
+| `npm run build` | Mengompilasi ke `dist/` |
+| `npm run lint` | Memeriksa dan merapikan gaya penulisan kode |
+| `npm test` | Pengujian unit |
+| `npm run test:e2e` | Pengujian alur dari ujung ke ujung |
+| `npm run seed` | Mengisi data contoh, aman dijalankan berulang |
+| `npm run db:schema` | Mengekspor skema ke `database/schema.sql` |
+| `npm run docs:export` | Mengekspor `docs/swagger.json` dan `docs/postman_collection.json` |
+| `npm run prisma:studio` | Membuka penjelajah data Prisma |
+
+## Pengujian
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm test          # 32 pengujian unit: perhitungan uang, waktu, dan mesin status
+npm run test:e2e  # 16 pengujian alur terhadap database sungguhan
 ```
 
-## Run tests
+Pengujian e2e mendaftarkan akun App Maker tersendiri setiap kali dijalankan dan
+menghapusnya kembali di akhir, sehingga tidak pernah bercampur dengan data seed
+dan tidak memerlukan database khusus.
 
-```bash
-# unit tests
-$ npm run test
+## Struktur folder
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+```
+src/
+  admin/       panel pengelola: profil, space, diskon, member, reservasi, laporan
+  auth/        registrasi, login, JWT strategy, guard role
+  common/      amplop response, exception filter, guard tenant, util, serializer
+  config/      pembacaan dan validasi environment
+  diskon/      katalog promo publik
+  maker/       akun App Maker dan penentuan tenant
+  prisma/      koneksi database
+  reservasi/   pemesanan, histori, e-ticket
+  spaces/      katalog space dan pengecekan ketersediaan
+  upload/      unggahan berkas gambar
+prisma/        skema, migrasi, dan seeder
+database/      schema.sql hasil ekspor
+docs/          soal, catatan keputusan, swagger.json, koleksi Postman
+test/          pengujian e2e
+uploads/       berkas gambar yang diunggah
 ```
 
-## Deployment
+## Berkas untuk dikumpulkan
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Observability
-
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
-
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
-
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observer](https://observer.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+| Berkas | Cara membuat |
+| --- | --- |
+| Source code | folder project ini |
+| `database/schema.sql` | `npm run db:schema` |
+| `prisma/migrations/` | sudah termasuk di dalam repositori |
+| `docs/swagger.json` | `npm run docs:export` |
+| `docs/postman_collection.json` | `npm run docs:export` |
+| `docs/KEPUTUSAN.md` | catatan keputusan teknis |
