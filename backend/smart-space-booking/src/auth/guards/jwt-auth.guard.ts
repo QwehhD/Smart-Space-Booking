@@ -1,4 +1,8 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { IS_PUBLIC_KEY } from '../../common/decorators/public.decorator';
@@ -20,5 +24,21 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     ]);
 
     return publik ? true : super.canActivate(context);
+  }
+
+  /**
+   * Passport membalas "Unauthorized" dalam Bahasa Inggris untuk token yang hilang
+   * atau rusak, berbeda dengan pesan endpoint lain. Pesannya diseragamkan di sini,
+   * dan sengaja tidak membedakan token hilang, kedaluwarsa, atau palsu agar tidak
+   * menjadi petunjuk bagi yang mencoba-coba.
+   */
+  handleRequest<TUser>(err: unknown, user: TUser): TUser {
+    if (err || !user) {
+      throw new UnauthorizedException(
+        'Token tidak valid atau sudah kedaluwarsa!',
+      );
+    }
+
+    return user;
   }
 }

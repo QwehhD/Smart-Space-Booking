@@ -170,6 +170,30 @@ export class AuthService {
     };
   }
 
+  /**
+   * Profil pengguna yang sedang login. Berbeda dengan login, soal hanya
+   * mencantumkan kunci profil yang relevan dengan role, tanpa `maker_id` dan
+   * tanpa kunci lawannya yang bernilai null.
+   */
+  async profile(idUser: number) {
+    const user = await this.prisma.user.findUniqueOrThrow({
+      where: { id: idUser },
+      include: { member: true, space_owner: true },
+    });
+
+    return {
+      id: user.id,
+      username: user.username,
+      role: user.role,
+      ...(user.member && {
+        member: serializeMember(user.member, this.appUrl),
+      }),
+      ...(user.space_owner && {
+        space_owner: serializeSpaceOwner(user.space_owner, this.appUrl),
+      }),
+    };
+  }
+
   private get appUrl(): string {
     return this.config.get<string>('appUrl') ?? 'http://localhost:3000';
   }

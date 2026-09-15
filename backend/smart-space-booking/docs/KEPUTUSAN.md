@@ -197,3 +197,37 @@ endpoint admin yang terbuka.
 Soal tidak mencontohkan pesan untuk 403, sehingga dipakai pesan
 "Anda tidak memiliki hak akses untuk melakukan tindakan ini!" dengan bentuk amplop error yang
 sama seperti status lainnya.
+
+## 17. Hanya `GET /api/auth/profile` yang dibuat, tanpa ubah profil dan ganti password
+
+Daftar 50 endpoint pada soal hanya memuat `GET /api/auth/profile` untuk akun pengguna.
+Tidak ada endpoint untuk mengubah profil sendiri maupun mengganti password, dan pengelolaan
+data member dilakukan admin lewat `/api/admin/members`. Karena itu keduanya tidak dibuat,
+agar cakupan pekerjaan tetap sama dengan yang diminta.
+
+Bentuk response profil sengaja berbeda dari login dan mengikuti contoh soal apa adanya:
+profil hanya memuat kunci yang relevan dengan role pengguna, tanpa `maker_id` dan tanpa
+kunci lawannya yang bernilai null, sedangkan login memuat `maker_id` beserta kedua kunci.
+
+## 18. Pembatasan laju hanya pada endpoint auth, dengan batas yang longgar
+
+Soal tidak meminta pembatasan laju, tetapi login dan registrasi adalah endpoint yang paling
+mudah dicoba berulang, dan `@nestjs/throttler` sudah termasuk dependency yang dipasang sejak
+awal. `ThrottlerGuard` karena itu dipasang hanya pada controller auth, bukan global, supaya
+katalog space dan endpoint lain tidak ikut terbatasi.
+
+Batasnya 10 request per menit per alamat IP. Angka itu jauh di atas pemakaian manusia biasa
+maupun pengujian dengan Postman, sehingga tidak mengganggu penguji, tetapi cukup untuk
+menghentikan percobaan password secara beruntun.
+
+Pesan bawaan pustaka, "ThrottlerException: Too Many Requests", diganti lewat
+`AuthThrottlerGuard` karena berbahasa Inggris dan menyebut nama kelas internal, sementara
+pesan ini akan tampil langsung di form login.
+
+## 19. Pesan 401 tidak membedakan sebab kegagalan token
+
+`JwtAuthGuard.handleRequest` mengganti balasan "Unauthorized" bawaan Passport dengan
+"Token tidak valid atau sudah kedaluwarsa!". Satu pesan dipakai untuk token yang hilang,
+rusak, kedaluwarsa, milik akun yang sudah dihapus, milik akun maker, maupun milik tenant
+lain. Membedakannya akan memberi petunjuk yang berguna bagi yang mencoba-coba, sedangkan
+bagi pemakai yang sah tindakan pemulihannya sama saja, yaitu login ulang.

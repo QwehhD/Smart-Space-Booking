@@ -1,5 +1,6 @@
 import { Module, ValidationPipe } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AppConfigModule } from './config/config.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
@@ -14,7 +15,15 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 @Module({
-  imports: [AppConfigModule, PrismaModule, MakerModule, AuthModule],
+  imports: [
+    AppConfigModule,
+    // Batas bawaan sengaja longgar karena ThrottlerGuard hanya dipasang pada
+    // controller auth; angka per endpoint ditentukan lewat @Throttle.
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),
+    PrismaModule,
+    MakerModule,
+    AuthModule,
+  ],
   controllers: [AppController],
   providers: [
     AppService,
