@@ -57,3 +57,13 @@ pids
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Uploads (file fisik tidak ikut di-commit, folder tetap dipertahankan)
+/uploads/*/*
+!/uploads/*/.gitkeep
+
+# Prisma
+/prisma/*.db
+
+# Env tambahan
+.env.test
