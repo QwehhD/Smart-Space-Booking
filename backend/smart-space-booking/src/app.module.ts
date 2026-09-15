@@ -5,6 +5,7 @@ import { AppConfigModule } from './config/config.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UploadModule } from './upload/upload.module';
+import { AdminModule } from './admin/admin.module';
 import { MakerModule } from './maker/maker.module';
 import { MakerContextGuard } from './common/guards/maker-context.guard';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
@@ -25,6 +26,7 @@ import { AppService } from './app.service';
     MakerModule,
     AuthModule,
     UploadModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [

@@ -1,5 +1,10 @@
+/**
+ * Bentuk profil member dan pemilik space yang dikembalikan ke klien. Dipakai
+ * bersama oleh modul auth dan admin agar satu profil tidak pernah tampil dengan
+ * bentuk yang berbeda-beda antar endpoint.
+ */
 import { Member, SpaceOwner } from '@prisma/client';
-import { buildFotoUrl } from '../common/utils/foto.util';
+import { buildFotoUrl } from '../utils/foto.util';
 
 export const serializeMember = (member: Member, appUrl: string) => ({
   id: member.id,

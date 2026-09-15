@@ -10,7 +10,10 @@ import * as bcrypt from 'bcrypt';
 import { BCRYPT_SALT_ROUNDS } from '../common/constants/validation.constant';
 import { MakerContext } from '../maker/interfaces/maker-context.interface';
 import { PrismaService } from '../prisma/prisma.service';
-import { serializeMember, serializeSpaceOwner } from './auth.serializer';
+import {
+  serializeMember,
+  serializeSpaceOwner,
+} from '../common/serializers/profil.serializer';
 import { LoginDto } from './dto/login.dto';
 import { RegisterAdminSpaceDto } from './dto/register-admin-space.dto';
 import { RegisterMemberDto } from './dto/register-member.dto';

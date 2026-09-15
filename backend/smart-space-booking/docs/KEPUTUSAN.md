@@ -270,3 +270,28 @@ Status 413 untuk berkas yang terlalu besar dibiarkan apa adanya, meski daftar co
 pada soal hanya menyebut 400, 401, 403, 404, dan 500. Daftar itu bersifat contoh, sedangkan
 413 adalah status yang tepat untuk kasus ini, dan bentuk amplop responsnya tetap sama
 sehingga frontend menanganinya persis seperti error lain.
+
+## 23. Profil lokasi dikembalikan utuh, dan pembaruannya bersifat parsial
+
+Contoh response `GET/PUT /api/admin/profile` pada soal hanya memuat `id`,
+`nama_coworking`, `nama_pemilik`, dan `telp`. Kolom `alamat`, `deskripsi`, dan `foto` tetap
+disertakan karena datanya memang tersimpan dan halaman profil pada frontend membutuhkannya.
+Penambahan field bersifat menambah, sehingga klien yang hanya membaca keempat field pada
+contoh tetap bekerja. Pola yang sama sudah dipakai sejak awal lewat `foto_url`.
+
+Payload `PUT` mewajibkan ketiga field yang disebut soal dan menerima `alamat`, `deskripsi`,
+serta `foto` sebagai opsional. Pembaruan bersifat parsial: field opsional yang tidak dikirim
+dibiarkan apa adanya, bukan dikosongkan. Tanpa aturan ini, request tiga field seperti contoh
+pada soal akan menghapus alamat dan deskripsi yang sudah tersimpan, dan keduanya menjadi
+mustahil diubah setelah registrasi karena tidak ada endpoint lain yang menyentuhnya.
+
+## 24. Catatan penyimpangan: `RegisterAdminSpaceDto` menerima tiga field di luar soal
+
+`RegisterAdminSpaceDto` pada soal hanya memuat lima field: `username`, `password`,
+`nama_coworking`, `nama_pemilik`, dan `telp`. Implementasi di project ini menerima tambahan
+`alamat`, `deskripsi`, dan `foto`, yang ketiganya opsional dan boleh kosong di database.
+
+Penyimpangan ini dicatat, bukan dihapus, karena ketiga kolom itu dibutuhkan halaman profil
+lokasi dan tidak ada endpoint lain yang dapat mengisinya saat pendaftaran. Karena semuanya
+opsional, request registrasi dengan lima field persis seperti contoh soal tetap diterima
+tanpa perubahan apa pun.
