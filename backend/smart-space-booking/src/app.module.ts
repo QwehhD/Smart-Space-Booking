@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { MakerModule } from './maker/maker.module';
 import { MakerContextGuard } from './common/guards/maker-context.guard';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { RolesGuard } from './auth/guards/roles.guard';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { TransformResponseInterceptor } from './common/interceptors/transform-response.interceptor';
 import { validationExceptionFactory } from './common/pipes/validation-exception.factory';
@@ -36,6 +37,10 @@ import { AppService } from './app.service';
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
     {
       provide: APP_INTERCEPTOR,

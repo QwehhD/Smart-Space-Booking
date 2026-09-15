@@ -181,3 +181,19 @@ akses member tersebut memang sudah dicabut.
 Pemeriksaan ini tidak terlihat dari bentuk response mana pun, sehingga diuji langsung di
 tingkat unit pada `src/auth/strategies/jwt.strategy.spec.ts`, tidak menunggu tahap pengujian
 di akhir.
+
+## 16. Pembatasan role memakai guard global dan menolak endpoint yang keliru dibiarkan publik
+
+`RolesGuard` didaftarkan sebagai `APP_GUARD` setelah `JwtAuthGuard`, sehingga membatasi
+endpoint cukup dengan menambahkan `@Roles(Role.admin_space)` tanpa memasang `@UseGuards` di
+setiap controller. Endpoint tanpa decorator tersebut terbuka untuk semua pengguna yang sudah
+login, karena pembatasan role adalah lapisan di atas autentikasi dan bukan penggantinya.
+
+Bila sebuah endpoint memiliki `@Roles(...)` tetapi tidak ada pengguna pada request, artinya
+endpoint itu keliru ditandai `@Public()`. Keadaan ini ditolak dengan 403, bukan diloloskan,
+supaya kesalahan konfigurasi tersebut langsung terlihat saat dicoba dan tidak menjadi
+endpoint admin yang terbuka.
+
+Soal tidak mencontohkan pesan untuk 403, sehingga dipakai pesan
+"Anda tidak memiliki hak akses untuk melakukan tindakan ini!" dengan bentuk amplop error yang
+sama seperti status lainnya.
