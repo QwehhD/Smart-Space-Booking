@@ -295,3 +295,35 @@ Penyimpangan ini dicatat, bukan dihapus, karena ketiga kolom itu dibutuhkan hala
 lokasi dan tidak ada endpoint lain yang dapat mengisinya saat pendaftaran. Karena semuanya
 opsional, request registrasi dengan lima field persis seperti contoh soal tetap diterima
 tanpa perubahan apa pun.
+
+## 25. Space dikembalikan dalam satu bentuk yang sama di semua endpoint
+
+Contoh response space pada soal berbeda-beda antar endpoint: daftar menyertakan `foto_url`
+tetapi tidak `deskripsi`, detail tidak menyertakan `foto_url`, dan pembuatan menyertakan
+`id_owner`. Perbedaan itu tampak sebagai ketidakkonsistenan penulisan contoh, bukan aturan,
+sehingga seluruh endpoint memakai satu serializer yang mengembalikan semua field.
+
+Bentuk yang seragam membuat frontend dapat memakai ulang komponen kartu space yang sama
+untuk daftar maupun detail, dan penambahan field bersifat menambah sehingga klien yang hanya
+membaca field pada contoh tetap bekerja.
+
+## 26. Space milik admin lain dibalas 404, bukan 403
+
+Kepemilikan diperiksa sebagai bagian dari pencarian data, bukan lewat guard tersendiri,
+karena barisnya memang perlu dibaca untuk diperbarui atau dihapus. Satu query dengan syarat
+`id`, `id_owner`, `id_maker`, dan `deleted_at: null` sekaligus menutup empat kemungkinan:
+data tidak ada, milik admin lain, milik tenant lain, atau sudah dihapus.
+
+Keempatnya dibalas 404 "Space tidak ditemukan!", bukan 403. Membedakan "tidak ada" dari
+"bukan milik Anda" akan memberi tahu admin bahwa suatu id memang ada dan dimiliki orang lain,
+yang justru merupakan kebocoran informasi tanpa manfaat bagi pemakai yang sah.
+
+## 27. Penghapusan space bersifat soft delete
+
+Baris space tidak benar-benar dihapus, melainkan diberi `deleted_at`. Reservasi lama masih
+merujuk ke space lewat `detail_reservasi`, sehingga riwayat pemesanan member dan laporan
+pendapatan admin harus tetap dapat dibaca setelah sebuah space tidak lagi disewakan.
+
+Space yang sudah dihapus hilang dari daftar, dan detail, pembaruan, maupun penghapusan
+ulangnya dibalas 404, sehingga dari sisi API perilakunya sama seperti data yang benar-benar
+tidak ada.
