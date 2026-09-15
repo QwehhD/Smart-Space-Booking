@@ -327,3 +327,47 @@ pendapatan admin harus tetap dapat dibaca setelah sebuah space tidak lagi disewa
 Space yang sudah dihapus hilang dari daftar, dan detail, pembaruan, maupun penghapusan
 ulangnya dibalas 404, sehingga dari sisi API perilakunya sama seperti data yang benar-benar
 tidak ada.
+
+## 28. Tidak ada field `status_berlaku` pada diskon
+
+Rencana kerja awal menyebutkan field `status_berlaku` untuk menandai promo yang sedang
+aktif, tetapi field tersebut tidak muncul di mana pun pada soal: baik pada DTO, pada contoh
+response panel admin, maupun pada `GET /api/diskon/active` yang justru sudah menyaring promo
+aktif melalui endpointnya sendiri. Karena itu field tersebut tidak dibuat, agar cakupan
+pekerjaan tetap sama dengan yang diminta.
+
+## 29. Periode promo diperiksa setelah digabung dengan nilai tersimpan
+
+Tanggal akhir promo harus melewati tanggal awalnya. Pada pembaruan, pemeriksaan dilakukan
+setelah nilai yang dikirim digabung dengan nilai yang sudah tersimpan, karena soal
+mencontohkan pembaruan yang hanya mengirim `tanggal_akhir` saja untuk memperpanjang promo.
+Tanpa penggabungan itu, pembaruan sebagian tidak akan pernah dapat diperiksa kewajarannya.
+
+## 30. Member bersifat per tenant, bukan per admin
+
+Berbeda dari `space` dan `diskon`, tabel `member` tidak memiliki `id_owner`, sehingga daftar
+member pada panel admin mencakup seluruh member pada tenant yang sama. Ini mengikuti sifat
+datanya: member mendaftar ke aplikasi, bukan ke satu lokasi coworking tertentu, dan satu
+member dapat memesan space milik pengelola mana pun.
+
+Konsekuensinya, dua admin pada tenant yang sama melihat daftar member yang sama. Pada
+pemakaian nyata project ini hanya ada satu tenant dengan satu pengelola, sehingga perbedaan
+itu tidak terasa.
+
+## 31. Username member tidak dapat diubah admin
+
+`UpdateMemberAdminDto` pada soal tidak memuat `username`, dan itu dipertahankan apa adanya.
+Username adalah identitas login member; bila admin dapat menukarnya, admin dapat mengambil
+alih akun member tanpa sepengetahuan pemiliknya. Password tetap dapat diubah admin, karena
+soal mencantumkannya secara eksplisit sebagai sarana reset kata sandi.
+
+## 32. Pencarian member memakai pencocokan `contains` biasa
+
+Pencarian `?search=` mencocokkan nama, instansi, dan nomor telepon dengan `contains` tanpa
+opsi `mode: 'insensitive'`, karena opsi tersebut hanya didukung PostgreSQL dan akan gagal di
+MySQL. Pada MySQL, collation `utf8mb4_unicode_ci` sudah membuat pencocokan mengabaikan besar
+kecil huruf.
+
+Perlu diingat saat rencana pindah ke Supabase dijalankan: di PostgreSQL pencocokan ini akan
+menjadi peka huruf besar kecil, sehingga perlu diganti dengan `mode: 'insensitive'` pada
+saat itu.

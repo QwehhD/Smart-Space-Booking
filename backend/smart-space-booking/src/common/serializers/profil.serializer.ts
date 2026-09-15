@@ -14,6 +14,9 @@ export const serializeMember = (member: Member, appUrl: string) => ({
   telp: member.telp,
   foto: member.foto,
   foto_url: buildFotoUrl(appUrl, 'members', member.foto),
+  // Disertakan karena daftar member pada panel admin membutuhkannya, dan satu
+  // bentuk yang sama memudahkan frontend memakai ulang komponen profil.
+  created_at: member.created_at,
 });
 
 export const serializeSpaceOwner = (owner: SpaceOwner, appUrl: string) => ({
