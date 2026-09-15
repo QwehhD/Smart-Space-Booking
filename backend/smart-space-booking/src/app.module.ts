@@ -2,6 +2,7 @@ import { Module, ValidationPipe } from '@nestjs/common';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { AppConfigModule } from './config/config.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { AuthModule } from './auth/auth.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { TransformResponseInterceptor } from './common/interceptors/transform-response.interceptor';
 import { validationExceptionFactory } from './common/pipes/validation-exception.factory';
@@ -9,7 +10,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 @Module({
-  imports: [AppConfigModule, PrismaModule],
+  imports: [AppConfigModule, PrismaModule, AuthModule],
   controllers: [AppController],
   providers: [
     AppService,
