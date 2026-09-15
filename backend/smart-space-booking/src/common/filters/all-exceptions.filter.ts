@@ -12,6 +12,7 @@ import { STATUS_CODES } from 'http';
 import {
   DEFAULT_ERROR_MESSAGE,
   PRISMA_ERROR_MESSAGE,
+  UPLOAD_ERROR_MESSAGE,
 } from '../constants/response.constant';
 import {
   ApiErrorResponse,
@@ -83,7 +84,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const payload = exception.getResponse();
 
     if (typeof payload === 'string') {
-      return { statusCode, message: payload };
+      return { statusCode, message: this.terjemahkanPesanUpload(payload) };
     }
 
     const body = payload as {
@@ -94,7 +95,24 @@ export class AllExceptionsFilter implements ExceptionFilter {
       ? body.message.join(', ')
       : (body.message ?? exception.message);
 
-    return { statusCode, message, errors: body.errors };
+    return {
+      statusCode,
+      message: this.terjemahkanPesanUpload(message),
+      errors: body.errors,
+    };
+  }
+
+  /**
+   * Mengganti pesan kegagalan unggahan bawaan NestJS dengan padanan Bahasa
+   * Indonesia. Dicocokkan dengan awalan kalimat karena NestJS menambahkan nama
+   * field di belakang sebagian pesan.
+   */
+  private terjemahkanPesanUpload(message: string): string {
+    const cocok = Object.keys(UPLOAD_ERROR_MESSAGE).find((inggris) =>
+      message.startsWith(inggris),
+    );
+
+    return cocok ? UPLOAD_ERROR_MESSAGE[cocok] : message;
   }
 
   private fromPrismaException(

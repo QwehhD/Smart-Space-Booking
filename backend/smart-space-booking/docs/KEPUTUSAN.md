@@ -231,3 +231,42 @@ pesan ini akan tampil langsung di form login.
 rusak, kedaluwarsa, milik akun yang sudah dihapus, milik akun maker, maupun milik tenant
 lain. Membedakannya akan memberi petunjuk yang berguna bagi yang mencoba-coba, sedangkan
 bagi pemakai yang sah tindakan pemulihannya sama saja, yaitu login ulang.
+
+## 20. Endpoint upload dibuat publik mengikuti kontrak rincinya
+
+Ringkasan daftar endpoint pada soal menyebut `POST /api/upload/spaces` sebagai milik Admin
+Space, tetapi kontrak rinci ketiga endpoint upload sama-sama menyebut
+"Auth: Tidak diperlukan / Header x-maker-key". Kontrak rinci dipakai sebagai acuan karena
+lebih spesifik dan disertai contoh request beserta responsnya.
+
+Pilihan ini juga cocok dengan alur pemakaiannya: foto diunggah lebih dulu, lalu nama
+berkasnya dikirim sebagai field `foto` saat membuat space atau member, sehingga unggahan
+terjadi sebelum sumber daya yang memilikinya ada.
+
+## 21. Nama berkas dibuat ulang, dan ekstensinya diambil dari mimetype
+
+Nama berkas kiriman tidak pernah dipakai. Setiap unggahan disimpan dengan nama
+`<epoch>-<acak>.<ext>` mengikuti contoh pada soal (`1787799592972-544446318.jpeg`), sehingga
+dua berkas dengan nama asli yang sama tidak saling menimpa dan nama kiriman tidak dapat
+menyelipkan komponen path yang keluar dari folder tujuan.
+
+Ekstensinya diturunkan dari mimetype, bukan dari nama asli. Contoh pada soal menunjukkan hal
+yang sama: berkas `banner.jpg` tersimpan sebagai `.jpeg`. Nama asli tetap dikembalikan pada
+`original_name` khusus untuk `POST /api/upload/image`, sesuai bentuk response yang diminta.
+
+Mimetype dan ekstensi nama asli diperiksa berdua. Mimetype mudah dipalsukan pengirim,
+sedangkan ekstensi saja tidak memastikan isi berkasnya, sehingga keduanya harus cocok.
+Jenis `.webp` hanya diterima pada unggahan gambar umum karena soal hanya mencantumkannya di
+sana, sedangkan foto space dan member dibatasi JPEG dan PNG.
+
+## 22. Kegagalan unggahan dibalas 413 untuk ukuran, dan pesannya diterjemahkan
+
+NestJS sudah mengubah error multer menjadi `HttpException` berbahasa Inggris sebelum sampai
+ke exception filter, sehingga pemetaan berdasarkan kelas `MulterError` tidak pernah
+tercapai. Penerjemahan karena itu dilakukan dengan mencocokkan awalan pesan, misalnya
+"File too large" dan "Unexpected field", yang disimpan di `UPLOAD_ERROR_MESSAGE`.
+
+Status 413 untuk berkas yang terlalu besar dibiarkan apa adanya, meski daftar contoh status
+pada soal hanya menyebut 400, 401, 403, 404, dan 500. Daftar itu bersifat contoh, sedangkan
+413 adalah status yang tepat untuk kasus ini, dan bentuk amplop responsnya tetap sama
+sehingga frontend menanganinya persis seperti error lain.

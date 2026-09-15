@@ -4,6 +4,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { AppConfigModule } from './config/config.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
+import { UploadModule } from './upload/upload.module';
 import { MakerModule } from './maker/maker.module';
 import { MakerContextGuard } from './common/guards/maker-context.guard';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
@@ -23,6 +24,7 @@ import { AppService } from './app.service';
     PrismaModule,
     MakerModule,
     AuthModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [
