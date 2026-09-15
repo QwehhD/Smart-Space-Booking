@@ -1,9 +1,11 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AppService } from './app.service';
+import { SkipMakerContext } from './common/decorators/skip-maker-context.decorator';
 
 @ApiTags('Root & Health Check')
 @Controller()
+@SkipMakerContext()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 

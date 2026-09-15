@@ -65,8 +65,10 @@ Saat skema disusun, mesin pengembangan belum memiliki database yang dapat diakse
 `prisma migrate diff --from-empty --to-schema-datamodel`, yang menghasilkan SQL identik
 dengan migrasi normal.
 
-Migrasi tersebut kini sudah diterapkan dengan `npx prisma migrate deploy` dan menghasilkan
-ketujuh tabel sesuai skema. Endpoint `/health`, registrasi member, dan registrasi
+Migrasi tersebut kini sudah diterapkan dengan `npx prisma migrate deploy`. Perubahan skema
+untuk App Maker ditambahkan sebagai migrasi kedua
+(`20260915001000_add_app_maker_multi_tenancy`), bukan dengan menulis ulang migrasi awal
+yang sudah ter-commit, mengikuti sifat migrasi yang hanya boleh ditambah. Endpoint `/health`, registrasi member, dan registrasi
 admin space sudah diuji terhadap database sungguhan: password tersimpan sebagai hash
 bcrypt 60 karakter berawalan `$2b$10$`, dan username ganda ditolak dengan pesan yang
 sesuai kontrak.
@@ -87,3 +89,41 @@ memberikan hak penuh kepada akun anonim atas database yang namanya berawalan `te
 sehingga database pengembangan dapat dibuat dan dimigrasikan tanpa `sudo` sama sekali dan
 tanpa melemahkan autentikasi root. Nama database hanya berlaku lokal, tidak memengaruhi
 kode maupun berkas yang dikumpulkan.
+
+## 9. Multi-tenancy App Maker dipasang di level tabel, bukan hanya di level query
+
+Ketentuan global no. 1 pada soal mewajibkan header `x-maker-key` (alias `x-app-key`) di
+setiap request dan menjanjikan isolasi otomatis atas data Member, Space, Diskon, dan
+Reservasi. Karena itu tenancy dijadikan bagian skema, bukan sekadar filter yang ditambahkan
+di setiap service.
+
+Kolom `id_maker` dipasang langsung di `users`, `member`, `space_owner`, `space`, `diskon`,
+dan `reservasi`. Nilai ini memang dapat ditelusuri lewat relasi, misalnya member melalui
+`users`, tetapi menyimpannya langsung membuat setiap tabel dapat difilter dan diindeks per
+tenant tanpa join. `detail_reservasi` tidak diberi kolom tersebut karena berelasi satu-satu
+dengan `reservasi` dan selalu diakses melalui induknya.
+
+`users.username` yang semula unik global diubah menjadi unik per maker
+(`@@unique([id_maker, username])`), demikian pula `reservasi.kode_booking`. Tanpa perubahan
+ini dua siswa tidak dapat memakai username contoh yang sama seperti `johndoe`, padahal
+justru itulah yang diisolasi.
+
+## 10. App key tanpa header memakai maker bawaan, app key salah ditolak
+
+`MakerContextGuard` menempelkan tenant ke setiap request. Request tanpa header diarahkan ke
+maker bawaan `mk_default_ukk_2026` yang muncul pada contoh `GET /api/maker/list`, sehingga
+endpoint publik tetap dapat dicoba tanpa mendaftar lebih dulu. Sebaliknya app key yang
+dikirim tetapi tidak dikenal ditolak dengan 401, agar salah ketik satu karakter tidak
+diam-diam menulis data ke tenant lain.
+
+Tenancy diwujudkan sebagai guard, bukan middleware, karena exception filter global di
+NestJS tidak menangkap error dari middleware; dengan guard, penolakan app key tetap
+memperoleh amplop response yang sama dengan endpoint lain. Endpoint `/` dan `/health`
+ditandai `@SkipMakerContext()` karena tidak menyentuh data tenant, sekaligus supaya health
+check tidak ikut membuat maker bawaan.
+
+Maker bawaan dibuat saat pertama kali dibutuhkan lalu id-nya di-cache, bukan saat aplikasi
+boot, supaya aplikasi tetap dapat dijalankan dan `/health` tetap dapat melaporkan
+`database: "disconnected"` ketika database belum siap. Password akun bawaan diisi nilai acak
+yang tidak pernah dicatat, karena akun itu hanya berfungsi sebagai wadah data dan tidak
+dimaksudkan untuk login.
