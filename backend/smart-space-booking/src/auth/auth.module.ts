@@ -1,28 +1,13 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
+import { AppJwtModule } from '../common/jwt/app-jwt.module';
 import { MakerModule } from '../maker/maker.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
 @Module({
-  imports: [
-    MakerModule,
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService): JwtModuleOptions => ({
-        secret: config.get<string>('jwt.secret'),
-        // Masa berlaku token dikonfigurasi lewat env sebagai string bebas,
-        // sedangkan tipe bawaan library hanya menerima literal seperti '1d'.
-        signOptions: {
-          expiresIn: config.get<string>('jwt.expiresIn') ?? '1d',
-        } as JwtModuleOptions['signOptions'],
-      }),
-    }),
-  ],
+  imports: [AppJwtModule, MakerModule],
   controllers: [AuthController],
   providers: [AuthService],
-  exports: [AuthService, JwtModule],
+  exports: [AuthService, AppJwtModule],
 })
 export class AuthModule {}

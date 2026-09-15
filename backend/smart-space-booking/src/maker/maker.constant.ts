@@ -23,4 +23,6 @@ export const DEFAULT_MAKER_PROFILE = {
 
 export const PESAN_MAKER = {
   APP_KEY_TIDAK_DIKENAL: 'App key tidak dikenal atau sudah tidak berlaku!',
+  IDENTITAS_TERPAKAI: 'Username atau Email sudah terdaftar sebagai App Maker!',
+  KREDENSIAL_SALAH: 'Kredensial login App Maker salah!',
 } as const;

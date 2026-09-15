@@ -127,3 +127,30 @@ boot, supaya aplikasi tetap dapat dijalankan dan `/health` tetap dapat melaporka
 `database: "disconnected"` ketika database belum siap. Password akun bawaan diisi nilai acak
 yang tidak pernah dicatat, karena akun itu hanya berfungsi sebagai wadah data dan tidak
 dimaksudkan untuk login.
+
+## 11. Token maker dan token user dibedakan lewat klaim `type`
+
+Token akun maker dan token member/admin space ditandatangani dengan secret yang sama, jadi
+tanpa pembeda apa pun token member akan diterima sebagai token maker dan dapat dipakai
+membaca app key. Karena itu token maker membawa klaim `type: 'maker'`, dan `MakerAuthGuard`
+menolak token yang tidak memuatnya. Guard user nantinya melakukan kebalikannya.
+
+## 12. `/api/maker/stats` tidak menghitung data yang sudah dihapus dan reservasi batal
+
+Soal tidak merinci cara menghitung angka pada statistik, jadi dipilih penghitungan yang
+paling sesuai dengan apa yang dilihat pemakai. `total_members`, `total_spaces`, dan
+`total_diskon` mengabaikan baris yang sudah di-soft-delete karena bagi pemakai data itu
+sudah tidak ada.
+
+`total_pendapatan` dijumlahkan dari `detail_reservasi.total_harga`, yaitu nilai setelah
+potongan diskon, mengikuti aritmetika laporan bulanan pada soal yang menunjukkan
+`realisasi_pendapatan_bersih` sama dengan pendapatan kotor dikurangi potongan. Reservasi
+berstatus `dibatalkan` tidak diikutkan karena bukan pendapatan, sementara `total_reservasi`
+tetap menghitung seluruh reservasi termasuk yang batal, karena yang ditanyakan adalah jumlah
+transaksi yang pernah terjadi.
+
+## 13. Login membalas 200, bukan 201
+
+NestJS memberi status 201 pada setiap handler `@Post`. Untuk endpoint login hal itu keliru
+karena tidak ada sumber daya yang dibuat, dan soal memang mencontohkan 200, sehingga login
+memakai `@HttpCode(HttpStatus.OK)`.
