@@ -8,6 +8,7 @@ import { UploadModule } from './upload/upload.module';
 import { AdminModule } from './admin/admin.module';
 import { SpacesModule } from './spaces/spaces.module';
 import { DiskonModule } from './diskon/diskon.module';
+import { ReservasiModule } from './reservasi/reservasi.module';
 import { MakerModule } from './maker/maker.module';
 import { MakerContextGuard } from './common/guards/maker-context.guard';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
@@ -31,6 +32,7 @@ import { AppService } from './app.service';
     AdminModule,
     SpacesModule,
     DiskonModule,
+    ReservasiModule,
   ],
   controllers: [AppController],
   providers: [

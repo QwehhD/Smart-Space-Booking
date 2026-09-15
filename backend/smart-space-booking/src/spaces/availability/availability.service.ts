@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { StatusReservasi } from '@prisma/client';
+import { Prisma, StatusReservasi } from '@prisma/client';
 import {
   hitungJamSelesai,
   tanggalKeDateUtc,
@@ -72,8 +72,11 @@ export class AvailabilityService {
     jamSelesai: string,
     maker: MakerContext,
     kecualiIdReservasi?: number,
+    // Pembuatan reservasi memanggil ini dari dalam transaksinya sendiri, supaya
+    // pengecekan bentrok dan penyimpanan baris terjadi pada transaksi yang sama.
+    tx?: Prisma.TransactionClient,
   ): Promise<boolean> {
-    const bentrok = await this.prisma.reservasi.findFirst({
+    const bentrok = await (tx ?? this.prisma).reservasi.findFirst({
       where: {
         id_maker: maker.id,
         tanggal_reservasi: tanggal,
@@ -90,10 +93,8 @@ export class AvailabilityService {
     return bentrok !== null;
   }
 
-  private pastikanDalamJamOperasional(
-    jamMulai: string,
-    jamSelesai: string,
-  ): void {
+  /** Dipakai juga oleh pembuatan reservasi, agar aturannya hanya ada satu. */
+  pastikanDalamJamOperasional(jamMulai: string, jamSelesai: string): void {
     const buka = this.config.get<string>('jamOperasional.buka') ?? '07:00';
     const tutup = this.config.get<string>('jamOperasional.tutup') ?? '22:00';
 

@@ -422,3 +422,64 @@ adanya konfigurasi jam operasional yang sudah disiapkan sejak awal.
 kode yang tidak ada, yang sudah lewat, maupun yang belum mulai. Pesan gabungan itu memang
 dicontohkan soal, dan sekaligus mencegah kode promo milik pengelola ditebak keberadaannya
 dengan mencoba-coba, karena perbedaan pesan akan memberi tahu mana kode yang benar-benar ada.
+
+## 38. Harga reservasi dihitung server dan disalin ke `detail_reservasi`
+
+Tarif, potongan, dan total bayar dihitung di server dari data space dan promo yang tersimpan,
+tidak pernah dari nilai kiriman klien, sehingga pemesan tidak dapat menentukan sendiri harga
+yang dibayarnya.
+
+Hasil perhitungan itu lalu disalin ke `detail_reservasi`, bukan dirujuk ke tabel space dan
+diskon setiap kali ditampilkan. Dengan begitu nota dan laporan lama tetap menunjukkan harga
+yang berlaku saat pemesanan meski tarif space atau persentase promonya berubah kemudian.
+
+Potongan dibulatkan ke bawah agar tidak pernah melebihi persentase yang dijanjikan; selisihnya
+paling banyak satu rupiah. Perhitungannya diuji terpisah di `src/common/utils/uang.util.spec.ts`.
+
+## 39. Pengecekan bentrok diulang di dalam transaksi
+
+Ketersediaan sudah diperiksa sebelum transaksi dimulai, tetapi pemeriksaan itu masih dapat
+kalah balapan dengan pemesanan lain yang berjalan bersamaan pada jadwal yang sama. Karena itu
+pengecekan diulang di dalam transaksi pembuatan reservasi, dan transaksinya memakai tingkat
+isolasi `Serializable` agar dua pemesanan bersamaan tidak sama-sama lolos.
+
+Konsekuensinya `AvailabilityService.adaYangBentrok` menerima `Prisma.TransactionClient`
+opsional, supaya pengecekan dan penyimpanan barisnya benar-benar terjadi pada transaksi yang
+sama, bukan pada dua koneksi berbeda.
+
+## 40. Kode booking ditulis setelah baris tersimpan
+
+Kode booking berbentuk `BOOK-YYYYMMDD-NNNN` dan memuat id barisnya sendiri, sehingga tidak
+dapat disusun sebelum barisnya ada. Reservasi karena itu disimpan lebih dulu dengan kode
+sementara, lalu kodenya ditulis pada langkah berikutnya di dalam transaksi yang sama, sehingga
+kode sementara itu tidak pernah terlihat dari luar.
+
+## 41. Kode promo manual didahulukan daripada promo pilihan katalog
+
+`CreateReservasiDto` menerima `id_diskon` dan `kode_promo` sekaligus, dan soal menyebut
+`kode_promo` sebagai "alternatif jika diinput manual". Bila keduanya dikirim, yang dipakai
+adalah `kode_promo`, karena mengetik kode adalah tindakan terakhir pengguna pada form checkout
+dan lebih mewakili maksudnya daripada promo yang sempat dipilih sebelumnya.
+
+## 42. Pembatalan hanya untuk reservasi yang belum berjalan
+
+Member dapat membatalkan reservasi berstatus `belum_dikonfirm` atau `disetujui`. Setelah
+statusnya `aktif`, artinya member sudah check-in dan spacenya benar-benar terpakai, sehingga
+pembatalan tidak lagi masuk akal dan menjadi urusan admin lewat perubahan status. Reservasi
+yang sudah `selesai` atau `dibatalkan` juga ditolak.
+
+Reservasi yang dibatalkan melepaskan kembali jadwalnya sehingga dapat dipesan orang lain, dan
+tidak dihitung pada `total_pengeluaran` histori karena tidak jadi dibayar, tetapi tetap
+ditampilkan pada daftar agar member dapat melihat riwayat pembatalannya.
+
+## 43. E-ticket menyertakan gambar QR, bukan hanya payloadnya
+
+Contoh response pada soal hanya memuat `qr_code_payload` berupa teks
+`VERIFY-RESERVASI-<id>-<app_key>`, sedangkan Gambar Kerja mensyaratkan e-ticket memuat QR Code
+untuk check-in. Karena itu payloadnya dikembalikan persis seperti contoh, dan ditambahkan
+`qr_code_data_url` berupa gambar PNG dalam bentuk data URI.
+
+Dengan begitu frontend dapat langsung menampilkan QR-nya tanpa memasang pustaka QR sendiri,
+sementara klien yang hanya membaca `qr_code_payload` tetap bekerja seperti pada contoh.
+App key ikut di dalam payload sesuai contoh soal, sehingga tiket milik satu tenant tidak dapat
+diverifikasi pada tenant lain.

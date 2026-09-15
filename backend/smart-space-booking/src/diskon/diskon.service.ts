@@ -58,6 +58,25 @@ export class DiskonService {
     return { ...serializeDiskon(diskon), is_active: true };
   }
 
+  /** Sama seperti `cariYangBerlaku`, tetapi dicari berdasarkan id. */
+  async cariYangBerlakuById(id: number, maker: MakerContext): Promise<Diskon> {
+    const diskon = await this.prisma.diskon.findFirst({
+      where: {
+        id,
+        id_maker: maker.id,
+        deleted_at: null,
+        tanggal_awal: { lte: new Date() },
+        tanggal_akhir: { gte: new Date() },
+      },
+    });
+
+    if (!diskon) {
+      throw new BadRequestException(TIDAK_BERLAKU);
+    }
+
+    return diskon;
+  }
+
   /**
    * Dipakai bersama oleh pengecekan promo dan pembuatan reservasi, supaya promo
    * yang dinyatakan berlaku saat checkout adalah promo yang sama persis dengan
