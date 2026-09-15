@@ -483,3 +483,64 @@ Dengan begitu frontend dapat langsung menampilkan QR-nya tanpa memasang pustaka 
 sementara klien yang hanya membaca `qr_code_payload` tetap bekerja seperti pada contoh.
 App key ikut di dalam payload sesuai contoh soal, sehingga tiket milik satu tenant tidak dapat
 diverifikasi pada tenant lain.
+
+## 44. Perpindahan status reservasi dibatasi mesin status
+
+Soal hanya menyebut kelima nilai status tanpa merinci urutannya. Aturan perpindahannya
+disusun mengikuti alur nyata sebuah pemesanan, dan dipusatkan di
+`src/admin/reservasi/status-machine.ts` supaya endpoint ubah status, check-in, dan check-out
+tidak masing-masing punya versi aturannya sendiri:
+
+- `belum_dikonfirm` menjadi `disetujui` atau `dibatalkan`
+- `disetujui` menjadi `aktif`, `selesai`, atau `dibatalkan`
+- `aktif` menjadi `selesai` atau `dibatalkan`
+- `selesai` dan `dibatalkan` bersifat akhir
+
+Keduanya dibuat akhir karena sudah masuk laporan pendapatan; mengembalikannya akan membuat
+laporan yang sudah dicetak tidak lagi cocok dengan datanya. Pembatalan tetap mungkin selama
+sewanya belum berakhir, karena admin memerlukan jalan keluar untuk pemesanan yang batal di
+luar aplikasi. Perpindahan ke status yang sama juga ditolak, agar kekeliruan pemanggilan
+terlihat dan bukan diam-diam dianggap berhasil.
+
+Check-in mensyaratkan status `disetujui`, check-out mensyaratkan `aktif`, dan keduanya
+mencatat waktunya agar admin dapat menelusuri kapan tamunya benar-benar datang dan pulang.
+Bila `STRICT_CHECKIN_DATE` diaktifkan, check-in hanya boleh pada tanggal sewanya; bawaannya
+dimatikan supaya pengujian dan demonstrasi tidak terhalang tanggal.
+
+Aturannya diuji terpisah di `src/admin/reservasi/status-machine.spec.ts`, karena keputusannya
+tidak tampak dari bentuk response.
+
+## 45. Pesan response yang bergantung nilai memakai pembungkus tersendiri
+
+`PATCH /api/admin/reservasi/{id}/status` membalas "Status reservasi berhasil diperbarui
+menjadi disetujui", yaitu pesan yang memuat nilai hasilnya, sedangkan `@ResponseMessage`
+bersifat tetap per endpoint.
+
+Karena itu ditambahkan `ResponseDenganPesan` di `src/common/responses/pesan-dinamis.ts`.
+Service membungkus hasilnya, lalu `TransformResponseInterceptor` memakai pesan tersebut dan
+meneruskan `data`-nya seperti biasa, sehingga bentuk amplop responsnya tetap sama persis
+dengan endpoint lain dan tidak ada jalur response kedua yang harus dipelihara.
+
+## 46. Laporan mengabaikan reservasi batal dan selalu menampilkan ketiga tipe space
+
+Reservasi berstatus `dibatalkan` tidak diikutkan karena tidak menghasilkan pendapatan.
+Sisanya diikutkan seluruhnya, termasuk yang belum dikonfirmasi, karena justru itulah yang
+membuat angkanya disebut "estimasi": pemesanan yang sudah masuk tetapi belum tentu
+terealisasi. Contoh pada soal juga memperlihatkan `estimasi_pendapatan_kotor` dikurangi
+`total_potongan_diskon` sama dengan `realisasi_pendapatan_bersih`, artinya keduanya dihitung
+dari kumpulan baris yang sama, hanya berbeda sebelum dan sesudah potongan.
+
+Seluruh angkanya dibaca dari `detail_reservasi` yang menyimpan harga saat pemesanan, sehingga
+laporan bulan lalu tidak ikut berubah ketika tarif space dinaikkan hari ini.
+
+`rincian_per_tipe_space` selalu memuat ketiga tipe meski nilainya nol, supaya grafik pada
+frontend memiliki kategori yang tetap dan tidak berubah bentuk dari bulan ke bulan.
+
+## 47. Tidak ada endpoint verifikasi QR maupun dashboard
+
+Rencana kerja awal menyebutkan endpoint verifikasi QR dan dashboard admin, tetapi keduanya
+tidak ada pada daftar 50 endpoint di soal. Payload QR pada e-ticket tetap dibuat sesuai
+contoh, dan pemindaiannya dilakukan admin sebagai cara menemukan reservasi yang lalu
+di-check-in lewat `POST /api/admin/reservasi/{id}/check-in` yang memang ada. Keduanya karena
+itu tidak dibuat, sejalan dengan `status_berlaku` dan `availability/slots` yang juga tidak
+ada di soal.

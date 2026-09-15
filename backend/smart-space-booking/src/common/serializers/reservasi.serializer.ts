@@ -71,3 +71,34 @@ export const serializeReservasiDetail = (
     harga_per_jam: reservasi.detail.space.harga_per_jam,
   },
 });
+
+/**
+ * Bentuk untuk panel admin, yang menurut soal menampilkan rincian uang lengkap
+ * beserta identitas member, karena admin perlu menagih dan mencocokkannya.
+ */
+export const serializeReservasiAdmin = (
+  reservasi: ReservasiLengkap & { member: Member },
+) => ({
+  id: reservasi.id,
+  kode_booking: reservasi.kode_booking,
+  tanggal_reservasi: dateUtcKeTanggal(reservasi.tanggal_reservasi),
+  jam_mulai: reservasi.jam_mulai,
+  jam_selesai: reservasi.jam_selesai,
+  durasi_jam: reservasi.durasi_jam,
+  total_harga_awal: reservasi.detail?.total_harga_awal ?? 0,
+  potongan_diskon: reservasi.detail?.potongan_diskon ?? 0,
+  total_bayar: reservasi.detail?.total_harga ?? 0,
+  status: reservasi.status,
+  check_in_time: reservasi.check_in_time,
+  check_out_time: reservasi.check_out_time,
+  member: {
+    id: reservasi.member.id,
+    nama_member: reservasi.member.nama_member,
+    telp: reservasi.member.telp,
+  },
+  space: reservasi.detail && {
+    id: reservasi.detail.space.id,
+    nama_space: reservasi.detail.space.nama_space,
+    tipe: reservasi.detail.space.tipe,
+  },
+});
