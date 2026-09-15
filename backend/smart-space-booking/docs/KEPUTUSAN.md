@@ -371,3 +371,54 @@ kecil huruf.
 Perlu diingat saat rencana pindah ke Supabase dijalankan: di PostgreSQL pencocokan ini akan
 menjadi peka huruf besar kecil, sehingga perlu diganti dengan `mode: 'insensitive'` pada
 saat itu.
+
+## 33. Tipe space disimpan sebagai konstanta, bukan tabel
+
+`GET /api/spaces/types` mengembalikan tiga tipe beserta label dan keterangannya. Ketiganya
+sudah menjadi nilai enum `TipeSpace` pada skema, dan keterangannya merupakan penjelasan
+kategori yang berlaku umum, bukan data milik satu pengelola. Karena itu isinya ditulis
+sebagai konstanta di `src/spaces/spaces.constant.ts`, bukan tabel tambahan yang harus
+di-seed dan dijaga tetap selaras dengan enumnya.
+
+## 34. Rute tetap didaftarkan sebelum rute `:id`
+
+`/api/spaces/availability`, `/api/spaces/types`, dan `/api/diskon/active` harus dikenali
+sebelum rute `:id` pada path yang sama, karena bila tidak, "availability" akan diperlakukan
+sebagai id dan ditolak sebagai bukan angka.
+
+Untuk `types` cukup dengan urutan penulisan di dalam controller. Untuk `availability`
+digunakan controller tersendiri, `AvailabilityController`, yang didaftarkan lebih dulu pada
+`SpacesModule`. Pemisahan itu sekaligus wajar secara isi, karena pengecekan jadwal adalah
+urusan yang berbeda dari katalog dan akan dipakai ulang saat pembuatan reservasi.
+
+## 35. Bentrok jadwal dibalas 400, bukan `available: false`
+
+Soal mencontohkan dua kemungkinan balasan untuk `GET /api/spaces/availability`: 200 dengan
+`available: true`, atau 400 dengan pesan "Maaf, space sudah terisi atau dibooking pada jam
+tersebut!". Jadi tidak ada bentuk balasan dengan `available: false`, dan ketidaktersediaan
+memang disampaikan sebagai error. Bentuk itu diikuti apa adanya.
+
+Dua jadwal dianggap bertabrakan bila yang satu mulai sebelum yang lain selesai dan selesai
+setelah yang lain mulai. Jadwal yang bersambung persis, misalnya 09:00-12:00 diikuti
+12:00-14:00, tidak dianggap bentrok. Reservasi berstatus `dibatalkan` melepaskan kembali
+jadwalnya.
+
+Perbandingan jamnya diserahkan ke database karena jam tersimpan sebagai `HH:mm` yang selalu
+dua digit, sehingga urutan teksnya sama dengan urutan waktu. Lihat keputusan nomor 5.
+
+## 36. Reservasi tidak boleh melewati tengah malam dan harus di dalam jam operasional
+
+Satu baris reservasi hanya memiliki satu `tanggal_reservasi`, sehingga sewa yang melewati
+tengah malam tidak dapat diwakili dan ditolak. Selain itu jam sewa harus berada di dalam
+`JAM_OPERASIONAL_BUKA` sampai `JAM_OPERASIONAL_TUTUP` dari konfigurasi, karena memesan di
+luar jam buka tidak masuk akal meski jadwalnya kosong.
+
+Keduanya tidak disebut soal, tetapi merupakan akibat langsung dari bentuk datanya dan dari
+adanya konfigurasi jam operasional yang sudah disiapkan sejak awal.
+
+## 37. Kode promo yang tidak ada dan yang kedaluwarsa dibalas sama
+
+`POST /api/diskon/check` membalas "Kode promo tidak ditemukan atau sudah kedaluwarsa!" untuk
+kode yang tidak ada, yang sudah lewat, maupun yang belum mulai. Pesan gabungan itu memang
+dicontohkan soal, dan sekaligus mencegah kode promo milik pengelola ditebak keberadaannya
+dengan mencoba-coba, karena perbedaan pesan akan memberi tahu mana kode yang benar-benar ada.
