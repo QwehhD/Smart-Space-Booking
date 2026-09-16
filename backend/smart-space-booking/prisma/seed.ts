@@ -279,10 +279,25 @@ async function pastikanReservasi(
   members: { id: number }[],
   spaces: { id: number; id_owner: number; harga_per_jam: number }[],
 ) {
+  const sekarangUntukPromo = new Date();
   const diskon = await prisma.diskon.findMany({
-    where: { id_maker: idMaker, deleted_at: null },
+    where: {
+      id_maker: idMaker,
+      deleted_at: null,
+      tanggal_awal: { lte: sekarangUntukPromo },
+      tanggal_akhir: { gte: sekarangUntukPromo },
+    },
+    orderBy: { id: 'asc' },
   });
-  const promoUtama = diskon.find((d) => d.nama_diskon === 'DISKONHEMAT20');
+
+  // Promo hanya berlaku pada space milik pengelola yang menerbitkannya, sehingga
+  // setiap space dipasangkan dengan promo milik pengelolanya sendiri.
+  const promoPerOwner = new Map<number, (typeof diskon)[number]>();
+  for (const d of diskon) {
+    if (!promoPerOwner.has(d.id_owner)) {
+      promoPerOwner.set(d.id_owner, d);
+    }
+  }
 
   const statusBerurutan = [
     StatusReservasi.selesai,
@@ -327,10 +342,10 @@ async function pastikanReservasi(
       continue;
     }
 
-    const pakaiDiskon = promoUtama && i % 4 === 0;
+    const promo = i % 4 === 0 ? promoPerOwner.get(space.id_owner) : undefined;
     const tarifKotor = space.harga_per_jam * durasi;
-    const potongan = pakaiDiskon
-      ? Math.floor((tarifKotor * promoUtama.persentase_diskon) / 100)
+    const potongan = promo
+      ? Math.floor((tarifKotor * promo.persentase_diskon) / 100)
       : 0;
 
     const baru = await prisma.reservasi.create({
@@ -354,10 +369,10 @@ async function pastikanReservasi(
         detail: {
           create: {
             id_space: space.id,
-            id_diskon: pakaiDiskon ? promoUtama.id : null,
+            id_diskon: promo?.id ?? null,
             harga_per_jam: space.harga_per_jam,
             total_harga_awal: tarifKotor,
-            persentase_diskon: pakaiDiskon ? promoUtama.persentase_diskon : 0,
+            persentase_diskon: promo?.persentase_diskon ?? 0,
             potongan_diskon: potongan,
             total_harga: tarifKotor - potongan,
           },

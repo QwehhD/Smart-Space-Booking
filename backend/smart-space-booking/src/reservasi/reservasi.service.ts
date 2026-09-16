@@ -66,7 +66,7 @@ export class ReservasiService {
       jamSelesai,
     );
 
-    const diskon = await this.cariDiskon(dto, maker);
+    const diskon = await this.cariDiskon(dto, maker, space.id_owner);
     const tarifKotor = hitungTarifKotor(space.harga_per_jam, dto.durasi_jam);
     const potongan = diskon
       ? hitungPotongan(tarifKotor, diskon.persentase_diskon)
@@ -233,17 +233,30 @@ export class ReservasiService {
   /**
    * Promo yang diketik manual didahulukan daripada yang dipilih dari katalog,
    * karena kode manual adalah tindakan terakhir pengguna pada form checkout.
+   *
+   * Pencariannya dibatasi pada pengelola pemilik space yang dipesan, sehingga
+   * promo terbitan pengelola lain ditolak dan kode yang sama pada dua pengelola
+   * tidak pernah tertukar.
    */
   private async cariDiskon(
     dto: CreateReservasiDto,
     maker: MakerContext,
+    idOwner: number,
   ): Promise<Diskon | null> {
     if (dto.kode_promo?.trim()) {
-      return this.diskonService.cariYangBerlaku(dto.kode_promo.trim(), maker);
+      return this.diskonService.cariYangBerlaku(
+        dto.kode_promo.trim(),
+        maker,
+        idOwner,
+      );
     }
 
     if (dto.id_diskon) {
-      return this.diskonService.cariYangBerlakuById(dto.id_diskon, maker);
+      return this.diskonService.cariYangBerlakuById(
+        dto.id_diskon,
+        maker,
+        idOwner,
+      );
     }
 
     return null;

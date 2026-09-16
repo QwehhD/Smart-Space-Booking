@@ -1437,7 +1437,7 @@
       "name": "Katalog Diskon",
       "item": [
         {
-          "name": "Daftar promo yang sedang aktif",
+          "name": "Daftar promo yang sedang aktif, dapat disaring per space",
           "request": {
             "method": "GET",
             "header": [
@@ -1455,6 +1455,13 @@
                 "api",
                 "diskon",
                 "active"
+              ],
+              "query": [
+                {
+                  "key": "id_space",
+                  "value": "",
+                  "disabled": true
+                }
               ]
             }
           }
@@ -1486,7 +1493,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nama_diskon\": \"DISKONHEMAT20\"\n}",
+              "raw": "{\n  \"nama_diskon\": \"DISKONHEMAT20\",\n  \"id_space\": 1\n}",
               "options": {
                 "raw": {
                   "language": "json"

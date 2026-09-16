@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Param,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentMaker } from '../common/decorators/current-maker.decorator';
@@ -15,6 +16,7 @@ import { ParseIdPipe } from '../common/pipes/parse-id.pipe';
 import { MakerContext } from '../maker/interfaces/maker-context.interface';
 import { DiskonService } from './diskon.service';
 import { CheckPromoDto } from './dto/check-promo.dto';
+import { ListDiskonQueryDto } from './dto/list-diskon.dto';
 
 @ApiTags('Katalog Diskon')
 @ApiHeader({ name: 'x-maker-key', required: false })
@@ -25,9 +27,14 @@ export class DiskonController {
 
   // Rute tetap didahulukan agar "active" tidak dibaca sebagai id diskon.
   @Get('active')
-  @ApiOperation({ summary: 'Daftar promo yang sedang aktif' })
-  aktif(@CurrentMaker() maker: MakerContext) {
-    return this.diskonService.aktif(maker);
+  @ApiOperation({
+    summary: 'Daftar promo yang sedang aktif, dapat disaring per space',
+  })
+  aktif(
+    @Query() query: ListDiskonQueryDto,
+    @CurrentMaker() maker: MakerContext,
+  ) {
+    return this.diskonService.aktif(maker, query);
   }
 
   @Post('check')

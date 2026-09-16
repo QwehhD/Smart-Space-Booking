@@ -656,3 +656,36 @@ Yang sudah benar sejak awal dan tidak diubah: penolakan tipe data yang salah, bi
 pada field bilangan bulat, enum di luar daftar, field asing pada body maupun query, id bukan
 angka, body yang bukan JSON, serta pemeriksaan kepemilikan data setelah validasi lolos.
 Pencemaran prototype lewat `__proto__` juga diuji dan tidak terjadi.
+
+## 55. Perbaikan bug: kode promo kini terikat pengelola penerbitnya
+
+Ditemukan saat menyusun rencana frontend. Promo hanya difilter `id_maker`, tidak pernah
+`id_owner`, baik pada katalog maupun pada validasi saat memesan. Akibatnya **promo terbitan
+satu pengelola dapat dipakai untuk memesan space milik pengelola lain**, dan backend
+menerimanya. Pada data seed hal itu benar-benar terjadi: dua reservasi memakai
+`DISKONHEMAT20` milik Moklet Hub untuk memesan space milik Ruang Kolaborasi.
+
+Ini diperbaiki sebagai **perubahan perilaku yang disengaja**, bukan penambahan, karena
+membiarkannya berarti pengelola menanggung potongan harga yang tidak pernah ia tawarkan.
+
+- Pencarian promo pada pembuatan reservasi, lewat `id_diskon` maupun `kode_promo`, kini
+  difilter `id_maker` **dan** `id_owner` space yang dipesan. Dengan begitu kode yang sama
+  diterbitkan dua pengelola tidak pernah tertukar, dan yang dipakai selalu milik pengelola
+  space tersebut.
+- Promo milik pengelola lain ditolak 400 dengan pesan tersendiri,
+  "Kode promo tidak berlaku untuk space ini". Dibedakan dari promo yang memang tidak ada atau
+  sudah lewat, karena pengguna sudah melihat kodenya di suatu tempat dan pantas tahu bahwa
+  masalahnya ada pada space yang ia pilih.
+- `serializeDiskon` menyertakan `id_owner`. Bersifat menambah.
+- `GET /api/diskon/active` menerima query opsional `?id_space`. Bila diisi, hanya promo milik
+  pengelola space tersebut yang dikembalikan; tanpa query, perilaku lama dipertahankan.
+- `POST /api/diskon/check` menerima field opsional `id_space`. Bila diisi, kepemilikan ikut
+  diperiksa sehingga hasil pengecekan di halaman checkout sama persis dengan yang nanti
+  diterapkan saat memesan.
+- Seeder diperbaiki: setiap space dipasangkan dengan promo milik pengelolanya sendiri.
+  Sebagai efek sampingnya `NUSANTARA15` kini benar-benar terpakai, sehingga data contoh
+  mewakili kedua pengelola.
+
+Frontend memanggil `/api/diskon/active?id_space=<id>` pada form pemesanan dan mengirim
+`id_space` ke `/api/diskon/check`, sehingga daftar promo yang ditawarkan sudah tersaring
+sebelum pengguna memilih.

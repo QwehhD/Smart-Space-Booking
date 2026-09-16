@@ -1511,6 +1511,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "id_space",
+            "required": false,
+            "in": "query",
+            "description": "Bila diisi, hanya promo milik pengelola space tersebut yang dikembalikan",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
           }
         ],
         "responses": {
@@ -1518,7 +1528,7 @@
             "description": ""
           }
         },
-        "summary": "Daftar promo yang sedang aktif",
+        "summary": "Daftar promo yang sedang aktif, dapat disaring per space",
         "tags": [
           "Katalog Diskon"
         ]
@@ -2249,6 +2259,11 @@
             "type": "string",
             "example": "DISKONHEMAT20",
             "description": "Kode promo yang dimasukkan pengguna pada form checkout"
+          },
+          "id_space": {
+            "type": "number",
+            "example": 1,
+            "description": "Space yang akan dipesan. Bila diisi, kepemilikan promo ikut diperiksa."
           }
         },
         "required": [
