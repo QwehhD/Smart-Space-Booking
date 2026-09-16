@@ -290,6 +290,24 @@ describe('Alur utama (e2e)', () => {
       realisasi_pendapatan_bersih: 68000,
     });
     expect(res.body.data.rincian_per_tipe_space).toHaveLength(3);
+
+    // Maret 2027 punya 31 hari, dan jumlah seluruh harinya harus sama persis
+    // dengan pendapatan bersih.
+    const perHari = res.body.data.pendapatan_per_hari as {
+      tanggal: string;
+      total: number;
+    }[];
+
+    expect(perHari).toHaveLength(31);
+    expect(perHari[0].tanggal).toBe('2027-03-01');
+    expect(perHari[30].tanggal).toBe('2027-03-31');
+    expect(perHari.reduce((j, h) => j + h.total, 0)).toBe(
+      res.body.data.realisasi_pendapatan_bersih,
+    );
+
+    // Kedua pemesanan jatuh pada tanggal yang sama.
+    const tanggalSewa = perHari.find((h) => h.tanggal === TANGGAL);
+    expect(tanggalSewa?.total).toBe(68000);
   });
 
   it('12. member membatalkan pemesanannya dan jadwalnya kembali bebas', async () => {

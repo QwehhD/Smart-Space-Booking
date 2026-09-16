@@ -9,6 +9,7 @@ import { AuthenticatedUser } from '../../auth/interfaces/authenticated-user.inte
 import { PrismaService } from '../../prisma/prisma.service';
 import { TIPE_SPACE } from '../../spaces/spaces.constant';
 import { ReportQueryDto } from './dto/report-query.dto';
+import { rekapPerHari } from './rekap-harian';
 
 /** Reservasi beserta rincian harga dan spacenya, sebagaimana dibaca laporan. */
 type ReservasiDenganDetail = Reservasi & {
@@ -62,6 +63,16 @@ export class AdminReportsService {
       total_potongan_diskon: potongan,
       realisasi_pendapatan_bersih: bersih,
       rincian_per_tipe_space: this.rincianPerTipe(reservasi),
+      // Dihitung dari kumpulan baris yang sama dengan total di atas, sehingga
+      // jumlah seluruh harinya pasti sama dengan realisasi_pendapatan_bersih.
+      pendapatan_per_hari: rekapPerHari(
+        reservasi.map((r) => ({
+          tanggal: r.tanggal_reservasi,
+          total: r.detail?.total_harga ?? 0,
+        })),
+        year,
+        month,
+      ),
     };
   }
 

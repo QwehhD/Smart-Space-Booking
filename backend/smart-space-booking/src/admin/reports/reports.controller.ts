@@ -23,6 +23,13 @@ export class AdminReportsController {
   @Get('monthly')
   @ApiOperation({
     summary: 'Rekap estimasi dan realisasi pendapatan per bulan',
+    description:
+      'Mengembalikan month, year, total_transaksi, total_jam_terpakai, ' +
+      'estimasi_pendapatan_kotor, total_potongan_diskon, realisasi_pendapatan_bersih, ' +
+      'rincian_per_tipe_space (selalu ketiga tipe), dan pendapatan_per_hari. ' +
+      'pendapatan_per_hari memuat setiap hari dalam bulan tersebut, hari tanpa ' +
+      'transaksi bernilai 0, dan jumlah seluruhnya sama dengan ' +
+      'realisasi_pendapatan_bersih.',
   })
   bulanan(
     @Query() query: ReportQueryDto,
