@@ -1,18 +1,8 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { StatusReservasi } from '@prisma/client';
-import {
-  IsEnum,
-  IsInt,
-  IsOptional,
-  IsString,
-  Matches,
-  Max,
-  Min,
-} from 'class-validator';
-import {
-  PESAN_VALIDASI,
-  TANGGAL_REGEX,
-} from '../../../common/constants/validation.constant';
+import { IsEnum, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { PESAN_VALIDASI } from '../../../common/constants/validation.constant';
+import { IsTanggalWujud } from '../../../common/validators/tanggal-wujud.validator';
 
 export class ListReservasiQueryDto {
   @ApiPropertyOptional({ example: 8, minimum: 1, maximum: 12 })
@@ -46,6 +36,6 @@ export class ListReservasiQueryDto {
   @ApiPropertyOptional({ example: '2026-08-30' })
   @IsOptional()
   @IsString({ message: 'Tanggal harus berupa teks' })
-  @Matches(TANGGAL_REGEX, { message: PESAN_VALIDASI.TANGGAL_FORMAT })
+  @IsTanggalWujud({ message: PESAN_VALIDASI.TANGGAL_WUJUD })
   tanggal?: string;
 }

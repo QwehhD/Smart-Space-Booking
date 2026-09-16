@@ -6,9 +6,14 @@ import {
   IsOptional,
   IsString,
   Length,
+  Matches,
   Max,
   Min,
 } from 'class-validator';
+import {
+  NAMA_BERKAS_REGEX,
+  PESAN_VALIDASI,
+} from '../../../common/constants/validation.constant';
 
 /** Batas atas sekadar penjaga salah ketik, bukan aturan bisnis dari soal. */
 const HARGA_MAKSIMAL = 100_000_000;
@@ -55,5 +60,6 @@ export class CreateSpaceDto {
   @IsOptional()
   @IsString({ message: 'Nama berkas foto harus berupa teks' })
   @Length(1, 255, { message: 'Nama berkas foto maksimal 255 karakter' })
+  @Matches(NAMA_BERKAS_REGEX, { message: PESAN_VALIDASI.NAMA_BERKAS_FORMAT })
   foto?: string;
 }

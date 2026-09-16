@@ -9,6 +9,7 @@ import {
   MinLength,
 } from 'class-validator';
 import {
+  NAMA_BERKAS_REGEX,
   PESAN_VALIDASI,
   TELP_REGEX,
   USERNAME_REGEX,
@@ -46,6 +47,9 @@ export class RegisterMemberDto {
   @ApiProperty({ example: 'Jl. Sudirman No. 123, Jakarta Selatan' })
   @IsString({ message: 'Alamat harus berupa teks' })
   @IsNotEmpty({ message: 'Alamat wajib diisi' })
+  @Length(5, 255, {
+    message: 'Alamat harus terdiri dari 5 sampai 255 karakter',
+  })
   alamat: string;
 
   @ApiProperty({ example: '081234567890' })
@@ -63,5 +67,6 @@ export class RegisterMemberDto {
   @IsOptional()
   @IsString({ message: 'Foto harus berupa nama file' })
   @MaxLength(255, { message: 'Nama file foto maksimal 255 karakter' })
+  @Matches(NAMA_BERKAS_REGEX, { message: PESAN_VALIDASI.NAMA_BERKAS_FORMAT })
   foto?: string;
 }

@@ -13,7 +13,6 @@ import {
   ApiBearerAuth,
   ApiHeader,
   ApiOperation,
-  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
@@ -22,6 +21,7 @@ import { AuthenticatedUser } from '../../auth/interfaces/authenticated-user.inte
 import { ResponseMessage } from '../../common/decorators/response-message.decorator';
 import { ParseIdPipe } from '../../common/pipes/parse-id.pipe';
 import { CreateMemberAdminDto } from './dto/create-member.dto';
+import { ListMembersQueryDto } from './dto/list-members.dto';
 import { UpdateMemberAdminDto } from './dto/update-member.dto';
 import { AdminMembersService } from './members.service';
 
@@ -34,17 +34,12 @@ export class AdminMembersController {
   constructor(private readonly membersService: AdminMembersService) {}
 
   @Get()
-  @ApiQuery({
-    name: 'search',
-    required: false,
-    description: 'Cari berdasarkan nama, instansi, atau nomor telepon',
-  })
   @ApiOperation({ summary: 'Daftar seluruh member pada tenant ini' })
   daftar(
+    @Query() query: ListMembersQueryDto,
     @CurrentUser() user: AuthenticatedUser,
-    @Query('search') search?: string,
   ) {
-    return this.membersService.daftar(user, search?.trim() || undefined);
+    return this.membersService.daftar(user, query.search?.trim() || undefined);
   }
 
   @Post()

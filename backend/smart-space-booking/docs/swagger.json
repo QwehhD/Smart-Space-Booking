@@ -860,6 +860,7 @@
             "in": "query",
             "description": "Cari berdasarkan nama, instansi, atau nomor telepon",
             "schema": {
+              "example": "Budi",
               "type": "string"
             }
           }

@@ -3,8 +3,8 @@ import { IsInt, IsString, Matches, Max, Min } from 'class-validator';
 import {
   JAM_REGEX,
   PESAN_VALIDASI,
-  TANGGAL_REGEX,
 } from '../../../common/constants/validation.constant';
+import { IsTanggalWujud } from '../../../common/validators/tanggal-wujud.validator';
 
 /** Batas atas durasi; satu reservasi tidak boleh melewati tengah malam. */
 const DURASI_MAKSIMAL = 24;
@@ -17,7 +17,7 @@ export class CheckAvailabilityQueryDto {
 
   @ApiProperty({ example: '2026-08-30' })
   @IsString({ message: 'Tanggal harus berupa teks' })
-  @Matches(TANGGAL_REGEX, { message: PESAN_VALIDASI.TANGGAL_FORMAT })
+  @IsTanggalWujud({ message: PESAN_VALIDASI.TANGGAL_WUJUD })
   tanggal!: string;
 
   @ApiProperty({ example: '09:00' })

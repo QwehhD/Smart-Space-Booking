@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional, IsString, Length, Matches } from 'class-validator';
 import {
+  NAMA_BERKAS_REGEX,
   PESAN_VALIDASI,
   TELP_REGEX,
 } from '../../../common/constants/validation.constant';
@@ -52,5 +53,6 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsString({ message: 'Nama berkas foto harus berupa teks' })
   @Length(1, 255, { message: 'Nama berkas foto maksimal 255 karakter' })
+  @Matches(NAMA_BERKAS_REGEX, { message: PESAN_VALIDASI.NAMA_BERKAS_FORMAT })
   foto?: string;
 }

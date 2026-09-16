@@ -1,6 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString, Length, Matches, MinLength } from 'class-validator';
 import {
+  IsEmail,
+  IsString,
+  Length,
+  Matches,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
+import {
+  PASSWORD_MAKS,
   PESAN_VALIDASI,
   USERNAME_REGEX,
 } from '../../common/constants/validation.constant';
@@ -28,5 +36,6 @@ export class RegisterMakerDto {
   @ApiProperty({ example: 'Password123!', minLength: 6 })
   @IsString({ message: 'Password harus berupa teks' })
   @MinLength(6, { message: 'Password minimal 6 karakter' })
+  @MaxLength(PASSWORD_MAKS, { message: PESAN_VALIDASI.PASSWORD_PANJANG })
   password!: string;
 }

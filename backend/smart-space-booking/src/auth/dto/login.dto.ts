@@ -1,5 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import {
+  PASSWORD_MAKS,
+  PESAN_VALIDASI,
+} from '../../common/constants/validation.constant';
 
 export class LoginDto {
   @ApiProperty({
@@ -8,6 +12,7 @@ export class LoginDto {
   })
   @IsString({ message: 'Username harus berupa teks' })
   @IsNotEmpty({ message: 'Username wajib diisi' })
+  @MaxLength(50, { message: 'Username maksimal 50 karakter' })
   username!: string;
 
   @ApiProperty({
@@ -16,5 +21,6 @@ export class LoginDto {
   })
   @IsString({ message: 'Password harus berupa teks' })
   @IsNotEmpty({ message: 'Password wajib diisi' })
+  @MaxLength(PASSWORD_MAKS, { message: PESAN_VALIDASI.PASSWORD_PANJANG })
   password!: string;
 }

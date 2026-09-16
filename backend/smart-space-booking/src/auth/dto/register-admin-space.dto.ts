@@ -8,6 +8,7 @@ import {
   MinLength,
 } from 'class-validator';
 import {
+  NAMA_BERKAS_REGEX,
   PESAN_VALIDASI,
   TELP_REGEX,
   USERNAME_REGEX,
@@ -53,6 +54,7 @@ export class RegisterAdminSpaceDto {
   @ApiPropertyOptional({ example: 'Jl. Danau Ranau No. 1, Malang' })
   @IsOptional()
   @IsString({ message: 'Alamat harus berupa teks' })
+  @MaxLength(255, { message: 'Alamat maksimal 255 karakter' })
   alamat?: string;
 
   @ApiPropertyOptional({
@@ -61,11 +63,13 @@ export class RegisterAdminSpaceDto {
   })
   @IsOptional()
   @IsString({ message: 'Deskripsi harus berupa teks' })
+  @MaxLength(1000, { message: 'Deskripsi maksimal 1000 karakter' })
   deskripsi?: string;
 
   @ApiPropertyOptional({ example: 'moklet_hub.jpg' })
   @IsOptional()
   @IsString({ message: 'Foto harus berupa nama file' })
   @MaxLength(255, { message: 'Nama file foto maksimal 255 karakter' })
+  @Matches(NAMA_BERKAS_REGEX, { message: PESAN_VALIDASI.NAMA_BERKAS_FORMAT })
   foto?: string;
 }

@@ -618,3 +618,41 @@ Pemeriksaan itu sekaligus membenarkan keputusan nomor 23: Gambar Kerja butir Adm
 mewajibkan admin dapat memperbarui alamat dan deskripsi fasilitas lokasinya, padahal contoh
 payload `PUT /api/admin/profile` pada Kontrak API hanya memuat tiga field. Menerima keduanya
 sebagai field opsional membuat kedua bagian soal terpenuhi sekaligus.
+
+## 54. Hasil audit validasi seluruh endpoint
+
+Seluruh endpoint diperiksa terhadap masukan yang tidak sah, dan ditemukan tujuh celah yang
+kemudian diperbaiki. Pola kegagalannya sama: nilai yang tidak masuk akal lolos dari
+ValidationPipe, lalu baru ditolak oleh database sebagai 500, atau tersimpan apa adanya.
+
+**Tanggal yang tidak ada pada kalender.** `2027-02-30` lolos pemeriksaan pola `YYYY-MM-DD`,
+lalu `Date.UTC` menggulungnya menjadi 2 Maret. Akibatnya reservasi tersimpan pada hari yang
+tidak diminta member, pengecekan bentroknya pun dilakukan pada hari yang salah, dan kode
+booking serta e-ticket ikut menyebut tanggal yang keliru. Ini yang paling berbahaya karena
+tidak memunculkan error sama sekali. Diperbaiki dengan `IsTanggalWujud`, yang menyusun ulang
+tanggalnya lalu memastikan hasilnya masih menunjuk hari yang sama.
+
+**Password melebihi 72 byte.** bcrypt hanya membaca 72 byte pertama, sehingga password yang
+lebih panjang diam-diam terpotong dan dua password berbeda dapat dianggap sama. Batas ini
+sudah ada pada registrasi member dan admin space, tetapi terlewat pada penambahan member oleh
+admin, registrasi App Maker, serta kedua endpoint login.
+
+**Teks tanpa batas panjang.** `alamat`, `deskripsi`, `kode_promo`, dan kredensial login tidak
+memiliki batas atas, sehingga kiriman 100.000 karakter melewati validasi dan baru gagal di
+database sebagai 500. Kini seluruhnya dibatasi dan ditolak sebagai 400.
+
+**Nama berkas foto.** Field `foto` menerima teks apa pun, termasuk `../../../etc/passwd` dan
+URL lengkap, yang kemudian ikut disusun menjadi `foto_url`. Nilainya memang tidak pernah
+dipakai membuka berkas, tetapi membiarkannya berarti menyimpan nilai yang pasti salah dan
+menggantungkan keamanannya pada kode di kemudian hari. Kini dibatasi pola nama berkas polos
+tanpa garis miring maupun titik ganda.
+
+**Parameter pencarian tanpa DTO.** `GET /api/admin/members` membaca `?search` langsung lewat
+`@Query('search')`, sehingga tidak pernah melewati ValidationPipe. Nilai berbentuk array atau
+objek seperti `?search[]=a` diterima dan penyaringannya diam-diam diabaikan. Kini memakai
+`ListMembersQueryDto`.
+
+Yang sudah benar sejak awal dan tidak diubah: penolakan tipe data yang salah, bilangan pecahan
+pada field bilangan bulat, enum di luar daftar, field asing pada body maupun query, id bukan
+angka, body yang bukan JSON, serta pemeriksaan kepemilikan data setelah validasi lolos.
+Pencemaran prototype lewat `__proto__` juga diuji dan tidak terjadi.

@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsNotEmpty,
+  MaxLength,
   IsOptional,
   IsString,
   Length,
@@ -8,6 +9,8 @@ import {
   MinLength,
 } from 'class-validator';
 import {
+  NAMA_BERKAS_REGEX,
+  PASSWORD_MAKS,
   PESAN_VALIDASI,
   TELP_REGEX,
   USERNAME_REGEX,
@@ -25,6 +28,7 @@ export class CreateMemberAdminDto {
   @ApiProperty({ example: 'Secret123!', minLength: 6 })
   @IsString({ message: 'Password harus berupa teks' })
   @MinLength(6, { message: 'Password minimal 6 karakter' })
+  @MaxLength(PASSWORD_MAKS, { message: PESAN_VALIDASI.PASSWORD_PANJANG })
   password!: string;
 
   @ApiProperty({ example: 'Budi Raharjo' })
@@ -44,6 +48,9 @@ export class CreateMemberAdminDto {
   @ApiProperty({ example: 'Jl. Danau Ranau No. 1, Sawojajar, Malang' })
   @IsString({ message: 'Alamat harus berupa teks' })
   @IsNotEmpty({ message: 'Alamat wajib diisi' })
+  @Length(5, 255, {
+    message: 'Alamat harus terdiri dari 5 sampai 255 karakter',
+  })
   alamat!: string;
 
   @ApiProperty({ example: '085712345678' })
@@ -58,5 +65,6 @@ export class CreateMemberAdminDto {
   @IsOptional()
   @IsString({ message: 'Nama berkas foto harus berupa teks' })
   @Length(1, 255, { message: 'Nama berkas foto maksimal 255 karakter' })
+  @Matches(NAMA_BERKAS_REGEX, { message: PESAN_VALIDASI.NAMA_BERKAS_FORMAT })
   foto?: string;
 }

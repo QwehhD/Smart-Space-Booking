@@ -5,13 +5,14 @@ import {
   IsString,
   Matches,
   Max,
+  MaxLength,
   Min,
 } from 'class-validator';
 import {
   JAM_REGEX,
   PESAN_VALIDASI,
-  TANGGAL_REGEX,
 } from '../../common/constants/validation.constant';
+import { IsTanggalWujud } from '../../common/validators/tanggal-wujud.validator';
 
 const DURASI_MAKSIMAL = 24;
 
@@ -23,7 +24,7 @@ export class CreateReservasiDto {
 
   @ApiProperty({ example: '2026-08-30' })
   @IsString({ message: 'Tanggal reservasi harus berupa teks' })
-  @Matches(TANGGAL_REGEX, { message: PESAN_VALIDASI.TANGGAL_FORMAT })
+  @IsTanggalWujud({ message: PESAN_VALIDASI.TANGGAL_WUJUD })
   tanggal_reservasi!: string;
 
   @ApiProperty({ example: '09:00' })
@@ -53,5 +54,6 @@ export class CreateReservasiDto {
   })
   @IsOptional()
   @IsString({ message: 'Kode promo harus berupa teks' })
+  @MaxLength(100, { message: 'Kode promo maksimal 100 karakter' })
   kode_promo?: string;
 }
