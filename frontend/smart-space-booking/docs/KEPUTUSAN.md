@@ -310,3 +310,64 @@ React Compiler melewati memoisasi seluruh komponen yang memanggil `form.watch()`
 karena fungsi yang dikembalikannya tidak dapat dimemoisasi dengan aman. Lint
 memperingatkan hal itu. `useWatch` berlangganan per field dan tidak memicu
 peringatan tersebut, sehingga dipakai untuk ketiga nilai yang diamati form.
+
+## 25. Detail reservasi disusun dari dua endpoint
+
+`GET /api/reservasi/{id}` hanya memuat `total_bayar`, tanpa rincian potongan, dan
+tidak memuat data pengelola sama sekali. Keduanya dibutuhkan halaman detail.
+
+Endpoint e-ticket memuat keduanya, yaitu `rincian_pembayaran` dan
+`coworking_space`, sehingga halaman detail memanggil keduanya. Pengambilan
+e-ticket dibuat bersifat pelengkap: bila gagal, halaman tetap tampil dengan data
+yang ada dan hanya kehilangan rincian tambahannya. Dengan begitu satu kegagalan
+tidak menjatuhkan seluruh halaman.
+
+Endpoint baru tidak diminta ke backend karena datanya sudah dapat disusun dari
+yang tersedia.
+
+## 26. Waktu check-in dan check-out belum dapat dilihat member
+
+Dokumen rencana meminta halaman detail reservasi menampilkan waktu check-in dan
+check-out bila ada. Data itu **tidak dikembalikan endpoint mana pun yang dapat
+diakses member**: `serializeReservasiDetail` tidak memuatnya, dan hanya
+`serializeReservasiAdmin` yang punya `check_in_time` serta `check_out_time`.
+
+Berbeda dengan data pengelola dan rincian harga, ini tidak dapat disusun dari
+endpoint lain. Bagian tersebut karena itu belum dibuat, dan dicatat di sini
+sebagai kekurangan yang disengaja, bukan kelalaian.
+
+Bila nanti diputuskan perlu, perubahannya bersifat menambah dan kecil: menyalin
+dua field itu ke `serializeReservasiDetail` di backend.
+
+## 27. Tab status disaring di klien
+
+`GET /api/reservasi/my` tidak menerima parameter status, dan seluruh pemesanan
+satu member memang dimuat sekaligus dalam satu response. Karena itu tab status
+menyaring data yang sudah ada di klien, bukan memanggil ulang backend, dan jumlah
+per status dapat ditampilkan pada tabnya tanpa request tambahan.
+
+Tab yang sedang aktif tetap disimpan pada URL supaya dapat ditautkan.
+
+## 28. Cetak memakai dialog peramban, bukan pustaka PDF
+
+Tombol cetak memanggil `window.print()`, dan tata letaknya diatur stylesheet
+`@media print` yang menyembunyikan seluruh halaman kecuali elemen bertanda
+`.cetak-tiket` atau `.cetak-laporan`. Dengan begitu navigasi dan tombol tidak
+ikut tercetak, dan pengguna dapat memilih "Simpan sebagai PDF" dari dialog cetak.
+
+Pustaka pembuat PDF tidak dipakai karena akan menambah beban unduhan yang cukup
+besar untuk hasil yang justru kurang setia terhadap tampilan aslinya.
+
+## 29. Berbagi tiket memakai Web Share API dengan cadangan salin tautan
+
+`navigator.share` hanya tersedia pada sebagian peramban, terutama di perangkat
+mobile. Bila tidak ada, tautan tiket disalin ke papan klip dan pengguna diberi
+tahu lewat notifikasi. Pembatalan dialog berbagi oleh pengguna sengaja tidak
+diperlakukan sebagai kegagalan.
+
+## 30. Halaman akun hanya dapat dibaca
+
+Backend tidak menyediakan endpoint bagi member untuk mengubah profilnya sendiri;
+perubahan data member dilakukan pengelola lewat `/api/admin/members`. Halaman akun
+karena itu tidak memiliki form, dan menyebutkan bahwa perubahan data dilakukan
+melalui pengelola.

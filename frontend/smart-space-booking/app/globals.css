@@ -173,3 +173,55 @@
     @apply font-sans;
   }
 }
+/**
+ * Tata letak cetak untuk e-ticket dan laporan.
+ *
+ * Saat dicetak, hanya elemen bertanda `.cetak-tiket` atau `.cetak-laporan` yang
+ * ditampilkan, sehingga navigasi, tombol, dan bilah samping tidak ikut tercetak
+ * dan tiketnya muat dalam satu halaman. Pengguna dapat memilih "Simpan sebagai
+ * PDF" dari dialog cetak peramban.
+ */
+@media print {
+  @page {
+    margin: 12mm;
+  }
+
+  body {
+    background: #fff;
+  }
+
+  /* Sembunyikan semuanya, lalu munculkan kembali hanya jalur menuju area cetak. */
+  body * {
+    visibility: hidden;
+  }
+
+  .cetak-tiket,
+  .cetak-tiket *,
+  .cetak-laporan,
+  .cetak-laporan * {
+    visibility: visible;
+  }
+
+  .cetak-tiket {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    margin-inline: auto;
+    max-width: 82mm;
+    border-color: #999;
+    box-shadow: none;
+  }
+
+  .cetak-laporan {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+  }
+
+  /* Elemen yang memang tidak pernah relevan di atas kertas. */
+  header,
+  nav,
+  .print\:hidden {
+    display: none !important;
+  }
+}
