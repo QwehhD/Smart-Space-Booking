@@ -515,3 +515,127 @@ mengirim satu request per huruf.
 minimumnya 1. Karena itu nilai kosong diubah menjadi `undefined` sehingga
 parameternya tidak ikut dikirim sama sekali, dan mengosongkan kotak pencarian
 mengembalikan daftar penuh alih-alih memunculkan pesan kesalahan.
+
+## 42. Tombol aksi reservasi mengikuti salinan mesin status
+
+`AksiReservasi` menentukan tombol yang tampil dari `TRANSISI_STATUS`,
+`bolehCheckIn`, dan `bolehCheckOut` di `lib/constants.ts`, yang disalin dari
+`backend/src/admin/reservasi/status-machine.ts`. Dengan begitu pengelola tidak
+pernah disodori tindakan yang pasti ditolak backend, misalnya tombol check-in
+pada pemesanan yang belum disetujui.
+
+Salinan itu hanya menentukan apa yang terlihat. Keputusan sebenarnya tetap di
+backend, dan bila ternyata berbeda, pesan penolakannya ditampilkan apa adanya.
+Perilaku itu sudah diuji: check-in sebelum disetujui dibalas
+"Check-in hanya dapat dilakukan pada reservasi yang sudah disetujui!", dan
+menyetujui pemesanan yang sudah selesai dibalas penolakan mesin status.
+
+Seluruh aksi dikumpulkan dalam satu komponen, dipakai bersama oleh halaman
+reservasi dan halaman check-in, supaya aturannya tidak perlu dijaga di dua
+tempat.
+
+## 43. Hanya pembatalan yang diberi konfirmasi
+
+Persetujuan, check-in, dan check-out berjalan langsung tanpa dialog konfirmasi,
+karena ketiganya adalah alur normal di meja depan dan masih ada jalan mundur
+lewat langkah berikutnya. Pembatalan diberi konfirmasi karena statusnya bersifat
+akhir: `dibatalkan` tidak memiliki perpindahan keluar sama sekali.
+
+## 44. Perpindahan `disetujui` langsung ke `selesai` tidak disediakan
+
+Mesin status backend mengizinkan `disetujui` langsung menjadi `selesai`, tetapi
+antarmuka tidak menyediakan tombolnya. Alur yang ditawarkan adalah check-in lalu
+check-out, karena keduanya sekaligus mencatat `check_in_time` dan
+`check_out_time`, sedangkan melompat langsung ke `selesai` meninggalkan kedua
+kolom itu kosong dan menghilangkan jejak kedatangan tamu.
+
+Pemesanan yang tamunya tidak datang tetap punya jalan keluar lewat tombol
+batalkan.
+
+## 45. Pencarian pemesanan disaring di klien, dan keterbatasannya dinyatakan
+
+`GET /admin/reservasi` tidak memiliki parameter pencarian kode booking maupun
+nama tamu, dan mengarang parameter baru tidak diperbolehkan. Pencarian karena itu
+dilakukan di klien atas data yang sudah dimuat.
+
+Keterbatasannya nyata: yang tercakup hanya pemesanan yang sedang ditampilkan,
+bukan seluruh riwayat. Agar tidak menyesatkan, keadaan kosong menyebutkannya
+terang-terangan dan menyarankan melonggarkan filter, bukan sekadar berkata tidak
+ditemukan.
+
+Filter status dan space tetap dikirim ke backend karena parameternya memang
+tersedia. Nilai status yang tidak dikenal pada URL diabaikan, bukan diteruskan,
+supaya salah ketik tidak berujung 400.
+
+## 46. Check-in mencocokkan agenda hari ini di klien, termasuk payload QR
+
+Backend tidak menyediakan endpoint verifikasi QR (lihat
+`backend/docs/KEPUTUSAN.md` nomor 47), jadi halaman check-in tidak mengirim
+pindaian apa pun ke server. Yang dilakukannya adalah memuat agenda hari ini
+sekali, lalu mencocokkan isian dengan daftar itu di klien, sehingga
+pencocokannya seketika dan tetap bekerja meski jaringan lambat.
+
+Isiannya menerima tiga bentuk: kode booking, nama tamu, dan payload QR e-ticket
+`VERIFY-RESERVASI-<id>`. Bentuk ketiga membuat kamera ponsel biasa sudah cukup
+untuk memakai halaman ini, tanpa memasang pustaka pemindai apa pun; pengelola
+memindai QR-nya lalu menempelkan hasilnya.
+
+Pemesanan di luar hari ini memang tidak akan ditemukan di sini, dan itu
+diinginkan: check-in hanya sah untuk reservasi yang sudah disetujui, dan backend
+pun dapat dipasang membatasi check-in pada tanggal sewanya lewat
+`STRICT_CHECKIN_DATE`.
+
+## 47. Laporan menampilkan angka backend apa adanya, tanpa menghitung ulang
+
+Seluruh angka pada halaman laporan datang dari `GET /admin/reports/monthly` dan
+tidak ada satu pun yang dihitung ulang di klien, termasuk baris jumlah pada
+tabel rincian per tipe space. Baris itu memakai `total_transaksi`,
+`total_jam_terpakai`, dan `realisasi_pendapatan_bersih` dari backend, bukan
+menjumlahkan sendiri isi tabelnya.
+
+Alasannya supaya yang tercetak persis sama dengan yang tersimpan. Bila suatu saat
+keduanya berbeda, perbedaan itu akan terlihat sebagai angka yang tidak cocok dan
+dapat ditelusuri, bukan tertutupi oleh penjumlahan di klien yang selalu konsisten
+dengan dirinya sendiri.
+
+Kecocokannya sudah diperiksa terhadap data nyata: untuk Agustus 2026, jumlah
+`pendapatan_per_hari` (446.000) dan jumlah `rincian_per_tipe_space` (446.000)
+keduanya sama dengan `realisasi_pendapatan_bersih`.
+
+## 48. Grafik memakai recharts dan menampilkan seluruh hari, termasuk yang nol
+
+Backend selalu mengirim seluruh hari dalam bulan itu pada `pendapatan_per_hari`,
+termasuk hari yang tidak ada pemesanannya. Grafik menampilkannya apa adanya
+tanpa mengisi atau membuang hari, sehingga bentuknya jujur menggambarkan hari
+ramai dan hari sepi.
+
+Label sumbu X hanya dipasang setiap lima hari agar tetap terbaca pada lebar
+ponsel; tanggal lengkapnya muncul di tooltip. Bulan yang sama sekali belum
+berpendapatan tidak menampilkan grafik kosong, melainkan satu kalimat yang
+menyatakannya.
+
+Warnanya memakai token `--color-chart-1` yang sudah didefinisikan sejak fase
+fondasi, sehingga ikut berubah mengikuti tema terang dan gelap.
+
+## 49. Cetak laporan memakai dialog peramban, seperti e-ticket
+
+Tidak ada pustaka PDF yang dipasang. Tombol cetak memanggil `window.print()`,
+dan pengguna dapat memilih "Simpan sebagai PDF" dari dialog peramban. Tata letak
+kertasnya diatur `@media print` di `globals.css` lewat kelas `cetak-laporan`,
+yang memang sudah disiapkan sejak fase fondasi bersama `cetak-tiket`.
+
+Kop laporan berisi nama lokasi dan waktu cetak hanya muncul di atas kertas
+(`hidden print:block`), karena di layar konteks itu sudah jelas dari judul
+halaman dan sidebar. Pemilih bulan dan tombol cetaknya sendiri disembunyikan saat
+mencetak.
+
+## 50. Perbaikan: `MonthPicker` menampilkan nomor bulan sebelum hidrasi
+
+`SelectValue` milik base-ui mencari label dari daftar item, sedangkan daftar itu
+belum terdaftar saat render di server. Akibatnya muatan pertama menampilkan "8",
+lalu berubah menjadi "Agustus" setelah hidrasi.
+
+Perbaikannya memberi `SelectValue` fungsi render sendiri sehingga labelnya
+dihitung langsung dari prop `month`. Masalah ini sudah ada sejak halaman histori
+member dibuat dan baru terlihat ketika komponennya dipakai pada halaman laporan;
+perbaikannya di satu tempat menyembuhkan keduanya.
