@@ -1,6 +1,7 @@
 'use client';
 
-import { LogOut } from 'lucide-react';
+import { LogIn, LogOut } from 'lucide-react';
+import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,8 +22,25 @@ import { inisial } from '@/lib/format';
  * mengikuti data terbaru di backend.
  */
 export function UserMenu() {
-  const { namaTampilan, fotoUrl, profil, role } = useSesi();
+  const { namaTampilan, fotoUrl, profil, role, sudahLogin } = useSesi();
   const logout = useLogout();
+
+  // Katalog space terbuka untuk pengunjung yang belum masuk, sehingga navbar
+  // tetap tampil dan yang ditawarkan adalah tombol masuk, bukan identitas kosong.
+  if (!sudahLogin) {
+    return (
+      <Button
+        size="sm"
+        variant="outline"
+        render={
+          <Link href="/login">
+            <LogIn />
+            Masuk
+          </Link>
+        }
+      />
+    );
+  }
 
   const nama = namaTampilan || profil?.username || 'Pengguna';
 

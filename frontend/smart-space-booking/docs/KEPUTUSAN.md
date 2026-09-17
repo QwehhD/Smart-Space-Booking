@@ -183,3 +183,66 @@ membingungkan daripada satu pesan yang jelas di awal.
 
 Setelah registrasi, backend sudah mengembalikan `access_token`, sehingga sesinya
 langsung dipasang tanpa meminta pengguna login ulang.
+
+## 16. Katalog dirender di server
+
+`/spaces` dan `/spaces/[id]` dibuat sebagai Server Component dan tidak
+memerlukan login. Ada tiga alasan:
+
+Pertama, kategori Fullstack pada soal menyebut "web utuh (server-side
+rendering)", sehingga perlu ada bagian aplikasi yang benar-benar dirender di
+server, bukan sekadar kerangka yang diisi JavaScript.
+
+Kedua, hasil pencarian dan penyaringan menjadi dapat ditautkan: seluruh filter
+disimpan pada URL, bukan pada state komponen, sehingga tautannya dapat dibagikan,
+disimpan sebagai bookmark, dan bertahan saat halaman dimuat ulang.
+
+Ketiga, pengunjung dapat menelusuri katalog sebelum mendaftar, yang masuk akal
+untuk aplikasi pemesanan.
+
+Komponen penyaringnya tetap Client Component, karena harus menanggapi ketikan,
+tetapi tugasnya hanya mengubah URL. Halaman katalognya yang membaca URL itu dan
+mengambil datanya di server.
+
+## 17. Status 404 pada halaman detail adalah 200 karena responsnya streamed
+
+`notFound()` pada `/spaces/[id]` menampilkan halaman tidak-ditemukan dengan
+benar, tetapi status HTTP-nya 200, bukan 404. Ini **perilaku Next.js yang
+terdokumentasi**, bukan kekeliruan implementasi: dokumentasi `not-found.js` versi
+terpasang menyatakan Next mengembalikan 200 untuk respons yang di-stream dan 404
+untuk yang tidak. Halaman ini di-stream karena memiliki `loading.tsx`.
+
+Mitigasi bawaannya sudah diverifikasi berjalan: Next menyisipkan
+`<meta name="robots" content="noindex">` pada respons tidak-ditemukan, dan tag
+itu tidak muncul pada halaman yang sah, sehingga mesin pencari tidak
+mengindeksnya meski statusnya 200.
+
+Dokumentasi menawarkan jalan keluar bila status 404 benar-benar dibutuhkan, yaitu
+memeriksa keberadaan sumber daya di `proxy.ts` sebelum badan respons dikirim.
+Itu tidak ditempuh karena berarti memanggil backend dari proxy untuk setiap
+pembukaan detail, sedangkan dokumentasinya sendiri menyarankan pemeriksaan di
+proxy tetap ringan dan tanpa pengambilan konten. Route yang memang tidak ada
+tetap membalas 404 sebagaimana mestinya.
+
+## 18. Detail space mengambil datanya satu kali lewat `cache`
+
+`generateMetadata` dan komponen halaman sama-sama membutuhkan data space.
+Keduanya memanggil satu fungsi yang dibungkus `cache` dari React, sehingga
+backend hanya dipanggil sekali per request dan judul halaman tidak pernah berbeda
+dari isinya.
+
+Fungsi itu juga yang menangani id tidak valid: id bukan bilangan bulat positif dan
+space yang tidak ditemukan sama-sama menghasilkan null, lalu halaman
+memanggil `notFound()`. Dengan begitu bentuk id yang salah tidak pernah sampai ke
+backend.
+
+## 19. Tombol pesan pada detail menyesuaikan role dari server
+
+Role dibaca dari cookie di server, sehingga tombol "Pesan Sekarang" hanya muncul
+untuk pengunjung dan member. Pengelola melihat keterangan bahwa pemesanan hanya
+dapat dilakukan dari akun member, tanpa perlu menunggu JavaScript dan tanpa
+tombol yang berkedip lalu berubah.
+
+Pengunjung yang belum masuk tetap melihat tombolnya. Saat diklik, proxy
+mengalihkannya ke halaman login beserta alamat tujuannya, sehingga setelah masuk
+ia kembali ke form pemesanan space yang sama.
