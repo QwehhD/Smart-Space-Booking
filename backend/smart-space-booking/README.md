@@ -100,13 +100,14 @@ frontend dapat menandai field yang salah.
 ## Pengujian
 
 ```bash
-npm test          # 32 pengujian unit: perhitungan uang, waktu, dan mesin status
-npm run test:e2e  # 16 pengujian alur terhadap database sungguhan
+npm test          # 42 pengujian unit: perhitungan uang, waktu, dan mesin status
+npm run test:e2e  # 25 pengujian alur terhadap database sungguhan (3 suite)
 ```
 
-Pengujian e2e mendaftarkan akun App Maker tersendiri setiap kali dijalankan dan
-menghapusnya kembali di akhir, sehingga tidak pernah bercampur dengan data seed
-dan tidak memerlukan database khusus.
+Setiap kali dijalankan, pengujian e2e memberi akhiran `Date.now()` pada nama
+akun dan space yang dibuatnya, lalu di akhir hanya menghapus baris miliknya
+sendiri. Dengan begitu pengujian tidak pernah bercampur dengan data seed maupun
+sisa pengujian sebelumnya, dan tidak memerlukan database khusus.
 
 ## Struktur folder
 
