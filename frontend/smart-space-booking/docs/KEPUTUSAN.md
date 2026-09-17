@@ -109,3 +109,77 @@ perbandingan teks, sama seperti yang dilakukan backend terhadap jam.
 Perhitungan "hari ini" dan "jam sekarang" memakai `Intl.DateTimeFormat` dengan
 `timeZone: 'Asia/Jakarta'`, sehingga tetap benar meski peramban pengguna berada
 di zona lain.
+
+## 11. Sesi disimpan di cookie yang dapat dibaca JavaScript
+
+Token dan role disimpan pada cookie `ssb_token` dan `ssb_role`, bukan di
+`localStorage`, supaya `proxy.ts` dan Server Component dapat membacanya sebelum
+halaman dirender. Tanpa itu, proteksi route hanya bisa dilakukan setelah halaman
+yang salah sempat tampil.
+
+Konsekuensi keamanannya perlu dicatat dengan jujur: cookie ini **tidak dapat**
+`httpOnly`, karena diisi oleh kode peramban setelah login dan dibaca lagi oleh
+klien axios. Artinya skrip apa pun yang berhasil berjalan di halaman ini dapat
+membacanya, sehingga perlindungan terhadap XSS bergantung pada React yang
+melakukan escaping secara bawaan dan pada tidak adanya `dangerouslySetInnerHTML`
+di aplikasi ini.
+
+Cara yang lebih aman adalah menyimpan token pada cookie `httpOnly` yang dipasang
+server, misalnya lewat Route Handler yang meneruskan login ke backend. Itu tidak
+ditempuh karena menambah satu lapisan proksi di depan seluruh endpoint
+terautentikasi, sementara aplikasi ini dijalankan lokal untuk keperluan ujian.
+
+Atribut lain tetap dipasang: `SameSite=Lax` menahan pengiriman lintas situs pada
+navigasi berbahaya, `Secure` aktif otomatis saat halaman diakses lewat HTTPS, dan
+`Max-Age` diambil dari klaim `exp` token sehingga cookie tidak pernah hidup lebih
+lama daripada tokennya sendiri. Token yang bentuknya tidak terbaca diberi masa
+berlaku bawaan satu hari, bukan dianggap gagal.
+
+## 12. Proteksi route memakai `proxy.ts`, bukan `middleware.ts`
+
+Next.js 16 menandai `middleware.ts` sebagai deprecated dan menggantinya dengan
+`proxy.ts`; fungsinya sama, hanya nama berkas dan nama ekspornya yang berubah.
+Dokumentasi yang terpasang di `node_modules/next/dist/docs` dipakai sebagai acuan,
+bukan kebiasaan dari versi sebelumnya.
+
+Pemeriksaan di sana hanya melihat ada tidaknya cookie sesi dan rolenya, bukan
+memvalidasi tokennya. Keabsahan token tetap ditentukan backend pada setiap
+request. Tujuan lapisan ini adalah mencegah halaman yang salah sempat tampil,
+bukan menjadi satu-satunya penjaga.
+
+Matcher-nya mengecualikan `_next/static`, `_next/image`, favicon, dan berkas
+gambar. Tanpa pengecualian itu proxy ikut berjalan untuk setiap aset dan dapat
+menghalangi CSS maupun gambar.
+
+## 13. Daftar menu tidak dilewatkan sebagai prop dari layout
+
+Setiap item navigasi memuat komponen ikon dari lucide. Komponen adalah fungsi,
+dan fungsi tidak dapat dilewatkan dari Server Component ke Client Component;
+build gagal dengan "Functions cannot be passed directly to Client Components".
+
+Karena itu `BottomNav` menerima `varian` berupa teks dan mengimpor sendiri daftar
+menunya. Layout hanya menentukan varian mana yang dipakai.
+
+## 14. Cookie dibaca lewat `useSyncExternalStore`
+
+Pola lama untuk menghindari ketidakcocokan hidrasi adalah menyalakan penanda
+"sudah terpasang" di dalam `useEffect`. Lint React 19 menolaknya karena memanggil
+`setState` secara sinkron di dalam effect dapat memicu render berantai.
+
+Cookie adalah sumber di luar React, sehingga dibaca dengan primitif yang memang
+disediakan untuk itu. Snapshot untuk server sengaja mengembalikan nilai kosong,
+sehingga render pertama di server dan di klien sama dan hidrasinya tidak bentrok.
+
+## 15. Satu endpoint login, dua halaman, dan role yang tidak cocok ditolak
+
+Backend hanya menyediakan satu `POST /api/auth/login` untuk kedua role, sehingga
+yang membedakan adalah halamannya. Bila role hasil login tidak cocok dengan
+halaman yang dibuka, sesinya sengaja **tidak disimpan** dan pengguna diberi tahu
+harus masuk lewat halaman yang mana.
+
+Membiarkannya masuk berarti pengguna berada di panel yang bukan haknya lalu
+ditolak satu per satu oleh backend pada setiap tindakan, yang jauh lebih
+membingungkan daripada satu pesan yang jelas di awal.
+
+Setelah registrasi, backend sudah mengembalikan `access_token`, sehingga sesinya
+langsung dipasang tanpa meminta pengguna login ulang.

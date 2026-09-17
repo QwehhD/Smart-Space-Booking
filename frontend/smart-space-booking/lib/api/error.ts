@@ -39,23 +39,22 @@ export class ApiError extends Error {
   }
 }
 
-/** Bentuk minimal `setError` dari react-hook-form yang dibutuhkan di sini. */
-type PemasangError = (
-  field: string,
-  error: { type: string; message: string },
-) => void;
-
 /**
  * Memindahkan rincian validasi backend ke field form yang sesuai.
+ *
+ * Tipenya generik terhadap nama field form, sehingga hanya field yang benar-benar
+ * ada pada form itu yang dapat dipasangi error. Nama field dari backend berupa
+ * teks biasa, jadi `fieldDikenal` dipakai sebagai penyaring sekaligus bukti bahwa
+ * nama tersebut memang milik form ini.
  *
  * Mengembalikan true bila ada yang terpasang, sehingga pemanggilnya dapat
  * memutuskan perlu tidaknya menampilkan toast: kesalahan yang sudah terlihat di
  * bawah fieldnya tidak perlu diulang sebagai notifikasi.
  */
-export function applyFieldErrors(
+export function applyFieldErrors<TField extends string>(
   error: unknown,
-  setError: PemasangError,
-  fieldDikenal?: readonly string[],
+  setError: (field: TField, kesalahan: { type: string; message: string }) => void,
+  fieldDikenal: readonly TField[],
 ): boolean {
   if (!(error instanceof ApiError) || error.fieldErrors.length === 0) {
     return false;
@@ -64,11 +63,13 @@ export function applyFieldErrors(
   let terpasang = false;
 
   for (const { field, messages } of error.fieldErrors) {
-    if (fieldDikenal && !fieldDikenal.includes(field)) {
+    // Penyaringan ini yang membuat penyempitan tipe di bawahnya aman: field yang
+    // tidak ada pada daftar tidak pernah diteruskan ke form.
+    if (!(fieldDikenal as readonly string[]).includes(field)) {
       continue;
     }
 
-    setError(field, { type: 'server', message: messages[0] });
+    setError(field as TField, { type: 'server', message: messages[0] });
     terpasang = true;
   }
 
