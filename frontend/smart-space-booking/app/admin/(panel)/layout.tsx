@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { AdminSidebar, AdminTopbar } from '@/components/layout/admin-sidebar';
 import { BottomNav } from '@/components/layout/bottom-nav';
+import { LewatiKeKonten } from '@/components/layout/lewati-ke-konten';
 
 /**
  * Bingkai panel pengelola.
@@ -10,13 +11,17 @@ import { BottomNav } from '@/components/layout/bottom-nav';
  */
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-svh">
+    <div className="relative flex min-h-svh">
+      <LewatiKeKonten />
       <AdminSidebar />
 
       <div className="flex min-w-0 flex-1 flex-col">
         <AdminTopbar />
 
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-6 pb-24 md:px-6 md:pb-10">
+        <main
+          id="konten-utama"
+          className="mx-auto w-full max-w-6xl flex-1 px-4 pt-6 pb-24 md:px-6 md:pb-10"
+        >
           {children}
         </main>
 
