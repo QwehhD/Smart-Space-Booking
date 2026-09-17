@@ -382,3 +382,59 @@ backend dan jam operasional. Field `maker_id` juga dibuang dari tipe `HasilLogin
 
 Keputusan 2 sebelumnya mencatat penggantian nama `NEXT_PUBLIC_MAKER_KEY` menjadi
 `NEXT_PUBLIC_APP_KEY`; catatan itu ikut dihapus karena variabelnya sudah tidak ada.
+
+## 32. Dashboard dirangkai dari endpoint yang sudah ada, bukan endpoint baru
+
+Backend tidak menyediakan endpoint dashboard (lihat `backend/docs/KEPUTUSAN.md`
+nomor 47), dan mengarang endpoint baru tidak diperbolehkan. Karena itu
+`/admin/dashboard` menyusun sendiri angkanya dari empat sumber yang sudah ada:
+`GET /admin/reports/monthly` untuk pendapatan bulan berjalan,
+`GET /admin/reservasi?tanggal=<hari ini>` untuk agenda,
+`GET /admin/reservasi?status=belum_dikonfirm` untuk antrean persetujuan, dan
+`GET /admin/spaces` untuk jumlah ruangan. Nama lokasi pada sapaan diambil dari
+`GET /admin/profile`, yang memang sudah dimuat halaman profil.
+
+Kelimanya diminta serentak dengan `Promise.all`, sehingga waktu muat halaman
+ditentukan permintaan paling lama, bukan jumlah seluruhnya.
+
+Agenda diurutkan ulang di klien berdasarkan `jam_mulai`. Backend mengurutkan
+daftar reservasi dari yang terbaru dibuat, sedangkan yang berguna bagi pengelola
+adalah urutan jam kedatangan tamu.
+
+## 33. Baris pada dashboard hanya menautkan, tidak menyediakan aksi sendiri
+
+Agenda dan antrean konfirmasi pada dashboard menampilkan data saja, lalu
+menautkan ke `/admin/reservasi`. Persetujuan, pembatalan, dan check-in sengaja
+tidak diduplikasi di sini supaya aturan perpindahan status hanya perlu dijaga di
+satu tempat. Bila tombolnya ada di dua halaman, keduanya harus diperbarui setiap
+kali mesin status berubah, dan yang terlupa akan menampilkan tombol yang pasti
+ditolak backend.
+
+## 34. Field opsional yang dikosongkan tidak dikirim, dan akibatnya tidak dapat dikosongkan
+
+`UpdateProfileDto` di backend menetapkan `alamat` minimal 3 karakter dan
+`deskripsi` minimal 3 karakter ketika field itu ada. Mengirim string kosong
+karena itu ditolak 400, bukan mengosongkan nilainya.
+
+Form profil lokasi menanganinya dengan menganggap kekosongan sebagai sah di
+tingkat validasi klien, lalu menyaring field kosong saat menyusun payload.
+Konsekuensinya alamat dan deskripsi yang sudah terisi hanya dapat diganti
+isinya, tidak dapat dikosongkan kembali lewat form. Ini diterima apa adanya
+karena mengosongkannya bukan tindakan yang masuk akal bagi data yang tampil di
+katalog publik, dan menambah endpoint atau field baru untuk itu tidak
+diperbolehkan.
+
+Perlu dicatat pula bahwa `z.preprocess` tidak dipakai untuk mengubah string
+kosong menjadi `undefined`, meski itu cara yang paling langsung. Preprocess
+membuat tipe masukan skema menjadi `unknown`, sehingga `zodResolver` tidak lagi
+cocok dengan tipe form react-hook-form dan TypeScript menolaknya. Yang dipakai
+adalah `refine` biasa yang mempertahankan tipe `string`.
+
+## 35. Tombol simpan hanya aktif ketika ada perubahan
+
+Form profil lokasi memakai `formState.isDirty` untuk mengunci tombol simpan dan
+tombol batalkan. Setelah penyimpanan berhasil, form disetel ulang dengan nilai
+yang dikembalikan server, bukan nilai yang diketik, sehingga penanda perubahan
+hilang dan yang tampil benar-benar yang tersimpan. `router.refresh()` dipanggil
+setelahnya karena halaman ini dirender di server dan nama lokasi ikut tampil
+pada sapaan dashboard serta katalog publik.
