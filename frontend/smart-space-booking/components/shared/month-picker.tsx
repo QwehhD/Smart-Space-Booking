@@ -10,6 +10,11 @@ import {
 } from '@/components/ui/select';
 import { DAFTAR_BULAN } from '@/lib/format';
 
+/** Nama bulan tanpa tahunnya, untuk label pemicu. */
+function namaBulanSaja(bulan: number): string {
+  return DAFTAR_BULAN[bulan - 1]?.nama ?? String(bulan);
+}
+
 /** Rentang tahun yang ditawarkan, berpusat pada tahun berjalan. */
 const MUNDUR = 2;
 const MAJU = 1;
@@ -51,7 +56,11 @@ export function MonthPicker({
         onValueChange={(nilai) => nilai && ubah('month', nilai)}
       >
         <SelectTrigger className="w-[9.5rem]" aria-label="Pilih bulan">
-          <SelectValue />
+          {/* Label dirender sendiri dari nilainya, bukan dibiarkan `SelectValue`
+              mencarinya pada daftar item. Daftar itu belum terdaftar saat render
+              di server, sehingga tanpa ini yang tampil pada muatan pertama adalah
+              angka bulannya, lalu berubah menjadi namanya setelah hidrasi. */}
+          <SelectValue>{() => namaBulanSaja(month)}</SelectValue>
         </SelectTrigger>
         <SelectContent>
           {DAFTAR_BULAN.map((bulan) => (
@@ -67,7 +76,7 @@ export function MonthPicker({
         onValueChange={(nilai) => nilai && ubah('year', nilai)}
       >
         <SelectTrigger className="w-[6.5rem]" aria-label="Pilih tahun">
-          <SelectValue />
+          <SelectValue>{() => year}</SelectValue>
         </SelectTrigger>
         <SelectContent>
           {pilihanTahun.map((tahun) => (
