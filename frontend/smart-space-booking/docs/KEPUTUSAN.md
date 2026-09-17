@@ -700,3 +700,69 @@ dan pembaca layar harus melewati seluruh menu lebih dulu. `LewatiKeKonten`
 dipasang sebagai elemen pertama pada kedua layout dan hanya muncul ketika
 mendapat fokus, jadi tampilan bagi pengguna tetikus tidak berubah. Tujuannya
 `#konten-utama` yang dipasang pada elemen `main` masing-masing layout.
+
+## 55. Pengujian memakai Vitest dan hanya menguji logika murni
+
+Vitest dipilih karena berjalan di atas konfigurasi Vite yang sudah dipahami
+project TypeScript modern, mendukung ESM dan TypeScript tanpa transpiler
+tambahan, dan tidak memerlukan berkas konfigurasi yang panjang.
+
+Lingkungannya `node`, bukan jsdom, karena seluruh yang diuji adalah fungsi murni
+di `lib/` yang tidak menyentuh DOM sama sekali. Menghindari jsdom membuat
+pengujiannya berjalan dalam ratusan milidetik dan konfigurasinya tetap sepuluh
+baris.
+
+Cakupannya sengaja dibatasi pada logika yang **harus sama persis dengan
+backend**, karena di situlah kesalahan paling mahal dapat bersembunyi tanpa
+gejala:
+
+| Berkas | Yang dijaga |
+| --- | --- |
+| `pricing` | Rumus harga harus sama dengan `uang.util.ts` di backend |
+| `waktu-lokal` | Konversi masa berlaku promo ke dan dari WIB |
+| `jadwal` | Jam operasional dan batas tengah malam |
+| `constants` | Salinan mesin status reservasi |
+| `format` | Tanggal polos tidak boleh bergeser karena zona waktu |
+| `bulan` | Parameter URL ngawur jatuh ke bulan berjalan |
+| `api/error` | Pesan backend menempel ke input yang benar |
+
+Pengujian komponen dan pengujian ujung ke ujung peramban tidak dibuat. Keduanya
+menuntut jsdom atau Playwright beserta konfigurasi yang jauh lebih besar,
+sementara alur antarmukanya sudah diperiksa langsung terhadap backend berjalan
+pada setiap fase. Bila suatu saat dibutuhkan, keduanya dapat ditambahkan tanpa
+mengubah yang sudah ada.
+
+## 56. Zona waktu pengujian dipaksa ke UTC
+
+`vitest.config.mts` menyetel `TZ: 'UTC'`, bukan membiarkannya mengikuti mesin
+yang menjalankan. Sebagian besar fungsi di `lib/` justru bertugas menjaga tanggal
+tetap benar dalam WIB, sehingga menjalankan pengujiannya di zona yang kebetulan
+sama dengan WIB akan menutupi persis kesalahan yang hendak dicegah.
+
+Satu pengujian di `format.test.ts` bahkan menggeser `process.env.TZ` ke
+`America/New_York` di tengah jalan, untuk membuktikan tanggal polos tidak mundur
+sehari di zona sebelah barat UTC. Perilaku Node yang menghormati perubahan `TZ`
+saat berjalan sudah diperiksa lebih dulu, sehingga pengujian itu benar-benar
+menguji sesuatu dan bukan lolos dengan sendirinya.
+
+## 57. Pengujian dibuktikan bergigi dengan sabotase sengaja
+
+Pengujian yang selalu lulus belum tentu menjaga apa pun. Karena itu setelah
+seluruhnya hijau, dua kesalahan yang paling mungkin terjadi dipasang dengan
+sengaja lalu dijalankan ulang:
+
+- `Math.floor` pada perhitungan potongan diganti `Math.round`
+- Mesin status diberi perpindahan `belum_dikonfirm` langsung ke `aktif`
+
+Keduanya tertangkap, masing-masing oleh dua pengujian, lalu kodenya dipulihkan
+persis seperti semula. Sabotase ini tidak ikut di-commit; yang dicatat hanya
+hasilnya di sini.
+
+## 58. `@types/node` dinaikkan dari 20 ke 24
+
+Vitest 5 menuntut `@types/node` versi 22 ke atas, sedangkan project masih memakai
+`^20` padahal runtime yang dipakai adalah Node 26. Tidak ada dependency lain yang
+bergantung padanya, sehingga menaikkannya ke `^24` sekaligus memperbaiki
+ketidakcocokan yang sudah ada, bukan sekadar menyiasati konflik peer dependency.
+`npm run lint`, `npx tsc --noEmit`, dan `npm run build` diperiksa ulang setelah
+kenaikan itu dan seluruhnya tetap lolos.
