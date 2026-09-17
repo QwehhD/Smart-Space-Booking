@@ -246,3 +246,67 @@ tombol yang berkedip lalu berubah.
 Pengunjung yang belum masuk tetap melihat tombolnya. Saat diklik, proxy
 mengalihkannya ke halaman login beserta alamat tujuannya, sehingga setelah masuk
 ia kembali ke form pemesanan space yang sama.
+
+## 20. Ketersediaan diperiksa ke backend, bukan disimpulkan di klien
+
+Setiap perubahan tanggal, jam, atau durasi memicu pemanggilan
+`GET /api/spaces/availability` setelah jeda singkat. Tombol lanjut baru aktif
+ketika backend menyatakan jadwalnya kosong.
+
+Alternatifnya adalah mengunduh seluruh reservasi space itu lalu memeriksa
+tumpang tindih di klien. Itu tidak ditempuh karena backend tidak menyediakan
+endpoint untuk mengambil jadwal satu space, dan karena jadwal dapat terisi orang
+lain kapan saja; satu-satunya jawaban yang dapat dipercaya adalah jawaban
+backend saat itu juga. Hasil pengecekannya karena itu tidak disimpan di cache.
+
+Nilai yang dipakai memeriksa sengaja tertunda, sedangkan ringkasan harga tetap
+mengikuti nilai terkini, supaya tampilan terasa responsif tanpa mengirim satu
+request per perubahan.
+
+## 21. Pratinjau harga dihitung ulang di klien, tetapi hasil akhirnya dari backend
+
+`lib/pricing.ts` menyalin rumus `backend/src/common/utils/uang.util.ts`, termasuk
+pembulatan potongan ke bawah, sehingga angka yang terlihat sebelum memesan sama
+dengan yang nanti ditagihkan. Kesamaannya diperiksa terhadap backend yang
+berjalan: 20.000 per jam selama 3 jam dengan promo 20 persen menghasilkan
+subtotal 60.000, potongan 12.000, dan total 48.000 pada kedua sisi.
+
+Setelah pemesanan berhasil, angka yang ditampilkan diambil dari response backend,
+bukan dari perhitungan pratinjau. Dengan begitu yang dibaca pengguna selalu yang
+benar-benar tersimpan, meski suatu saat rumusnya berbeda.
+
+## 22. Pilihan jam dan durasi dibatasi jam operasional
+
+Jam mulai yang ditawarkan berhenti satu jam sebelum tutup, karena durasi
+minimalnya satu jam. Bila tanggal yang dipilih adalah hari ini, jam yang sudah
+lewat dibuang. Durasi maksimalnya adalah sisa jam sampai tutup, sehingga satu
+reservasi tidak pernah melewati tengah malam.
+
+Ketika jam mulai berubah, durasi yang terlanjur terpilih ikut dipangkas bila
+melewati jam tutup; dan ketika tanggal berubah ke hari ini, jam yang sudah lewat
+diganti dengan pilihan terdekat. Tanpa keduanya, form dapat berada pada keadaan
+yang pasti ditolak backend.
+
+Nilai jam operasionalnya berasal dari env frontend dan harus sama dengan env
+backend. Yang menentukan tetap backend; pembatasan di sini hanya mencegah
+pengguna memilih sesuatu yang sudah pasti gagal.
+
+## 23. Promo disaring per space sejak daftarnya dimuat
+
+Daftar promo diambil dengan `?id_space`, dan kode manual dikirim beserta
+`id_space`. Keduanya memakai penyaringan pemilik yang ditambahkan ke backend,
+sehingga promo terbitan pengelola lain tidak pernah ditawarkan maupun diterima.
+Diverifikasi terhadap data seed: space milik Moklet Hub menawarkan dua promo,
+space milik Ruang Kolaborasi menawarkan satu, dan memakai kode milik pengelola
+lain dibalas "Kode promo tidak berlaku untuk space ini".
+
+Dua cara memilih promo tidak pernah aktif bersamaan. Memilih dari katalog
+mengirim `id_diskon`, mengetik kode mengirim `kode_promo`, dan promo yang sudah
+dipakai dapat dilepas kembali.
+
+## 24. Form pemesanan memakai `useWatch`, bukan `form.watch`
+
+React Compiler melewati memoisasi seluruh komponen yang memanggil `form.watch()`,
+karena fungsi yang dikembalikannya tidak dapat dimemoisasi dengan aman. Lint
+memperingatkan hal itu. `useWatch` berlangganan per field dan tidak memicu
+peringatan tersebut, sehingga dipakai untuk ketiga nilai yang diamati form.
