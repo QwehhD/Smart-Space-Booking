@@ -438,3 +438,80 @@ yang dikembalikan server, bukan nilai yang diketik, sehingga penanda perubahan
 hilang dan yang tampil benar-benar yang tersimpan. `router.refresh()` dipanggil
 setelahnya karena halaman ini dirender di server dan nama lokasi ikut tampil
 pada sapaan dashboard serta katalog publik.
+
+## 36. Daftar master data memakai data server sebagai `initialData` TanStack Query
+
+Ketiga halaman master data mengambil daftarnya di Server Component, lalu
+menyerahkannya ke komponen klien sebagai `initialData`. Dengan begitu isinya
+sudah terlihat pada render pertama tanpa kedipan keadaan kosong, sekaligus
+berada di cache TanStack Query sehingga setiap penambahan, perubahan, dan
+penghapusan cukup membatalkan kuncinya, bukan memuat ulang seluruh halaman.
+
+Mutasi pada space dan diskon juga membatalkan kunci publiknya (`qk.spaces.all`
+dan `qk.diskon.all`), karena data yang sama tampil di katalog dan di daftar promo
+yang dilihat member.
+
+## 37. Satu dialog untuk tambah dan ubah, kecuali member
+
+Space dan diskon memakai satu komponen dialog untuk menambah dan mengubah,
+karena payload keduanya identik dan yang berbeda hanya endpoint tujuannya.
+Menyatukannya membuat aturan validasi mustahil berbeda antara menambah dan
+mengubah.
+
+Member menjadi pengecualian: `username` tidak dapat diubah dan `password` menjadi
+opsional saat mengubah, sehingga skemanya memang berbeda. Formnya karena itu
+dipecah menjadi dua, bukan satu form dengan field yang disembunyikan, supaya
+tipe dan validasinya tidak bercampur. Bagian data diri yang sama persis tetap
+dipakai bersama lewat komponen generik terhadap tipe form, sehingga label dan
+aturannya mustahil berbeda antara kedua form itu.
+
+Konsekuensinya daftar field yang boleh dipasangi pesan kesalahan dari backend
+juga dipisah: form ubah tidak mengirim `username` sama sekali, sehingga tidak
+mungkin menerima kesalahan untuk field itu.
+
+## 38. Password kosong pada form ubah member berarti tidak diatur ulang
+
+`UpdateMemberAdminDto` menerima `password` sebagai field opsional yang berfungsi
+sebagai reset kata sandi oleh admin. Mengirim string kosong akan ditolak karena
+panjang minimumnya 6, jadi field yang dikosongkan tidak dikirim sama sekali.
+
+Perilakunya sudah diuji langsung: mengubah data diri tanpa mengisi password
+membuat member tetap dapat masuk dengan kata sandi lamanya, sedangkan mengisinya
+benar-benar menggantinya.
+
+## 39. Masa berlaku promo dikonversi ke WIB, bukan ke zona peramban
+
+Input `datetime-local` tidak mengenal zona waktu: nilainya `YYYY-MM-DDTHH:mm`
+apa adanya. Sementara itu backend menyimpan masa berlaku promo sebagai waktu
+penuh ISO 8601. Tanpa penerjemahan yang disengaja, pengelola yang perambannya
+tidak berzona WIB akan melihat dan mengirim jam yang berbeda dari yang ia maksud.
+
+Karena itu `lib/waktu-lokal.ts` memaku kedua arahnya ke WIB: nilai yang diketik
+selalu dibaca sebagai waktu WIB, dan nilai dari backend selalu ditampilkan dalam
+WIB. Bolak-baliknya sudah diuji utuh sampai satuan menit pada zona WIB, New York,
+dan UTC.
+
+Satu akibat yang perlu diketahui: `datetime-local` tidak memiliki satuan detik,
+sehingga mengubah promo yang tersimpan berakhir pada detik ke-59 akan
+memangkasnya menjadi detik ke-0. Selisih kurang dari satu menit ini diterima apa
+adanya karena masa berlaku promo diukur dalam hari.
+
+## 40. Status berlaku promo dihitung di klien
+
+`GET /admin/diskon` tidak mengirim penanda aktif (lihat `backend/docs/KEPUTUSAN.md`
+nomor 28), jadi label "Berlaku", "Terjadwal", dan "Kedaluwarsa" dihitung di klien
+dari rentang tanggalnya. Perhitungan ini hanya menentukan apa yang terlihat;
+yang menentukan promo benar-benar dapat dipakai tetap backend saat pemesanan
+dibuat.
+
+## 41. Pencarian member dikirim ke backend, dan tidak pernah dikirim kosong
+
+Pencarian member memakai parameter `?search` milik backend, bukan penyaringan di
+klien, karena mencari di backend mencakup seluruh member dan bukan hanya yang
+kebetulan sudah termuat. Ketikan ditunda dengan `useDebounced` agar tidak
+mengirim satu request per huruf.
+
+`?search=` dengan nilai kosong ditolak backend dengan 400 karena panjang
+minimumnya 1. Karena itu nilai kosong diubah menjadi `undefined` sehingga
+parameternya tidak ikut dikirim sama sekali, dan mengosongkan kotak pencarian
+mengembalikan daftar penuh alih-alih memunculkan pesan kesalahan.
