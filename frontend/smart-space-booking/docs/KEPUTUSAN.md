@@ -639,3 +639,64 @@ Perbaikannya memberi `SelectValue` fungsi render sendiri sehingga labelnya
 dihitung langsung dari prop `month`. Masalah ini sudah ada sejak halaman histori
 member dibuat dan baru terlihat ketika komponennya dipakai pada halaman laporan;
 perbaikannya di satu tempat menyembuhkan keduanya.
+
+## 51. Skeleton dipasang lewat grup rute agar `notFound()` tetap 404
+
+Menambahkan `loading.tsx` pada sebuah segmen menyalakan streaming untuk segmen
+itu beserta seluruh rute anaknya. Pada rute yang memanggil `notFound()`, respons
+sudah terkirim sebelum panggilan itu terjadi, sehingga statusnya menjadi 200
+meski isinya halaman tidak-ditemukan.
+
+Karena itu `loading.tsx` untuk daftar tiket diletakkan di dalam grup rute
+`app/(member)/tiket/(daftar)/`, bukan langsung di `tiket/`. Grup rute tidak
+mengubah alamat halaman tetapi membatasi jangkauan `loading.tsx`, sehingga
+daftarnya tetap memperoleh kerangka muat sementara `tiket/[id]` tetap membalas
+404. Hasilnya sudah diperiksa pada build produksi: `/tiket` membalas 200 dengan
+kerangka, `/tiket/99999` membalas 404.
+
+Halaman yang tidak punya rute anak, yaitu `akun` dan `reservasi/histori`,
+memperoleh `loading.tsx` biasa. Panel pengelola memperoleh satu `loading.tsx` di
+tingkat grup karena tidak ada satu pun halamannya yang memanggil `notFound()`.
+Daftar `/reservasi` milik member sudah memakai `Suspense` di dalam halamannya
+sendiri sejak awal, jadi tidak ditambahi apa pun.
+
+## 52. Masalah terbuka: `/spaces/[id]` membalas 200 untuk space yang tidak ada
+
+Dari empat rute yang memanggil `notFound()`, tiga membalas 404 dengan benar
+(`reservasi/[id]`, `tiket/[id]`, `reservasi/baru`) sedangkan `spaces/[id]`
+membalas 200. Perilaku ini sudah ada sebelum fase polesan dan tetap muncul pada
+build produksi, jadi bukan gejala mode pengembangan.
+
+Dua dugaan sudah diuji dan keduanya terbantah: membuang `loading.tsx` milik rute
+itu tidak mengubah apa pun, dan membuang `notFound()` dari `generateMetadata`,
+bahkan membuang `generateMetadata` seluruhnya, juga tidak. Komentar yang ada di
+`app/(member)/spaces/[id]/page.tsx` menjelaskan perilaku ini secara keliru:
+komentar itu menyatakan pemanggilan `notFound()` di `generateMetadata` mencegah
+status yang salah, padahal pengukuran menunjukkan sebaliknya.
+
+Dampaknya terbatas. Halamannya tetap merender antarmuka tidak-ditemukan yang
+benar, dan Next menyisipkan `<meta name="robots" content="noindex">` sehingga
+mesin pencari tidak mengindeksnya. Yang keliru hanya kode statusnya. Dicatat di
+sini sebagai masalah terbuka alih-alih ditambal dengan tebakan.
+
+## 53. Penangkap kesalahan per bagian, bukan hanya di akar
+
+`app/error.tsx` menggantikan seluruh halaman termasuk navigasinya, sehingga
+pengguna yang menemuinya hanya dapat memuat ulang. Ditambahkan `error.tsx` di
+dalam layout member dan panel pengelola sehingga kesalahan pada satu halaman
+tidak menghapus bingkainya: navigasi tetap terlihat dan pengguna dapat berpindah
+ke halaman lain.
+
+Isinya dipakai bersama lewat `components/layout/error-bagian.tsx`, yang tidak
+menampilkan pesan asli dari backend. Kegagalan API yang dapat dijelaskan sudah
+ditangani di tempatnya lewat `ErrorState` dan notifikasi; yang sampai ke
+penangkap ini adalah sisanya, yang pesan aslinya belum tentu berguna bagi
+pengguna.
+
+## 54. Tautan lompat ke konten utama
+
+Kedua bingkai menaruh navigasi sebelum isi halaman, sehingga pengguna keyboard
+dan pembaca layar harus melewati seluruh menu lebih dulu. `LewatiKeKonten`
+dipasang sebagai elemen pertama pada kedua layout dan hanya muncul ketika
+mendapat fokus, jadi tampilan bagi pengguna tetikus tidak berubah. Tujuannya
+`#konten-utama` yang dipasang pada elemen `main` masing-masing layout.
