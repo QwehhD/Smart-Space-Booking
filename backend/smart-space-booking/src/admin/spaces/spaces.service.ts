@@ -39,7 +39,6 @@ export class AdminSpacesService {
         deskripsi: dto.deskripsi,
         foto: dto.foto ?? null,
         id_owner: user.owner_id as number,
-        id_maker: user.id_maker,
       },
     });
 
@@ -107,7 +106,6 @@ export class AdminSpacesService {
   private milikAdmin(user: AuthenticatedUser) {
     return {
       id_owner: user.owner_id as number,
-      id_maker: user.id_maker,
       deleted_at: null,
     };
   }

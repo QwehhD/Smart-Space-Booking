@@ -8,7 +8,6 @@ import { JwtService } from '@nestjs/jwt';
 import { Prisma, Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { BCRYPT_SALT_ROUNDS } from '../common/constants/validation.constant';
-import { MakerContext } from '../maker/interfaces/maker-context.interface';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   serializeMember,
@@ -37,8 +36,8 @@ export class AuthService {
     private readonly config: ConfigService,
   ) {}
 
-  async registerMember(dto: RegisterMemberDto, maker: MakerContext) {
-    await this.pastikanUsernameBelumDipakai(dto.username, maker.id);
+  async registerMember(dto: RegisterMemberDto) {
+    await this.pastikanUsernameBelumDipakai(dto.username);
 
     const { user, member } = await this.prisma
       .$transaction(async (tx) => {
@@ -47,7 +46,6 @@ export class AuthService {
             username: dto.username,
             password: await this.hashPassword(dto.password),
             role: Role.member,
-            id_maker: maker.id,
           },
         });
 
@@ -59,7 +57,6 @@ export class AuthService {
             telp: dto.telp,
             foto: dto.foto ?? null,
             id_user: user.id,
-            id_maker: maker.id,
           },
         });
 
@@ -76,14 +73,13 @@ export class AuthService {
         sub: user.id,
         username: user.username,
         role: user.role,
-        maker_id: maker.id,
         member_id: member.id,
       }),
     };
   }
 
-  async registerAdminSpace(dto: RegisterAdminSpaceDto, maker: MakerContext) {
-    await this.pastikanUsernameBelumDipakai(dto.username, maker.id);
+  async registerAdminSpace(dto: RegisterAdminSpaceDto) {
+    await this.pastikanUsernameBelumDipakai(dto.username);
 
     const { user, owner } = await this.prisma
       .$transaction(async (tx) => {
@@ -92,7 +88,6 @@ export class AuthService {
             username: dto.username,
             password: await this.hashPassword(dto.password),
             role: Role.admin_space,
-            id_maker: maker.id,
           },
         });
 
@@ -105,7 +100,6 @@ export class AuthService {
             deskripsi: dto.deskripsi ?? null,
             foto: dto.foto ?? null,
             id_user: user.id,
-            id_maker: maker.id,
           },
         });
 
@@ -122,21 +116,14 @@ export class AuthService {
         sub: user.id,
         username: user.username,
         role: user.role,
-        maker_id: maker.id,
         owner_id: owner.id,
       }),
     };
   }
 
-  /**
-   * Login dicari di dalam tenant yang aktif, karena username hanya unik per
-   * maker sehingga username yang sama bisa dimiliki akun di tenant lain.
-   */
-  async login(dto: LoginDto, maker: MakerContext) {
+  async login(dto: LoginDto) {
     const user = await this.prisma.user.findUnique({
-      where: {
-        id_maker_username: { id_maker: maker.id, username: dto.username },
-      },
+      where: { username: dto.username },
       include: { member: true, space_owner: true },
     });
 
@@ -155,7 +142,6 @@ export class AuthService {
       id: user.id,
       username: user.username,
       role: user.role,
-      maker_id: user.id_maker,
       // Soal mencontohkan kedua kunci selalu ada pada response login, yang tidak
       // relevan bernilai null, sehingga frontend tidak perlu memeriksa role dulu.
       member: user.member ? serializeMember(user.member, this.appUrl) : null,
@@ -166,7 +152,6 @@ export class AuthService {
         sub: user.id,
         username: user.username,
         role: user.role,
-        maker_id: user.id_maker,
         member_id: user.member?.id,
         owner_id: user.space_owner?.id,
       }),
@@ -175,8 +160,8 @@ export class AuthService {
 
   /**
    * Profil pengguna yang sedang login. Berbeda dengan login, soal hanya
-   * mencantumkan kunci profil yang relevan dengan role, tanpa `maker_id` dan
-   * tanpa kunci lawannya yang bernilai null.
+   * mencantumkan kunci profil yang relevan dengan role, tanpa kunci lawannya
+   * yang bernilai null.
    */
   async profile(idUser: number) {
     const user = await this.prisma.user.findUniqueOrThrow({
@@ -209,16 +194,9 @@ export class AuthService {
     return this.jwt.sign(payload);
   }
 
-  /**
-   * Username hanya perlu unik di dalam satu maker, sehingga dua siswa yang
-   * mengerjakan UKK dapat memakai username contoh yang sama tanpa bertabrakan.
-   */
-  private async pastikanUsernameBelumDipakai(
-    username: string,
-    idMaker: number,
-  ): Promise<void> {
+  private async pastikanUsernameBelumDipakai(username: string): Promise<void> {
     const terpakai = await this.prisma.user.findUnique({
-      where: { id_maker_username: { id_maker: idMaker, username } },
+      where: { username },
       select: { id: true },
     });
 

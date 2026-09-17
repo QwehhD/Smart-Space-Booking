@@ -11,13 +11,6 @@ import type { ApiEnvelope, ApiFailure } from '@/types/api';
  */
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000/api';
 
-/**
- * App key milik akun App Maker. Backend mengisolasi seluruh data berdasarkan key
- * ini; bila kosong, backend memakai maker bawaan sehingga aplikasi tetap berjalan
- * tanpa konfigurasi apa pun.
- */
-const APP_KEY = process.env.NEXT_PUBLIC_APP_KEY?.trim();
-
 export const api = axios.create({ baseURL: BASE_URL });
 
 /** Membaca token sesi dari cookie saat berjalan di peramban. */
@@ -34,10 +27,6 @@ function tokenDariCookie(): string | undefined {
 }
 
 api.interceptors.request.use((config) => {
-  if (APP_KEY) {
-    config.headers['x-maker-key'] = APP_KEY;
-  }
-
   // Header yang sudah diisi pemanggil tidak ditimpa, sehingga Server Component
   // dapat menyuntikkan tokennya sendiri dari cookie milik request tersebut.
   if (!config.headers.Authorization) {

@@ -68,16 +68,6 @@ Tersedia setelah `npm run seed`:
 | Admin space | `admin_kolaborasi` | `Admin123!` |
 | Member | `budi`, `siti`, `joko`, `dewi`, `agus` | `Secret123!` |
 
-## Multi-tenancy App Maker
-
-Setiap request dari frontend sebaiknya menyertakan header
-`x-maker-key: <app_key>` yang diperoleh dari `POST /api/maker/register`. Seluruh
-data (member, space, diskon, reservasi) terisolasi per app key.
-
-Request tanpa header diarahkan ke maker bawaan `mk_default_ukk_2026`, sehingga
-aplikasi tetap dapat dicoba tanpa mendaftar lebih dulu. Sebaliknya app key yang
-dikirim tetapi tidak dikenal ditolak dengan 401.
-
 ## Bentuk response
 
 Seluruh endpoint, sukses maupun gagal, memakai amplop yang sama:
@@ -124,10 +114,9 @@ dan tidak memerlukan database khusus.
 src/
   admin/       panel pengelola: profil, space, diskon, member, reservasi, laporan
   auth/        registrasi, login, JWT strategy, guard role
-  common/      amplop response, exception filter, guard tenant, util, serializer
+  common/      amplop response, exception filter, util, serializer
   config/      pembacaan dan validasi environment
   diskon/      katalog promo publik
-  maker/       akun App Maker dan penentuan tenant
   prisma/      koneksi database
   reservasi/   pemesanan, histori, e-ticket
   spaces/      katalog space dan pengecekan ketersediaan

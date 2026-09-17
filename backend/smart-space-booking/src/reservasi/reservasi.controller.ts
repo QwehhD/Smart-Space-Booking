@@ -8,19 +8,12 @@ import {
   Query,
 } from '@nestjs/common';
 import { Role } from '@prisma/client';
-import {
-  ApiBearerAuth,
-  ApiHeader,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { AuthenticatedUser } from '../auth/interfaces/authenticated-user.interface';
-import { CurrentMaker } from '../common/decorators/current-maker.decorator';
 import { ResponseMessage } from '../common/decorators/response-message.decorator';
 import { ParseIdPipe } from '../common/pipes/parse-id.pipe';
-import { MakerContext } from '../maker/interfaces/maker-context.interface';
 import { CreateReservasiDto } from './dto/create-reservasi.dto';
 import { HistoryQueryDto } from './dto/history-query.dto';
 import { EtiketService } from './eticket.service';
@@ -29,7 +22,6 @@ import { ReservasiService } from './reservasi.service';
 
 @ApiTags('Reservasi Member')
 @ApiBearerAuth('access-token')
-@ApiHeader({ name: 'x-maker-key', required: false })
 @Controller('reservasi')
 export class ReservasiController {
   constructor(
@@ -44,9 +36,8 @@ export class ReservasiController {
   buat(
     @Body() dto: CreateReservasiDto,
     @CurrentUser() user: AuthenticatedUser,
-    @CurrentMaker() maker: MakerContext,
   ) {
-    return this.reservasiService.buat(dto, user, maker);
+    return this.reservasiService.buat(dto, user);
   }
 
   // Rute tetap `my` dan `my/history` didaftarkan sebelum `:id`, agar "my" tidak
@@ -54,11 +45,8 @@ export class ReservasiController {
   @Get('my')
   @Roles(Role.member)
   @ApiOperation({ summary: 'Seluruh pemesanan milik sendiri' })
-  milikSaya(
-    @CurrentUser() user: AuthenticatedUser,
-    @CurrentMaker() maker: MakerContext,
-  ) {
-    return this.reservasiService.milikSaya(user, maker);
+  milikSaya(@CurrentUser() user: AuthenticatedUser) {
+    return this.reservasiService.milikSaya(user);
   }
 
   @Get('my/history')
@@ -67,9 +55,8 @@ export class ReservasiController {
   histori(
     @Query() query: HistoryQueryDto,
     @CurrentUser() user: AuthenticatedUser,
-    @CurrentMaker() maker: MakerContext,
   ) {
-    return this.reservasiService.histori(query, user, maker);
+    return this.reservasiService.histori(query, user);
   }
 
   @Get(':id/e-ticket')
@@ -78,9 +65,8 @@ export class ReservasiController {
   etiket(
     @Param('id', ParseIdPipe) id: number,
     @CurrentUser() user: AuthenticatedUser,
-    @CurrentMaker() maker: MakerContext,
   ) {
-    return this.etiketService.muat(id, user, maker);
+    return this.etiketService.muat(id, user);
   }
 
   @Get(':id')
@@ -88,9 +74,8 @@ export class ReservasiController {
   detail(
     @Param('id', ParseIdPipe) id: number,
     @CurrentUser() user: AuthenticatedUser,
-    @CurrentMaker() maker: MakerContext,
   ) {
-    return this.reservasiService.detail(id, user, maker);
+    return this.reservasiService.detail(id, user);
   }
 
   @Patch(':id/cancel')
@@ -100,8 +85,7 @@ export class ReservasiController {
   batalkan(
     @Param('id', ParseIdPipe) id: number,
     @CurrentUser() user: AuthenticatedUser,
-    @CurrentMaker() maker: MakerContext,
   ) {
-    return this.reservasiService.batalkan(id, user, maker);
+    return this.reservasiService.batalkan(id, user);
   }
 }

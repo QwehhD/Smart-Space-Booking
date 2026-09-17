@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { Diskon } from '@prisma/client';
 import { serializeDiskon } from '../common/serializers/diskon.serializer';
-import { MakerContext } from '../maker/interfaces/maker-context.interface';
 import { PrismaService } from '../prisma/prisma.service';
 import { SpacesService } from '../spaces/spaces.service';
 import { CheckPromoDto } from './dto/check-promo.dto';
@@ -27,15 +26,14 @@ export class DiskonService {
    *
    * Bila `id_space` diisi, hanya promo milik pengelola space tersebut yang
    * dikembalikan, karena promo hanya berlaku pada space milik pengelola yang
-   * menerbitkannya. Tanpa query itu, seluruh promo aktif pada tenant dikembalikan
-   * seperti sebelumnya.
+   * menerbitkannya. Tanpa query itu, seluruh promo aktif dikembalikan.
    */
-  async aktif(maker: MakerContext, query: ListDiskonQueryDto = {}) {
-    const idOwner = await this.ownerDariSpace(query.id_space, maker);
+  async aktif(query: ListDiskonQueryDto = {}) {
+    const idOwner = await this.ownerDariSpace(query.id_space);
 
     const diskon = await this.prisma.diskon.findMany({
       where: {
-        ...this.yangSedangBerlaku(maker),
+        ...this.yangSedangBerlaku(),
         ...(idOwner !== undefined && { id_owner: idOwner }),
       },
       orderBy: { id: 'asc' },
@@ -44,9 +42,9 @@ export class DiskonService {
     return diskon.map(serializeDiskon);
   }
 
-  async detail(id: number, maker: MakerContext) {
+  async detail(id: number) {
     const diskon = await this.prisma.diskon.findFirst({
-      where: { id, id_maker: maker.id, deleted_at: null },
+      where: { id, deleted_at: null },
     });
 
     if (!diskon) {
@@ -65,9 +63,9 @@ export class DiskonService {
    * disertakan, kepemilikannya ikut diperiksa supaya hasil pengecekan di halaman
    * checkout sama persis dengan yang nanti diterapkan saat memesan.
    */
-  async periksa(dto: CheckPromoDto, maker: MakerContext) {
-    const idOwner = await this.ownerDariSpace(dto.id_space, maker);
-    const diskon = await this.cariYangBerlaku(dto.nama_diskon, maker, idOwner);
+  async periksa(dto: CheckPromoDto) {
+    const idOwner = await this.ownerDariSpace(dto.id_space);
+    const diskon = await this.cariYangBerlaku(dto.nama_diskon, idOwner);
 
     return { ...serializeDiskon(diskon), is_active: true };
   }
@@ -80,42 +78,34 @@ export class DiskonService {
    * Pencariannya difilter pemilik ketika `idOwner` diketahui, sehingga kode yang
    * sama pada dua pengelola tidak pernah tertukar.
    */
-  async cariYangBerlaku(
-    namaDiskon: string,
-    maker: MakerContext,
-    idOwner?: number,
-  ): Promise<Diskon> {
+  async cariYangBerlaku(namaDiskon: string, idOwner?: number): Promise<Diskon> {
     const diskon = await this.prisma.diskon.findFirst({
       where: {
         nama_diskon: namaDiskon,
-        ...this.yangSedangBerlaku(maker),
+        ...this.yangSedangBerlaku(),
         ...(idOwner !== undefined && { id_owner: idOwner }),
       },
     });
 
     if (!diskon) {
-      await this.jelaskanKegagalan({ nama_diskon: namaDiskon }, maker, idOwner);
+      await this.jelaskanKegagalan({ nama_diskon: namaDiskon }, idOwner);
     }
 
     return diskon as Diskon;
   }
 
   /** Sama seperti `cariYangBerlaku`, tetapi dicari berdasarkan id. */
-  async cariYangBerlakuById(
-    id: number,
-    maker: MakerContext,
-    idOwner?: number,
-  ): Promise<Diskon> {
+  async cariYangBerlakuById(id: number, idOwner?: number): Promise<Diskon> {
     const diskon = await this.prisma.diskon.findFirst({
       where: {
         id,
-        ...this.yangSedangBerlaku(maker),
+        ...this.yangSedangBerlaku(),
         ...(idOwner !== undefined && { id_owner: idOwner }),
       },
     });
 
     if (!diskon) {
-      await this.jelaskanKegagalan({ id }, maker, idOwner);
+      await this.jelaskanKegagalan({ id }, idOwner);
     }
 
     return diskon as Diskon;
@@ -124,18 +114,15 @@ export class DiskonService {
   /**
    * Membedakan dua sebab kegagalan yang berbeda bagi pengguna: promo yang memang
    * tidak ada atau sudah lewat, dan promo yang ada serta masih berlaku tetapi
-   * diterbitkan pengelola lain. Yang kedua perlu pesannya sendiri, karena
-   * pengguna sudah melihat kodenya di suatu tempat dan pantas tahu bahwa masalahnya
-   * ada pada space yang ia pilih.
+   * diterbitkan pengelola lain.
    */
   private async jelaskanKegagalan(
     kunci: { id: number } | { nama_diskon: string },
-    maker: MakerContext,
     idOwner?: number,
   ): Promise<never> {
     if (idOwner !== undefined) {
       const milikPengelolaLain = await this.prisma.diskon.findFirst({
-        where: { ...kunci, ...this.yangSedangBerlaku(maker) },
+        where: { ...kunci, ...this.yangSedangBerlaku() },
         select: { id: true },
       });
 
@@ -147,32 +134,26 @@ export class DiskonService {
     throw new BadRequestException(TIDAK_BERLAKU);
   }
 
-  /** Promo pada tenant ini yang belum dihapus dan periodenya mencakup saat ini. */
-  private yangSedangBerlaku(maker: MakerContext) {
+  /** Promo yang belum dihapus dan periodenya mencakup saat ini. */
+  private yangSedangBerlaku() {
     const sekarang = new Date();
 
     return {
-      id_maker: maker.id,
       deleted_at: null,
       tanggal_awal: { lte: sekarang },
       tanggal_akhir: { gte: sekarang },
     };
   }
 
-  /**
-   * Menerjemahkan id space menjadi id pengelolanya. Space yang tidak ada atau
-   * milik tenant lain ditolak di sini, sehingga pemanggil tidak perlu memeriksanya
-   * sendiri.
-   */
+  /** Menerjemahkan id space menjadi id pengelolanya. */
   private async ownerDariSpace(
     idSpace: number | undefined,
-    maker: MakerContext,
   ): Promise<number | undefined> {
     if (idSpace === undefined) {
       return undefined;
     }
 
-    const space = await this.spacesService.cariAtauGagal(idSpace, maker);
+    const space = await this.spacesService.cariAtauGagal(idSpace);
     return space.id_owner;
   }
 }

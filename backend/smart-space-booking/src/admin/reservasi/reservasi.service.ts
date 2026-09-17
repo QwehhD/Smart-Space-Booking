@@ -188,6 +188,6 @@ export class AdminReservasiService {
   }
 
   private milikAdmin(user: AuthenticatedUser) {
-    return { id_owner: user.owner_id as number, id_maker: user.id_maker };
+    return { id_owner: user.owner_id as number };
   }
 }

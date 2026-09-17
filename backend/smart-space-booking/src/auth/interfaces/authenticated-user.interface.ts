@@ -9,7 +9,6 @@ export interface AuthenticatedUser {
   id: number;
   username: string;
   role: Role;
-  id_maker: number;
   member_id?: number;
   owner_id?: number;
 }

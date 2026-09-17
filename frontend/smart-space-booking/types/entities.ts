@@ -62,7 +62,6 @@ export interface HasilLogin {
   id: number;
   username: string;
   role: Role;
-  maker_id: number;
   member: Member | null;
   space_owner: SpaceOwner | null;
   access_token: string;
@@ -78,7 +77,7 @@ export interface HasilRegistrasi {
   access_token: string;
 }
 
-/** Hasil `GET /auth/profile`. Tanpa `maker_id`, dan hanya kunci yang relevan. */
+/** Hasil `GET /auth/profile`. Hanya memuat kunci profil yang relevan dengan role. */
 export interface ProfilPengguna {
   id: number;
   username: string;

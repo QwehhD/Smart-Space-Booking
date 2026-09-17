@@ -9,15 +9,8 @@ import {
   Query,
 } from '@nestjs/common';
 import { Role } from '@prisma/client';
-import {
-  ApiBearerAuth,
-  ApiHeader,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
-import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../../auth/decorators/roles.decorator';
-import { AuthenticatedUser } from '../../auth/interfaces/authenticated-user.interface';
 import { ResponseMessage } from '../../common/decorators/response-message.decorator';
 import { ParseIdPipe } from '../../common/pipes/parse-id.pipe';
 import { CreateMemberAdminDto } from './dto/create-member.dto';
@@ -27,38 +20,28 @@ import { AdminMembersService } from './members.service';
 
 @ApiTags('Admin - Member')
 @ApiBearerAuth('access-token')
-@ApiHeader({ name: 'x-maker-key', required: false })
 @Roles(Role.admin_space)
 @Controller('admin/members')
 export class AdminMembersController {
   constructor(private readonly membersService: AdminMembersService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Daftar seluruh member pada tenant ini' })
-  daftar(
-    @Query() query: ListMembersQueryDto,
-    @CurrentUser() user: AuthenticatedUser,
-  ) {
-    return this.membersService.daftar(user, query.search?.trim() || undefined);
+  @ApiOperation({ summary: 'Daftar seluruh member' })
+  daftar(@Query() query: ListMembersQueryDto) {
+    return this.membersService.daftar(query.search?.trim() || undefined);
   }
 
   @Post()
   @ResponseMessage('Data member baru berhasil ditambahkan!')
   @ApiOperation({ summary: 'Tambah data member baru beserta akun loginnya' })
-  buat(
-    @Body() dto: CreateMemberAdminDto,
-    @CurrentUser() user: AuthenticatedUser,
-  ) {
-    return this.membersService.buat(dto, user);
+  buat(@Body() dto: CreateMemberAdminDto) {
+    return this.membersService.buat(dto);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Detail member berdasarkan ID' })
-  detail(
-    @Param('id', ParseIdPipe) id: number,
-    @CurrentUser() user: AuthenticatedUser,
-  ) {
-    return this.membersService.detail(id, user);
+  detail(@Param('id', ParseIdPipe) id: number) {
+    return this.membersService.detail(id);
   }
 
   @Put(':id')
@@ -67,18 +50,14 @@ export class AdminMembersController {
   perbarui(
     @Param('id', ParseIdPipe) id: number,
     @Body() dto: UpdateMemberAdminDto,
-    @CurrentUser() user: AuthenticatedUser,
   ) {
-    return this.membersService.perbarui(id, dto, user);
+    return this.membersService.perbarui(id, dto);
   }
 
   @Delete(':id')
   @ResponseMessage('Data member berhasil dihapus!')
   @ApiOperation({ summary: 'Hapus data member (soft delete)' })
-  hapus(
-    @Param('id', ParseIdPipe) id: number,
-    @CurrentUser() user: AuthenticatedUser,
-  ) {
-    return this.membersService.hapus(id, user);
+  hapus(@Param('id', ParseIdPipe) id: number) {
+    return this.membersService.hapus(id);
   }
 }

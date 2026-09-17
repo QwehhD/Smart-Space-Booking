@@ -13,15 +13,10 @@ import * as bcrypt from 'bcrypt';
  * kunci alaminya, lalu dibuat bila belum ada dan disesuaikan bila sudah. Dengan
  * begitu `npm run seed` dapat dijalankan berkali-kali tanpa menggandakan data
  * maupun menghapus data yang sudah ada.
- *
- * Datanya dimasukkan ke maker bawaan `mk_default_ukk_2026`, yaitu tenant yang
- * dipakai ketika request tidak menyertakan header `x-maker-key`, sehingga hasil
- * seed langsung terlihat tanpa konfigurasi apa pun di frontend.
  */
 
 const prisma = new PrismaClient();
 
-const APP_KEY_BAWAAN = 'mk_default_ukk_2026';
 const SALT_ROUNDS = 10;
 
 /** Password contoh sengaja seragam dan dicatat di README agar mudah diuji. */
@@ -31,15 +26,13 @@ const PASSWORD_MEMBER = 'Secret123!';
 const JAM_BUKA = 7;
 
 async function main() {
-  const maker = await pastikanMakerBawaan();
-  const owners = await pastikanOwner(maker.id);
-  const members = await pastikanMember(maker.id);
-  const spaces = await pastikanSpace(maker.id, owners);
-  await pastikanDiskon(maker.id, owners);
-  const jumlahReservasi = await pastikanReservasi(maker.id, members, spaces);
+  const owners = await pastikanOwner();
+  const members = await pastikanMember();
+  const spaces = await pastikanSpace(owners);
+  await pastikanDiskon(owners);
+  const jumlahReservasi = await pastikanReservasi(members, spaces);
 
   console.log('Seed selesai:');
-  console.log(`  maker       : ${maker.app_key}`);
   console.log(`  space owner : ${owners.length}`);
   console.log(`  member      : ${members.length}`);
   console.log(`  space       : ${spaces.length}`);
@@ -49,40 +42,20 @@ async function main() {
   console.log(`  login member: budi / ${PASSWORD_MEMBER}`);
 }
 
-async function pastikanMakerBawaan() {
-  return prisma.maker.upsert({
-    where: { app_key: APP_KEY_BAWAAN },
-    update: {},
-    create: {
-      name: 'Admin Default UKK',
-      username: 'admin_default',
-      email: 'admin@ukk.sch.id',
-      app_key: APP_KEY_BAWAAN,
-      password: await bcrypt.hash(PASSWORD_ADMIN, SALT_ROUNDS),
-    },
-  });
-}
-
-/** Akun login beserta profilnya, dicari berdasarkan username dalam tenant. */
-async function upsertUser(
-  idMaker: number,
-  username: string,
-  password: string,
-  role: Role,
-) {
+/** Akun login beserta profilnya, dicari berdasarkan username yang unik. */
+async function upsertUser(username: string, password: string, role: Role) {
   return prisma.user.upsert({
-    where: { id_maker_username: { id_maker: idMaker, username } },
+    where: { username },
     update: {},
     create: {
       username,
       password: await bcrypt.hash(password, SALT_ROUNDS),
       role,
-      id_maker: idMaker,
     },
   });
 }
 
-async function pastikanOwner(idMaker: number) {
+async function pastikanOwner() {
   const daftar = [
     {
       username: 'admin_moklet',
@@ -108,7 +81,6 @@ async function pastikanOwner(idMaker: number) {
 
   for (const data of daftar) {
     const user = await upsertUser(
-      idMaker,
       data.username,
       PASSWORD_ADMIN,
       Role.admin_space,
@@ -131,7 +103,6 @@ async function pastikanOwner(idMaker: number) {
           alamat: data.alamat,
           deskripsi: data.deskripsi,
           id_user: user.id,
-          id_maker: idMaker,
         },
       }),
     );
@@ -140,7 +111,7 @@ async function pastikanOwner(idMaker: number) {
   return hasil;
 }
 
-async function pastikanMember(idMaker: number) {
+async function pastikanMember() {
   const daftar = [
     { username: 'budi', nama: 'Budi Raharjo', instansi: 'SMK Telkom Malang', telp: '085712345678' },
     { username: 'siti', nama: 'Siti Nurhaliza', instansi: 'Universitas Brawijaya', telp: '085712345679' },
@@ -152,12 +123,7 @@ async function pastikanMember(idMaker: number) {
   const hasil = [];
 
   for (const [i, data] of daftar.entries()) {
-    const user = await upsertUser(
-      idMaker,
-      data.username,
-      PASSWORD_MEMBER,
-      Role.member,
-    );
+    const user = await upsertUser(data.username, PASSWORD_MEMBER, Role.member);
 
     hasil.push(
       await prisma.member.upsert({
@@ -173,7 +139,6 @@ async function pastikanMember(idMaker: number) {
           alamat: `Jl. Contoh No. ${i + 1}, Malang`,
           telp: data.telp,
           id_user: user.id,
-          id_maker: idMaker,
         },
       }),
     );
@@ -182,10 +147,7 @@ async function pastikanMember(idMaker: number) {
   return hasil;
 }
 
-async function pastikanSpace(
-  idMaker: number,
-  owners: { id: number }[],
-) {
+async function pastikanSpace(owners: { id: number }[]) {
   const daftar = [
     { owner: 0, nama_space: 'Personal Desk - Flexi 01', harga: 20000, tipe: TipeSpace.desk, kapasitas: 1, deskripsi: 'Meja kerja individual dengan colokan listrik, WiFi 100Mbps, dan lampu meja LED.' },
     { owner: 0, nama_space: 'Personal Desk - Flexi 02', harga: 20000, tipe: TipeSpace.desk, kapasitas: 1, deskripsi: 'Meja kerja individual dekat jendela dengan pencahayaan alami.' },
@@ -222,7 +184,6 @@ async function pastikanSpace(
               kapasitas: data.kapasitas,
               deskripsi: data.deskripsi,
               id_owner: idOwner,
-              id_maker: idMaker,
             },
           }),
     );
@@ -231,7 +192,7 @@ async function pastikanSpace(
   return hasil;
 }
 
-async function pastikanDiskon(idMaker: number, owners: { id: number }[]) {
+async function pastikanDiskon(owners: { id: number }[]) {
   const tahun = new Date().getFullYear();
 
   const daftar = [
@@ -260,7 +221,6 @@ async function pastikanDiskon(idMaker: number, owners: { id: number }[]) {
         tanggal_awal: new Date(`${data.awal}T00:00:00.000Z`),
         tanggal_akhir: new Date(`${data.akhir}T23:59:59.000Z`),
         id_owner: idOwner,
-        id_maker: idMaker,
       },
     });
   }
@@ -275,14 +235,12 @@ async function pastikanDiskon(idMaker: number, owners: { id: number }[]) {
  * sehingga menjalankan ulang seed tidak menggandakan pemesanan.
  */
 async function pastikanReservasi(
-  idMaker: number,
   members: { id: number }[],
   spaces: { id: number; id_owner: number; harga_per_jam: number }[],
 ) {
   const sekarangUntukPromo = new Date();
   const diskon = await prisma.diskon.findMany({
     where: {
-      id_maker: idMaker,
       deleted_at: null,
       tanggal_awal: { lte: sekarangUntukPromo },
       tanggal_akhir: { gte: sekarangUntukPromo },
@@ -331,7 +289,6 @@ async function pastikanReservasi(
 
     const sudahAda = await prisma.reservasi.findFirst({
       where: {
-        id_maker: idMaker,
         tanggal_reservasi: tanggal,
         jam_mulai: jamMulai,
         detail: { id_space: space.id },
@@ -357,7 +314,6 @@ async function pastikanReservasi(
         durasi_jam: durasi,
         id_owner: space.id_owner,
         id_member: member.id,
-        id_maker: idMaker,
         status,
         ...(status === StatusReservasi.selesai && {
           check_in_time: new Date(tanggal),

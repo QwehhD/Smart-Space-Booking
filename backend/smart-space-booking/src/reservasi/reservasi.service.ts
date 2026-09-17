@@ -17,7 +17,6 @@ import {
 } from '../common/utils/uang.util';
 import { hitungJamSelesai, tanggalKeDateUtc } from '../common/utils/waktu.util';
 import { DiskonService } from '../diskon/diskon.service';
-import { MakerContext } from '../maker/interfaces/maker-context.interface';
 import { PrismaService } from '../prisma/prisma.service';
 import { AvailabilityService } from '../spaces/availability/availability.service';
 import { SpacesService } from '../spaces/spaces.service';
@@ -48,12 +47,8 @@ export class ReservasiService {
    * tersimpan, tidak pernah dari nilai kiriman klien, supaya harga tidak dapat
    * ditentukan sendiri oleh pemesan.
    */
-  async buat(
-    dto: CreateReservasiDto,
-    user: AuthenticatedUser,
-    maker: MakerContext,
-  ) {
-    const space = await this.spacesService.cariAtauGagal(dto.id_space, maker);
+  async buat(dto: CreateReservasiDto, user: AuthenticatedUser) {
+    const space = await this.spacesService.cariAtauGagal(dto.id_space);
     const tanggal = tanggalKeDateUtc(dto.tanggal_reservasi);
     const jamSelesai = this.hitungJamSelesaiAtauGagal(
       dto.jam_mulai,
@@ -66,7 +61,7 @@ export class ReservasiService {
       jamSelesai,
     );
 
-    const diskon = await this.cariDiskon(dto, maker, space.id_owner);
+    const diskon = await this.cariDiskon(dto, space.id_owner);
     const tarifKotor = hitungTarifKotor(space.harga_per_jam, dto.durasi_jam);
     const potongan = diskon
       ? hitungPotongan(tarifKotor, diskon.persentase_diskon)
@@ -83,7 +78,6 @@ export class ReservasiService {
             tanggal,
             dto.jam_mulai,
             jamSelesai,
-            maker,
             undefined,
             tx,
           )
@@ -102,7 +96,6 @@ export class ReservasiService {
             durasi_jam: dto.durasi_jam,
             id_owner: space.id_owner,
             id_member: user.member_id as number,
-            id_maker: maker.id,
             status: StatusReservasi.belum_dikonfirm,
             detail: {
               create: {
@@ -133,9 +126,9 @@ export class ReservasiService {
   }
 
   /** Seluruh pemesanan milik member sendiri, terbaru lebih dulu. */
-  async milikSaya(user: AuthenticatedUser, maker: MakerContext) {
+  async milikSaya(user: AuthenticatedUser) {
     const reservasi = await this.prisma.reservasi.findMany({
-      where: { id_maker: maker.id, id_member: user.member_id as number },
+      where: { id_member: user.member_id as number },
       include: SERTAKAN_DETAIL,
       orderBy: [{ tanggal_reservasi: 'desc' }, { id: 'desc' }],
     });
@@ -154,11 +147,7 @@ export class ReservasiService {
    * jadi dibayar, tetapi tetap ditampilkan pada daftar agar member dapat melihat
    * riwayat pembatalannya.
    */
-  async histori(
-    query: HistoryQueryDto,
-    user: AuthenticatedUser,
-    maker: MakerContext,
-  ) {
+  async histori(query: HistoryQueryDto, user: AuthenticatedUser) {
     const sekarang = new Date();
     const month = query.month ?? sekarang.getMonth() + 1;
     const year = query.year ?? sekarang.getFullYear();
@@ -168,7 +157,6 @@ export class ReservasiService {
 
     const reservasi = await this.prisma.reservasi.findMany({
       where: {
-        id_maker: maker.id,
         id_member: user.member_id as number,
         tanggal_reservasi: { gte: awal, lt: awalBulanBerikutnya },
       },
@@ -197,10 +185,8 @@ export class ReservasiService {
    * Detail satu reservasi. Member hanya boleh membuka miliknya sendiri,
    * sedangkan admin space boleh membuka reservasi pada lokasinya.
    */
-  async detail(id: number, user: AuthenticatedUser, maker: MakerContext) {
-    return serializeReservasiDetail(
-      await this.cariYangBolehDilihat(id, user, maker),
-    );
+  async detail(id: number, user: AuthenticatedUser) {
+    return serializeReservasiDetail(await this.cariYangBolehDilihat(id, user));
   }
 
   /**
@@ -208,8 +194,8 @@ export class ReservasiService {
    * dapat dibatalkan; setelah member masuk ruangan, pembatalan menjadi urusan
    * admin lewat perubahan status.
    */
-  async batalkan(id: number, user: AuthenticatedUser, maker: MakerContext) {
-    const reservasi = await this.cariMilikMember(id, user, maker);
+  async batalkan(id: number, user: AuthenticatedUser) {
+    const reservasi = await this.cariMilikMember(id, user);
 
     if (!STATUS_BOLEH_DIBATALKAN.includes(reservasi.status)) {
       throw new BadRequestException(PESAN_RESERVASI.TIDAK_BISA_DIBATALKAN);
@@ -240,23 +226,14 @@ export class ReservasiService {
    */
   private async cariDiskon(
     dto: CreateReservasiDto,
-    maker: MakerContext,
     idOwner: number,
   ): Promise<Diskon | null> {
     if (dto.kode_promo?.trim()) {
-      return this.diskonService.cariYangBerlaku(
-        dto.kode_promo.trim(),
-        maker,
-        idOwner,
-      );
+      return this.diskonService.cariYangBerlaku(dto.kode_promo.trim(), idOwner);
     }
 
     if (dto.id_diskon) {
-      return this.diskonService.cariYangBerlakuById(
-        dto.id_diskon,
-        maker,
-        idOwner,
-      );
+      return this.diskonService.cariYangBerlakuById(dto.id_diskon, idOwner);
     }
 
     return null;
@@ -287,23 +264,18 @@ export class ReservasiService {
   }
 
   /** Dipakai EtiketService, yang memakai aturan akses yang sama dengan detail. */
-  cariUntukEtiket(id: number, user: AuthenticatedUser, maker: MakerContext) {
-    return this.cariYangBolehDilihat(id, user, maker);
+  cariUntukEtiket(id: number, user: AuthenticatedUser) {
+    return this.cariYangBolehDilihat(id, user);
   }
 
   /**
    * Reservasi yang boleh dilihat pengguna ini: miliknya sendiri bila member,
    * atau yang berada di lokasinya bila admin space.
    */
-  private async cariYangBolehDilihat(
-    id: number,
-    user: AuthenticatedUser,
-    maker: MakerContext,
-  ) {
+  private async cariYangBolehDilihat(id: number, user: AuthenticatedUser) {
     const reservasi = await this.prisma.reservasi.findFirst({
       where: {
         id,
-        id_maker: maker.id,
         ...(user.role === Role.admin_space
           ? { id_owner: user.owner_id as number }
           : { id_member: user.member_id as number }),
@@ -319,13 +291,9 @@ export class ReservasiService {
   }
 
   /** Reservasi milik member ini pada tenant ini. */
-  private async cariMilikMember(
-    id: number,
-    user: AuthenticatedUser,
-    maker: MakerContext,
-  ) {
+  private async cariMilikMember(id: number, user: AuthenticatedUser) {
     const reservasi = await this.prisma.reservasi.findFirst({
-      where: { id, id_maker: maker.id, id_member: user.member_id as number },
+      where: { id, id_member: user.member_id as number },
       include: SERTAKAN_DETAIL,
     });
 

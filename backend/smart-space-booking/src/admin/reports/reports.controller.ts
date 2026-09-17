@@ -1,11 +1,6 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { Role } from '@prisma/client';
-import {
-  ApiBearerAuth,
-  ApiHeader,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { Roles } from '../../auth/decorators/roles.decorator';
 import { AuthenticatedUser } from '../../auth/interfaces/authenticated-user.interface';
@@ -14,7 +9,6 @@ import { AdminReportsService } from './reports.service';
 
 @ApiTags('Admin - Laporan')
 @ApiBearerAuth('access-token')
-@ApiHeader({ name: 'x-maker-key', required: false })
 @Roles(Role.admin_space)
 @Controller('admin/reports')
 export class AdminReportsController {

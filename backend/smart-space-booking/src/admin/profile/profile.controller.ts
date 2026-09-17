@@ -1,11 +1,6 @@
 import { Body, Controller, Get, Put } from '@nestjs/common';
 import { Role } from '@prisma/client';
-import {
-  ApiBearerAuth,
-  ApiHeader,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ResponseMessage } from '../../common/decorators/response-message.decorator';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { Roles } from '../../auth/decorators/roles.decorator';
@@ -15,7 +10,6 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @ApiTags('Admin - Profil Lokasi')
 @ApiBearerAuth('access-token')
-@ApiHeader({ name: 'x-maker-key', required: false })
 @Roles(Role.admin_space)
 @Controller('admin/profile')
 export class AdminProfileController {

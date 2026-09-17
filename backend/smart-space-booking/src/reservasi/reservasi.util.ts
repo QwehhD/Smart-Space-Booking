@@ -43,10 +43,13 @@ export function buatNomorEtiket(
 }
 
 /**
- * Payload QR yang dipindai admin saat check-in. App key ikut disertakan sesuai
- * contoh soal, sehingga tiket milik satu tenant tidak dapat diverifikasi pada
- * tenant lain.
+ * Payload QR yang dipindai admin saat check-in.
+ *
+ * Memuat id reservasi, yang dipakai admin untuk membuka reservasinya lalu
+ * melakukan check-in. Bukan rahasia: yang menentukan boleh tidaknya check-in
+ * tetap backend, yang memeriksa bahwa reservasi itu memang milik lokasi admin
+ * tersebut dan statusnya sudah disetujui.
  */
-export function buatPayloadQr(idReservasi: number, appKey: string): string {
-  return `${AWALAN_QR}-${idReservasi}-${appKey}`;
+export function buatPayloadQr(idReservasi: number): string {
+  return `${AWALAN_QR}-${idReservasi}`;
 }

@@ -5,13 +5,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import {
-  ApiBody,
-  ApiConsumes,
-  ApiHeader,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Public } from '../common/decorators/public.decorator';
 import { ResponseMessage } from '../common/decorators/response-message.decorator';
 import { opsiUpload } from './upload.storage';
@@ -28,12 +22,11 @@ const BODY_BERKAS = {
 
 /**
  * Ketiga endpoint ditandai @Public() mengikuti kontrak rincinya pada soal, yang
- * menyebut "Auth: Tidak diperlukan / Header x-maker-key". Ringkasan daftar
- * endpoint menyebut sebagian di antaranya milik Admin Space, namun kontrak rinci
- * yang lebih spesifik dipakai sebagai acuan.
+ * menyebut "Auth: Tidak diperlukan". Ringkasan daftar endpoint menyebut sebagian
+ * di antaranya milik Admin Space, namun kontrak rinci yang lebih spesifik dipakai
+ * sebagai acuan.
  */
 @ApiTags('Upload Berkas')
-@ApiHeader({ name: 'x-maker-key', required: false })
 @Public()
 @Controller('upload')
 export class UploadController {

@@ -8,12 +8,7 @@ import {
   Put,
 } from '@nestjs/common';
 import { Role } from '@prisma/client';
-import {
-  ApiBearerAuth,
-  ApiHeader,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ParseIdPipe } from '../../common/pipes/parse-id.pipe';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { Roles } from '../../auth/decorators/roles.decorator';
@@ -25,7 +20,6 @@ import { AdminSpacesService } from './spaces.service';
 
 @ApiTags('Admin - Space')
 @ApiBearerAuth('access-token')
-@ApiHeader({ name: 'x-maker-key', required: false })
 @Roles(Role.admin_space)
 @Controller('admin/spaces')
 export class AdminSpacesController {

@@ -9,10 +9,11 @@ import { PrismaService } from './../src/prisma/prisma.service';
 /**
  * Pengujian alur utama dari ujung ke ujung, memakai database sungguhan.
  *
- * Setiap kali dijalankan, pengujian ini mendaftarkan akun App Maker baru dan
- * bekerja sepenuhnya di dalam tenant tersebut. Dengan begitu data pengujian tidak
- * pernah bercampur dengan data seed maupun sisa pengujian sebelumnya, dan seluruh
- * tenantnya dapat dihapus sekali jalan di akhir karena relasinya bersifat cascade.
+ * Karena username kini unik secara global, setiap kali dijalankan pengujian ini
+ * memakai akhiran waktu pada seluruh nama akun dan nama space yang dibuatnya.
+ * Dengan begitu data pengujian tidak pernah bertabrakan dengan data seed maupun
+ * sisa pengujian sebelumnya, dan di akhir hanya baris milik jalannya sendiri
+ * yang dihapus lewat `bersihkan()`.
  *
  * Urutan pengujiannya sengaja berurutan, karena yang diperiksa memang alurnya:
  * space harus ada sebelum dapat dipesan, dan reservasi harus disetujui sebelum
@@ -22,8 +23,6 @@ describe('Alur utama (e2e)', () => {
   let app: INestApplication<App>;
   let prisma: PrismaService;
 
-  let appKey: string;
-  let idMaker: number;
   let tokenAdmin: string;
   let tokenMember: string;
   let idSpace: number;
@@ -32,12 +31,16 @@ describe('Alur utama (e2e)', () => {
   const TANGGAL = '2027-03-15';
   const unik = Date.now();
 
-  /** Setiap request menyertakan app key tenant pengujian ini. */
+  /** Nama-nama yang dibuat jalannya sendiri, dipakai juga saat pembersihan. */
+  const USER_ADMIN = `admin_e2e_${unik}`;
+  const USER_MEMBER = `member_e2e_${unik}`;
+  const USER_ADMIN_LAIN = `lain_e2e_${unik}`;
+  const NAMA_SPACE = `Personal Desk E2E ${unik}`;
+  const usernameDipakai = [USER_ADMIN, USER_MEMBER, USER_ADMIN_LAIN];
+
   const api = () => request(app.getHttpServer());
-  const sebagai = (token?: string) => (req: request.Test) => {
-    req.set('x-maker-key', appKey);
-    return token ? req.set('Authorization', `Bearer ${token}`) : req;
-  };
+  const sebagai = (token?: string) => (req: request.Test) =>
+    token ? req.set('Authorization', `Bearer ${token}`) : req;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -48,68 +51,75 @@ describe('Alur utama (e2e)', () => {
     pasangGlobalPrefix(app);
     await app.init();
     prisma = app.get(PrismaService);
+
+    // Bila jalan sebelumnya berhenti di tengah, sisanya dibuang lebih dulu.
+    await bersihkan();
   });
 
   afterAll(async () => {
-    if (idMaker) {
-      await hapusTenant(idMaker);
-    }
-
+    await bersihkan();
     await app.close();
   });
 
   /**
-   * Menghapus seluruh data satu tenant.
+   * Menghapus seluruh data yang dibuat pengujian ini.
    *
-   * Penghapusannya dilakukan berurutan dari anak ke induk, bukan mengandalkan
-   * cascade dari `maker`, karena `reservasi` merujuk `member` tanpa cascade
-   * sehingga urutan penghapusan yang dipilih database sendiri dapat melanggar
-   * foreign key itu.
+   * Penghapusannya dilakukan berurutan dari anak ke induk karena `reservasi`
+   * merujuk `member` tanpa cascade, sehingga urutan yang dipilih database
+   * sendiri dapat melanggar foreign key itu. Titik awalnya adalah akun yang
+   * dibuat jalan ini, lalu profil dan data turunannya ditelusuri dari sana.
    */
-  async function hapusTenant(id: number) {
-    await prisma.detailReservasi.deleteMany({
-      where: { reservasi: { id_maker: id } },
+  async function bersihkan() {
+    const users = await prisma.user.findMany({
+      where: { username: { in: usernameDipakai } },
+      select: {
+        id: true,
+        member: { select: { id: true } },
+        space_owner: { select: { id: true } },
+      },
     });
-    await prisma.reservasi.deleteMany({ where: { id_maker: id } });
-    await prisma.diskon.deleteMany({ where: { id_maker: id } });
-    await prisma.space.deleteMany({ where: { id_maker: id } });
-    await prisma.member.deleteMany({ where: { id_maker: id } });
-    await prisma.spaceOwner.deleteMany({ where: { id_maker: id } });
-    await prisma.user.deleteMany({ where: { id_maker: id } });
-    await prisma.maker.delete({ where: { id } });
+
+    if (users.length === 0) {
+      return;
+    }
+
+    const idUser = users.map((u) => u.id);
+    const idMember = users.flatMap((u) => (u.member ? [u.member.id] : []));
+    const idOwner = users.flatMap((u) =>
+      u.space_owner ? [u.space_owner.id] : [],
+    );
+
+    const milikJalanIni = {
+      OR: [{ id_member: { in: idMember } }, { id_owner: { in: idOwner } }],
+    };
+
+    await prisma.detailReservasi.deleteMany({
+      where: { reservasi: milikJalanIni },
+    });
+    await prisma.reservasi.deleteMany({ where: milikJalanIni });
+    await prisma.diskon.deleteMany({ where: { id_owner: { in: idOwner } } });
+    await prisma.space.deleteMany({ where: { id_owner: { in: idOwner } } });
+    await prisma.member.deleteMany({ where: { id: { in: idMember } } });
+    await prisma.spaceOwner.deleteMany({ where: { id: { in: idOwner } } });
+    await prisma.user.deleteMany({ where: { id: { in: idUser } } });
   }
 
-  it('1. mendaftarkan App Maker dan menerbitkan app key', async () => {
-    const res = await api()
-      .post('/api/maker/register')
+  it('1. mendaftarkan admin space dan member, lalu keduanya dapat login', async () => {
+    await api()
+      .post('/api/auth/register/admin-space')
       .send({
-        name: 'Penguji E2E',
-        username: `e2e_${unik}`,
-        email: `e2e_${unik}@smk.sch.id`,
-        password: 'Password123!',
-      })
-      .expect(201);
-
-    expect(res.body.data.app_key).toMatch(/^mk_[0-9a-f]{32}$/);
-
-    appKey = res.body.data.app_key;
-    idMaker = res.body.data.id;
-  });
-
-  it('2. mendaftarkan admin space dan member, lalu keduanya dapat login', async () => {
-    await sebagai()(api().post('/api/auth/register/admin-space'))
-      .send({
-        username: 'admin_e2e',
+        username: USER_ADMIN,
         password: 'Admin123!',
-        nama_coworking: 'Moklet Hub E2E',
+        nama_coworking: `Moklet Hub E2E ${unik}`,
         nama_pemilik: 'Ahmad Bidin',
         telp: '081298765432',
       })
       .expect(201);
 
-    await sebagai()(api().post('/api/auth/register/member'))
+    await api()
+      .post('/api/auth/register/member')
       .send({
-        username: 'member_e2e',
+        username: USER_MEMBER,
         password: 'Secret123!',
         nama_member: 'John Doe',
         instansi: 'Universitas Indonesia',
@@ -118,11 +128,13 @@ describe('Alur utama (e2e)', () => {
       })
       .expect(201);
 
-    const admin = await sebagai()(api().post('/api/auth/login'))
-      .send({ username: 'admin_e2e', password: 'Admin123!' })
+    const admin = await api()
+      .post('/api/auth/login')
+      .send({ username: USER_ADMIN, password: 'Admin123!' })
       .expect(200);
-    const member = await sebagai()(api().post('/api/auth/login'))
-      .send({ username: 'member_e2e', password: 'Secret123!' })
+    const member = await api()
+      .post('/api/auth/login')
+      .send({ username: USER_MEMBER, password: 'Secret123!' })
       .expect(200);
 
     expect(admin.body.data.role).toBe('admin_space');
@@ -133,15 +145,29 @@ describe('Alur utama (e2e)', () => {
     tokenMember = member.body.data.access_token;
   });
 
+  it('2. menolak username yang sudah dipakai', async () => {
+    await api()
+      .post('/api/auth/register/member')
+      .send({
+        username: USER_MEMBER,
+        password: 'Secret123!',
+        nama_member: 'John Doe Kembar',
+        instansi: 'Universitas Indonesia',
+        alamat: 'Jl. Sudirman No. 123',
+        telp: '081234567890',
+      })
+      .expect(400);
+  });
+
   it('3. menolak akses admin bagi member dan akses tanpa token', async () => {
     await sebagai(tokenMember)(api().get('/api/admin/spaces')).expect(403);
-    await sebagai()(api().get('/api/admin/spaces')).expect(401);
+    await api().get('/api/admin/spaces').expect(401);
   });
 
   it('4. admin menambah space dan kode promo', async () => {
     const space = await sebagai(tokenAdmin)(api().post('/api/admin/spaces'))
       .send({
-        nama_space: 'Personal Desk E2E',
+        nama_space: NAMA_SPACE,
         harga_per_jam: 20000,
         tipe: 'desk',
         kapasitas: 1,
@@ -151,7 +177,7 @@ describe('Alur utama (e2e)', () => {
 
     await sebagai(tokenAdmin)(api().post('/api/admin/diskon'))
       .send({
-        nama_diskon: 'E2EPROMO20',
+        nama_diskon: `E2EPROMO20${unik}`,
         persentase_diskon: 20,
         // Masa berlaku promo dinilai saat pemesanan dibuat, bukan pada tanggal
         // sewanya, sehingga periodenya harus mencakup hari ini.
@@ -164,26 +190,28 @@ describe('Alur utama (e2e)', () => {
   });
 
   it('5. katalog publik menampilkan space itu beserta pengelolanya', async () => {
-    const res = await sebagai()(api().get('/api/spaces')).expect(200);
+    const res = await api()
+      .get('/api/spaces')
+      .query({ search: NAMA_SPACE })
+      .expect(200);
 
     expect(res.body.data).toHaveLength(1);
-    expect(res.body.data[0].owner.nama_coworking).toBe('Moklet Hub E2E');
-
-    const kosong = await api().get('/api/spaces').expect(200);
-    expect(
-      kosong.body.data.every((s: { id: number }) => s.id !== idSpace),
-    ).toBe(true);
+    expect(res.body.data[0].id).toBe(idSpace);
+    expect(res.body.data[0].owner.nama_coworking).toBe(
+      `Moklet Hub E2E ${unik}`,
+    );
   });
 
   it('6. ketersediaan menghitung jam selesai dan estimasi harganya', async () => {
-    const res = await sebagai()(
-      api().get('/api/spaces/availability').query({
+    const res = await api()
+      .get('/api/spaces/availability')
+      .query({
         id_space: idSpace,
         tanggal: TANGGAL,
         jam_mulai: '09:00',
         durasi_jam: 3,
-      }),
-    ).expect(200);
+      })
+      .expect(200);
 
     expect(res.body.data).toMatchObject({
       available: true,
@@ -199,7 +227,7 @@ describe('Alur utama (e2e)', () => {
         tanggal_reservasi: TANGGAL,
         jam_mulai: '09:00',
         durasi_jam: 3,
-        kode_promo: 'E2EPROMO20',
+        kode_promo: `E2EPROMO20${unik}`,
       })
       .expect(201);
 
@@ -267,11 +295,11 @@ describe('Alur utama (e2e)', () => {
 
     expect(res.body.data.rincian_pembayaran).toMatchObject({
       tarif_kotor: 60000,
-      diskon_promo: '20% (E2EPROMO20)',
+      diskon_promo: `20% (E2EPROMO20${unik})`,
       total_dibayar: 48000,
     });
     expect(res.body.data.qr_code_payload).toBe(
-      `VERIFY-RESERVASI-${idReservasi}-${appKey}`,
+      `VERIFY-RESERVASI-${idReservasi}`,
     );
     expect(res.body.data.qr_code_data_url).toMatch(/^data:image\/png;base64,/);
   });
@@ -332,36 +360,52 @@ describe('Alur utama (e2e)', () => {
       .expect(201);
   });
 
-  it('13. data tenant lain tidak terlihat dari app key yang berbeda', async () => {
-    const lain = await api()
-      .post('/api/maker/register')
+  /**
+   * Setelah App Maker ditiadakan, pemisah data antar pengelola sepenuhnya
+   * bertumpu pada `id_owner`. Karena itu pemisahan tersebut diuji langsung.
+   */
+  it('13. pengelola lain tidak melihat maupun dapat mengubah data pengelola ini', async () => {
+    await api()
+      .post('/api/auth/register/admin-space')
       .send({
-        name: 'Tenant Lain',
-        username: `lain_${unik}`,
-        email: `lain_${unik}@smk.sch.id`,
-        password: 'Password123!',
+        username: USER_ADMIN_LAIN,
+        password: 'Admin123!',
+        nama_coworking: `Ruang Lain E2E ${unik}`,
+        nama_pemilik: 'Siti Aminah',
+        telp: '082233445566',
       })
       .expect(201);
 
-    // Body supertest bertipe any, jadi bentuk yang dipakai dinyatakan di sini.
-    const { id: idLain, app_key: keyLain } = lain.body.data as {
-      id: number;
-      app_key: string;
-    };
-
-    const katalog = await api()
-      .get('/api/spaces')
-      .set('x-maker-key', keyLain)
+    const lain = await api()
+      .post('/api/auth/login')
+      .send({ username: USER_ADMIN_LAIN, password: 'Admin123!' })
       .expect(200);
-    expect(katalog.body.data).toHaveLength(0);
+    const tokenLain = lain.body.data.access_token as string;
 
-    // Token dari tenant ini ditolak bila dipakai bersama app key tenant lain.
-    await api()
-      .get('/api/auth/profile')
-      .set('x-maker-key', keyLain)
-      .set('Authorization', `Bearer ${tokenMember}`)
-      .expect(401);
+    // Daftar space dan reservasinya kosong, milik pengelola pertama tak terbawa.
+    const spaces = await sebagai(tokenLain)(
+      api().get('/api/admin/spaces'),
+    ).expect(200);
+    expect(
+      spaces.body.data.every((s: { id: number }) => s.id !== idSpace),
+    ).toBe(true);
 
-    await hapusTenant(idLain);
+    const reservasi = await sebagai(tokenLain)(
+      api().get('/api/admin/reservasi'),
+    ).expect(200);
+    expect(
+      reservasi.body.data.every((r: { id: number }) => r.id !== idReservasi),
+    ).toBe(true);
+
+    // Menyentuh langsung berdasarkan id pun ditolak sebagai tidak ditemukan.
+    await sebagai(tokenLain)(api().put(`/api/admin/spaces/${idSpace}`))
+      .send({ harga_per_jam: 1000 })
+      .expect(404);
+
+    await sebagai(tokenLain)(
+      api().patch(`/api/admin/reservasi/${idReservasi}/status`),
+    )
+      .send({ status: 'dibatalkan' })
+      .expect(404);
   });
 });

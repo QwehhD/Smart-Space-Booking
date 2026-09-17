@@ -14,7 +14,6 @@ describe('RolesGuard', () => {
     id: 7,
     username: 'johndoe',
     role: Role.member,
-    id_maker: 1,
     member_id: 6,
   };
 
@@ -22,7 +21,6 @@ describe('RolesGuard', () => {
     id: 8,
     username: 'admin_space1',
     role: Role.admin_space,
-    id_maker: 1,
     owner_id: 3,
   };
 

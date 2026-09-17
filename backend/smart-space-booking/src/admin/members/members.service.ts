@@ -9,7 +9,6 @@ import * as bcrypt from 'bcrypt';
 import { BCRYPT_SALT_ROUNDS } from '../../common/constants/validation.constant';
 import { serializeMember } from '../../common/serializers/profil.serializer';
 import { PrismaService } from '../../prisma/prisma.service';
-import { AuthenticatedUser } from '../../auth/interfaces/authenticated-user.interface';
 import { CreateMemberAdminDto } from './dto/create-member.dto';
 import { UpdateMemberAdminDto } from './dto/update-member.dto';
 
@@ -23,10 +22,10 @@ export class AdminMembersService {
     private readonly config: ConfigService,
   ) {}
 
-  async daftar(user: AuthenticatedUser, search?: string) {
+  async daftar(search?: string) {
     const members = await this.prisma.member.findMany({
       where: {
-        ...this.dalamTenant(user),
+        ...this.belumDihapus(),
         ...(search && {
           OR: [
             { nama_member: { contains: search } },
@@ -41,8 +40,8 @@ export class AdminMembersService {
     return members.map((member) => this.tampilkan(member));
   }
 
-  async detail(id: number, user: AuthenticatedUser) {
-    return this.tampilkan(await this.pastikanAda(id, user));
+  async detail(id: number) {
+    return this.tampilkan(await this.pastikanAda(id));
   }
 
   /**
@@ -50,7 +49,7 @@ export class AdminMembersService {
    * registrasi mandiri, supaya tidak pernah ada akun tanpa profil bila salah satu
    * penyimpanan gagal.
    */
-  async buat(dto: CreateMemberAdminDto, user: AuthenticatedUser) {
+  async buat(dto: CreateMemberAdminDto) {
     const member = await this.prisma
       .$transaction(async (tx) => {
         const akun = await tx.user.create({
@@ -58,7 +57,6 @@ export class AdminMembersService {
             username: dto.username,
             password: await bcrypt.hash(dto.password, BCRYPT_SALT_ROUNDS),
             role: Role.member,
-            id_maker: user.id_maker,
           },
         });
 
@@ -70,7 +68,6 @@ export class AdminMembersService {
             telp: dto.telp,
             foto: dto.foto ?? null,
             id_user: akun.id,
-            id_maker: user.id_maker,
           },
         });
       })
@@ -79,12 +76,8 @@ export class AdminMembersService {
     return this.tampilkan(member);
   }
 
-  async perbarui(
-    id: number,
-    dto: UpdateMemberAdminDto,
-    user: AuthenticatedUser,
-  ) {
-    const sekarang = await this.pastikanAda(id, user);
+  async perbarui(id: number, dto: UpdateMemberAdminDto) {
+    const sekarang = await this.pastikanAda(id);
 
     const member = await this.prisma.member.update({
       where: { id },
@@ -115,8 +108,8 @@ export class AdminMembersService {
    * ikut kehilangan akses karena login dan JwtStrategy sama-sama menolak member
    * yang sudah dihapus.
    */
-  async hapus(id: number, user: AuthenticatedUser) {
-    await this.pastikanAda(id, user);
+  async hapus(id: number) {
+    await this.pastikanAda(id);
 
     await this.prisma.member.update({
       where: { id },
@@ -126,12 +119,9 @@ export class AdminMembersService {
     return { id, deleted: true };
   }
 
-  private async pastikanAda(
-    id: number,
-    user: AuthenticatedUser,
-  ): Promise<Member> {
+  private async pastikanAda(id: number): Promise<Member> {
     const member = await this.prisma.member.findFirst({
-      where: { id, ...this.dalamTenant(user) },
+      where: { id, ...this.belumDihapus() },
     });
 
     if (!member) {
@@ -142,11 +132,12 @@ export class AdminMembersService {
   }
 
   /**
-   * Member tidak memiliki `id_owner`, sehingga cakupannya adalah seluruh member
-   * pada tenant yang sama, bukan per admin.
+   * Member tidak memiliki `id_owner`, sehingga daftar pada panel admin mencakup
+   * seluruh member yang belum dihapus, bukan per pengelola. Ini mengikuti sifat
+   * datanya: member mendaftar ke aplikasi, bukan ke satu lokasi tertentu.
    */
-  private dalamTenant(user: AuthenticatedUser) {
-    return { id_maker: user.id_maker, deleted_at: null };
+  private belumDihapus() {
+    return { deleted_at: null };
   }
 
   private terjemahkanUsernameGanda(error: unknown): never {

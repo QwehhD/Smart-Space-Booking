@@ -8,12 +8,7 @@ import {
   Put,
 } from '@nestjs/common';
 import { Role } from '@prisma/client';
-import {
-  ApiBearerAuth,
-  ApiHeader,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { Roles } from '../../auth/decorators/roles.decorator';
 import { AuthenticatedUser } from '../../auth/interfaces/authenticated-user.interface';
@@ -25,7 +20,6 @@ import { AdminDiskonService } from './diskon.service';
 
 @ApiTags('Admin - Kode Promo')
 @ApiBearerAuth('access-token')
-@ApiHeader({ name: 'x-maker-key', required: false })
 @Roles(Role.admin_space)
 @Controller('admin/diskon')
 export class AdminDiskonController {

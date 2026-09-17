@@ -40,7 +40,6 @@ export class AdminReportsService {
     const reservasi = await this.prisma.reservasi.findMany({
       where: {
         id_owner: user.owner_id as number,
-        id_maker: user.id_maker,
         status: { not: StatusReservasi.dibatalkan },
         tanggal_reservasi: {
           gte: new Date(Date.UTC(year, month - 1, 1)),

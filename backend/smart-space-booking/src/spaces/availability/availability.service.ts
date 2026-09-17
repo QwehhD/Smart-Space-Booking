@@ -5,7 +5,6 @@ import {
   hitungJamSelesai,
   tanggalKeDateUtc,
 } from '../../common/utils/waktu.util';
-import { MakerContext } from '../../maker/interfaces/maker-context.interface';
 import { PrismaService } from '../../prisma/prisma.service';
 import { SpacesService } from '../spaces.service';
 import { PESAN_SPACE } from '../spaces.constant';
@@ -19,8 +18,8 @@ export class AvailabilityService {
     private readonly spacesService: SpacesService,
   ) {}
 
-  async cek(query: CheckAvailabilityQueryDto, maker: MakerContext) {
-    const space = await this.spacesService.cariAtauGagal(query.id_space, maker);
+  async cek(query: CheckAvailabilityQueryDto) {
+    const space = await this.spacesService.cariAtauGagal(query.id_space);
 
     const jamSelesai = hitungJamSelesai(query.jam_mulai, query.durasi_jam);
 
@@ -38,7 +37,6 @@ export class AvailabilityService {
         tanggalKeDateUtc(query.tanggal),
         query.jam_mulai,
         jamSelesai,
-        maker,
       )
     ) {
       throw new BadRequestException(PESAN_SPACE.SUDAH_DIBOOKING);
@@ -70,7 +68,6 @@ export class AvailabilityService {
     tanggal: Date,
     jamMulai: string,
     jamSelesai: string,
-    maker: MakerContext,
     kecualiIdReservasi?: number,
     // Pembuatan reservasi memanggil ini dari dalam transaksinya sendiri, supaya
     // pengecekan bentrok dan penyimpanan baris terjadi pada transaksi yang sama.
@@ -78,7 +75,6 @@ export class AvailabilityService {
   ): Promise<boolean> {
     const bentrok = await (tx ?? this.prisma).reservasi.findFirst({
       where: {
-        id_maker: maker.id,
         tanggal_reservasi: tanggal,
         // Reservasi yang dibatalkan melepaskan kembali jadwalnya.
         status: { not: StatusReservasi.dibatalkan },

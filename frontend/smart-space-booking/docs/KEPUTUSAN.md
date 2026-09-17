@@ -22,13 +22,10 @@ memuat `/api`. Konvensi dokumen rencana yang dipakai, dan kliennya disesuaikan:
 `baseURL` kini memakai nilai env apa adanya, dan path pada setiap fungsi domain
 ditulis tanpa awalan tersebut.
 
-Variabel `NEXT_PUBLIC_MAKER_KEY` juga diganti namanya menjadi
-`NEXT_PUBLIC_APP_KEY` mengikuti dokumen rencana.
-
 ## 3. Tipe entitas diturunkan dari serializer backend, bukan dari Swagger
 
-`backend/docs/swagger.json` tidak memuat skema response sama sekali: nol dari 50
-endpoint mendokumentasikan bentuk balasannya, karena tidak ada satu pun endpoint
+`backend/docs/swagger.json` tidak memuat skema response sama sekali: nol dari
+seluruh endpoint mendokumentasikan bentuk balasannya, karena tidak ada satu pun endpoint
 yang memakai `@ApiOkResponse` dengan tipe. Yang terdokumentasi hanya path,
 parameter, body, dan autentikasi.
 
@@ -371,3 +368,17 @@ Backend tidak menyediakan endpoint bagi member untuk mengubah profilnya sendiri;
 perubahan data member dilakukan pengelola lewat `/api/admin/members`. Halaman akun
 karena itu tidak memiliki form, dan menyebutkan bahwa perubahan data dilakukan
 melalui pengelola.
+
+## 31. App key dibuang mengikuti keputusan 56 di backend
+
+`NEXT_PUBLIC_APP_KEY` dan header `x-maker-key` dihapus dari klien axios, dari
+`.env.example`, dan dari `.env.local`, karena backend meniadakan seluruh mekanisme
+App Maker (lihat `backend/docs/KEPUTUSAN.md` nomor 56). Alasannya ada pada
+pembagian paket soal: App Maker adalah kewajiban Lampiran B (Backend), sedangkan
+project ini mengerjakan Lampiran A (Fullstack) yang merujuk Gambar Kerja saja.
+
+Akibatnya frontend kini tidak memerlukan konfigurasi apa pun selain alamat
+backend dan jam operasional. Field `maker_id` juga dibuang dari tipe `HasilLogin`.
+
+Keputusan 2 sebelumnya mencatat penggantian nama `NEXT_PUBLIC_MAKER_KEY` menjadi
+`NEXT_PUBLIC_APP_KEY`; catatan itu ikut dihapus karena variabelnya sudah tidak ada.

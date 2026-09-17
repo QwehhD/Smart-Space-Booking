@@ -45,7 +45,6 @@ export class AdminDiskonService {
           tanggal_awal: tanggalAwal,
           tanggal_akhir: tanggalAkhir,
           id_owner: user.owner_id as number,
-          id_maker: user.id_maker,
         },
       })
       .catch((error: unknown) => this.terjemahkanNamaGanda(error));
@@ -121,7 +120,6 @@ export class AdminDiskonService {
   private milikAdmin(user: AuthenticatedUser) {
     return {
       id_owner: user.owner_id as number,
-      id_maker: user.id_maker,
       deleted_at: null,
     };
   }

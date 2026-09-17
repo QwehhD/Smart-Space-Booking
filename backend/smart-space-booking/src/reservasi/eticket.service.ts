@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { toDataURL } from 'qrcode';
 import { AuthenticatedUser } from '../auth/interfaces/authenticated-user.interface';
 import { dateUtcKeTanggal } from '../common/utils/waktu.util';
-import { MakerContext } from '../maker/interfaces/maker-context.interface';
 import { PrismaService } from '../prisma/prisma.service';
 import { TIPE_SPACE } from '../spaces/spaces.constant';
 import { buatNomorEtiket, buatPayloadQr } from './reservasi.util';
@@ -22,12 +21,8 @@ export class EtiketService {
    * tarif space saat ini, supaya tiket lama tetap menunjukkan harga yang benar
    * meski tarif spacenya sudah berubah.
    */
-  async muat(id: number, user: AuthenticatedUser, maker: MakerContext) {
-    const reservasi = await this.reservasiService.cariUntukEtiket(
-      id,
-      user,
-      maker,
-    );
+  async muat(id: number, user: AuthenticatedUser) {
+    const reservasi = await this.reservasiService.cariUntukEtiket(id, user);
     const owner = await this.prisma.spaceOwner.findUniqueOrThrow({
       where: { id: reservasi.id_owner },
     });
@@ -37,7 +32,7 @@ export class EtiketService {
       ? await this.prisma.diskon.findUnique({ where: { id: detail.id_diskon } })
       : null;
 
-    const payloadQr = buatPayloadQr(reservasi.id, maker.app_key);
+    const payloadQr = buatPayloadQr(reservasi.id);
 
     return {
       e_ticket_number: buatNomorEtiket(

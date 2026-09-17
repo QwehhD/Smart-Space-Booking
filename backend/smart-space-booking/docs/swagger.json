@@ -31,135 +31,10 @@
         ]
       }
     },
-    "/api/maker/register": {
-      "post": {
-        "operationId": "MakerController_register",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RegisterMakerDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "summary": "Registrasi akun siswa dan penerbitan app key",
-        "tags": [
-          "App Maker"
-        ]
-      }
-    },
-    "/api/maker/login": {
-      "post": {
-        "operationId": "MakerController_login",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginMakerDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "summary": "Login akun siswa dengan username atau email",
-        "tags": [
-          "App Maker"
-        ]
-      }
-    },
-    "/api/maker/me": {
-      "get": {
-        "operationId": "MakerController_me",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "access-token": []
-          }
-        ],
-        "summary": "Profil dan app key siswa yang sedang login",
-        "tags": [
-          "App Maker"
-        ]
-      }
-    },
-    "/api/maker/stats": {
-      "get": {
-        "operationId": "MakerController_stats",
-        "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "description": "Alternatif autentikasi bila tidak memakai bearer token.",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "access-token": []
-          }
-        ],
-        "summary": "Rekap jumlah data milik siswa",
-        "tags": [
-          "App Maker"
-        ]
-      }
-    },
-    "/api/maker/list": {
-      "get": {
-        "operationId": "MakerController_list",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "summary": "Daftar seluruh siswa terdaftar (panel guru)",
-        "tags": [
-          "App Maker"
-        ]
-      }
-    },
     "/api/auth/register/member": {
       "post": {
         "operationId": "AuthController_registerMember",
-        "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "description": "App key pemilik data. Bila dikosongkan, data masuk ke maker bawaan.",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -184,17 +59,7 @@
     "/api/auth/register/admin-space": {
       "post": {
         "operationId": "AuthController_registerAdminSpace",
-        "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "description": "App key pemilik data. Bila dikosongkan, data masuk ke maker bawaan.",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -219,17 +84,7 @@
     "/api/auth/login": {
       "post": {
         "operationId": "AuthController_login",
-        "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "description": "App key pemilik data. Bila dikosongkan, data masuk ke maker bawaan.",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -254,17 +109,7 @@
     "/api/auth/profile": {
       "get": {
         "operationId": "AuthController_profile",
-        "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "description": "App key pemilik data. Bila dikosongkan, data masuk ke maker bawaan.",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -284,16 +129,7 @@
     "/api/upload/image": {
       "post": {
         "operationId": "UploadController_image",
-        "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -327,16 +163,7 @@
     "/api/upload/spaces": {
       "post": {
         "operationId": "UploadController_spaces",
-        "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -370,16 +197,7 @@
     "/api/upload/members": {
       "post": {
         "operationId": "UploadController_members",
-        "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -413,16 +231,7 @@
     "/api/admin/profile": {
       "get": {
         "operationId": "AdminProfileController_lihat",
-        "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -440,16 +249,7 @@
       },
       "put": {
         "operationId": "AdminProfileController_perbarui",
-        "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -479,16 +279,7 @@
     "/api/admin/spaces": {
       "get": {
         "operationId": "AdminSpacesController_daftar",
-        "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -506,16 +297,7 @@
       },
       "post": {
         "operationId": "AdminSpacesController_buat",
-        "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -547,14 +329,6 @@
         "operationId": "AdminSpacesController_detail",
         "parameters": [
           {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "id",
             "required": true,
             "in": "path",
@@ -581,14 +355,6 @@
       "put": {
         "operationId": "AdminSpacesController_perbarui",
         "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "id",
             "required": true,
@@ -627,14 +393,6 @@
         "operationId": "AdminSpacesController_hapus",
         "parameters": [
           {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "id",
             "required": true,
             "in": "path",
@@ -662,16 +420,7 @@
     "/api/admin/diskon": {
       "get": {
         "operationId": "AdminDiskonController_daftar",
-        "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -689,16 +438,7 @@
       },
       "post": {
         "operationId": "AdminDiskonController_buat",
-        "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -730,14 +470,6 @@
         "operationId": "AdminDiskonController_detail",
         "parameters": [
           {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "id",
             "required": true,
             "in": "path",
@@ -764,14 +496,6 @@
       "put": {
         "operationId": "AdminDiskonController_perbarui",
         "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "id",
             "required": true,
@@ -810,14 +534,6 @@
         "operationId": "AdminDiskonController_hapus",
         "parameters": [
           {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "id",
             "required": true,
             "in": "path",
@@ -847,14 +563,6 @@
         "operationId": "AdminMembersController_daftar",
         "parameters": [
           {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "search",
             "required": false,
             "in": "query",
@@ -875,23 +583,14 @@
             "access-token": []
           }
         ],
-        "summary": "Daftar seluruh member pada tenant ini",
+        "summary": "Daftar seluruh member",
         "tags": [
           "Admin - Member"
         ]
       },
       "post": {
         "operationId": "AdminMembersController_buat",
-        "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -923,14 +622,6 @@
         "operationId": "AdminMembersController_detail",
         "parameters": [
           {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "id",
             "required": true,
             "in": "path",
@@ -957,14 +648,6 @@
       "put": {
         "operationId": "AdminMembersController_perbarui",
         "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "id",
             "required": true,
@@ -1003,14 +686,6 @@
         "operationId": "AdminMembersController_hapus",
         "parameters": [
           {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "id",
             "required": true,
             "in": "path",
@@ -1039,14 +714,6 @@
       "get": {
         "operationId": "AdminReservasiController_daftar",
         "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "month",
             "required": false,
@@ -1122,14 +789,6 @@
         "operationId": "AdminReservasiController_ubahStatus",
         "parameters": [
           {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "id",
             "required": true,
             "in": "path",
@@ -1169,14 +828,6 @@
         "operationId": "AdminReservasiController_checkIn",
         "parameters": [
           {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "id",
             "required": true,
             "in": "path",
@@ -1205,14 +856,6 @@
       "post": {
         "operationId": "AdminReservasiController_checkOut",
         "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "id",
             "required": true,
@@ -1243,14 +886,6 @@
         "description": "Mengembalikan month, year, total_transaksi, total_jam_terpakai, estimasi_pendapatan_kotor, total_potongan_diskon, realisasi_pendapatan_bersih, rincian_per_tipe_space (selalu ketiga tipe), dan pendapatan_per_hari. pendapatan_per_hari memuat setiap hari dalam bulan tersebut, hari tanpa transaksi bernilai 0, dan jumlah seluruhnya sama dengan realisasi_pendapatan_bersih.",
         "operationId": "AdminReportsController_bulanan",
         "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "month",
             "required": false,
@@ -1293,14 +928,6 @@
         "operationId": "AdminReportsController_pendapatan",
         "parameters": [
           {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "month",
             "required": false,
             "in": "query",
@@ -1341,14 +968,6 @@
       "get": {
         "operationId": "AvailabilityController_cek",
         "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "id_space",
             "required": true,
@@ -1401,16 +1020,7 @@
     "/api/spaces/types": {
       "get": {
         "operationId": "SpacesController_tipe",
-        "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -1426,14 +1036,6 @@
       "get": {
         "operationId": "SpacesController_daftar",
         "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "tipe",
             "required": false,
@@ -1474,14 +1076,6 @@
         "operationId": "SpacesController_detail",
         "parameters": [
           {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "id",
             "required": true,
             "in": "path",
@@ -1505,14 +1099,6 @@
       "get": {
         "operationId": "DiskonController_aktif",
         "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "id_space",
             "required": false,
@@ -1538,16 +1124,7 @@
     "/api/diskon/check": {
       "post": {
         "operationId": "DiskonController_periksa",
-        "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -1574,14 +1151,6 @@
         "operationId": "DiskonController_detail",
         "parameters": [
           {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "id",
             "required": true,
             "in": "path",
@@ -1604,16 +1173,7 @@
     "/api/reservasi": {
       "post": {
         "operationId": "ReservasiController_buat",
-        "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -1643,16 +1203,7 @@
     "/api/reservasi/my": {
       "get": {
         "operationId": "ReservasiController_milikSaya",
-        "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -1673,14 +1224,6 @@
       "get": {
         "operationId": "ReservasiController_histori",
         "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "month",
             "required": false,
@@ -1723,14 +1266,6 @@
         "operationId": "ReservasiController_etiket",
         "parameters": [
           {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "id",
             "required": true,
             "in": "path",
@@ -1760,14 +1295,6 @@
         "operationId": "ReservasiController_detail",
         "parameters": [
           {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "id",
             "required": true,
             "in": "path",
@@ -1796,14 +1323,6 @@
       "patch": {
         "operationId": "ReservasiController_batalkan",
         "parameters": [
-          {
-            "name": "x-maker-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "id",
             "required": true,
@@ -1848,52 +1367,6 @@
       }
     },
     "schemas": {
-      "RegisterMakerDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "example": "Budi Santoso"
-          },
-          "username": {
-            "type": "string",
-            "example": "budisantoso"
-          },
-          "email": {
-            "type": "string",
-            "example": "budi@smk.sch.id"
-          },
-          "password": {
-            "type": "string",
-            "example": "Password123!",
-            "minLength": 6
-          }
-        },
-        "required": [
-          "name",
-          "username",
-          "email",
-          "password"
-        ]
-      },
-      "LoginMakerDto": {
-        "type": "object",
-        "properties": {
-          "usernameOrEmail": {
-            "type": "string",
-            "example": "budisantoso",
-            "description": "Username atau alamat email akun App Maker"
-          },
-          "password": {
-            "type": "string",
-            "example": "Password123!"
-          }
-        },
-        "required": [
-          "usernameOrEmail",
-          "password"
-        ]
-      },
       "RegisterMemberDto": {
         "type": "object",
         "properties": {

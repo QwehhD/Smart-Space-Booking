@@ -9,8 +9,6 @@ import { AdminModule } from './admin/admin.module';
 import { SpacesModule } from './spaces/spaces.module';
 import { DiskonModule } from './diskon/diskon.module';
 import { ReservasiModule } from './reservasi/reservasi.module';
-import { MakerModule } from './maker/maker.module';
-import { MakerContextGuard } from './common/guards/maker-context.guard';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
@@ -26,7 +24,6 @@ import { AppService } from './app.service';
     // controller auth; angka per endpoint ditentukan lewat @Throttle.
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),
     PrismaModule,
-    MakerModule,
     AuthModule,
     UploadModule,
     AdminModule,
@@ -46,12 +43,6 @@ import { AppService } from './app.service';
         transformOptions: { enableImplicitConversion: true },
         exceptionFactory: validationExceptionFactory,
       }),
-    },
-    // Urutan penting: tenant harus sudah menempel pada request sebelum
-    // JwtStrategy mencocokkan token dengan tenant tersebut.
-    {
-      provide: APP_GUARD,
-      useClass: MakerContextGuard,
     },
     {
       provide: APP_GUARD,

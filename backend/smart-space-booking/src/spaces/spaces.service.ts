@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Space, SpaceOwner } from '@prisma/client';
 import { serializeSpacePublik } from '../common/serializers/space.serializer';
-import { MakerContext } from '../maker/interfaces/maker-context.interface';
 import { PrismaService } from '../prisma/prisma.service';
 import { ListSpacesQueryDto } from './dto/list-spaces.dto';
 import { PESAN_SPACE, TIPE_SPACE } from './spaces.constant';
@@ -19,10 +18,9 @@ export class SpacesService {
     return TIPE_SPACE;
   }
 
-  async daftar(query: ListSpacesQueryDto, maker: MakerContext) {
+  async daftar(query: ListSpacesQueryDto) {
     const spaces = await this.prisma.space.findMany({
       where: {
-        id_maker: maker.id,
         deleted_at: null,
         ...(query.tipe && { tipe: query.tipe }),
         // Soal menyebut pencarian mencakup nama space dan fasilitasnya, dan
@@ -41,21 +39,18 @@ export class SpacesService {
     return spaces.map((space) => this.tampilkan(space));
   }
 
-  async detail(id: number, maker: MakerContext) {
-    return this.tampilkan(await this.cariAtauGagal(id, maker));
+  async detail(id: number) {
+    return this.tampilkan(await this.cariAtauGagal(id));
   }
 
   /**
-   * Space yang masih disewakan pada tenant ini. Dipakai bersama oleh katalog dan
-   * pengecekan ketersediaan supaya keduanya tidak pernah berbeda pendapat tentang
-   * space mana yang ada.
+   * Space yang masih disewakan. Dipakai bersama oleh katalog dan pengecekan
+   * ketersediaan supaya keduanya tidak pernah berbeda pendapat tentang space
+   * mana yang ada.
    */
-  async cariAtauGagal(
-    id: number,
-    maker: MakerContext,
-  ): Promise<Space & { owner: SpaceOwner }> {
+  async cariAtauGagal(id: number): Promise<Space & { owner: SpaceOwner }> {
     const space = await this.prisma.space.findFirst({
-      where: { id, id_maker: maker.id, deleted_at: null },
+      where: { id, deleted_at: null },
       include: { owner: true },
     });
 

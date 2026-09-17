@@ -92,6 +92,8 @@ kode maupun berkas yang dikumpulkan.
 
 ## 9. Multi-tenancy App Maker dipasang di level tabel, bukan hanya di level query
 
+> **Dicabut oleh keputusan 56.** Bagian ini disimpan sebagai catatan riwayat.
+
 Ketentuan global no. 1 pada soal mewajibkan header `x-maker-key` (alias `x-app-key`) di
 setiap request dan menjanjikan isolasi otomatis atas data Member, Space, Diskon, dan
 Reservasi. Karena itu tenancy dijadikan bagian skema, bukan sekadar filter yang ditambahkan
@@ -109,6 +111,8 @@ ini dua siswa tidak dapat memakai username contoh yang sama seperti `johndoe`, p
 justru itulah yang diisolasi.
 
 ## 10. App key tanpa header memakai maker bawaan, app key salah ditolak
+
+> **Dicabut oleh keputusan 56.** Bagian ini disimpan sebagai catatan riwayat.
 
 `MakerContextGuard` menempelkan tenant ke setiap request. Request tanpa header diarahkan ke
 maker bawaan `mk_default_ukk_2026` yang muncul pada contoh `GET /api/maker/list`, sehingga
@@ -130,12 +134,16 @@ dimaksudkan untuk login.
 
 ## 11. Token maker dan token user dibedakan lewat klaim `type`
 
+> **Dicabut oleh keputusan 56.** Bagian ini disimpan sebagai catatan riwayat.
+
 Token akun maker dan token member/admin space ditandatangani dengan secret yang sama, jadi
 tanpa pembeda apa pun token member akan diterima sebagai token maker dan dapat dipakai
 membaca app key. Karena itu token maker membawa klaim `type: 'maker'`, dan `MakerAuthGuard`
 menolak token yang tidak memuatnya. Guard user nantinya melakukan kebalikannya.
 
 ## 12. `/api/maker/stats` tidak menghitung data yang sudah dihapus dan reservasi batal
+
+> **Dicabut oleh keputusan 56.** Bagian ini disimpan sebagai catatan riwayat.
 
 Soal tidak merinci cara menghitung angka pada statistik, jadi dipilih penghitungan yang
 paling sesuai dengan apa yang dilihat pemakai. `total_members`, `total_spaces`, dan
@@ -162,17 +170,9 @@ ditandai `@Public()`. Pilihan ini diambil agar kesalahan yang paling mudah terja
 lupa memasang guard pada endpoint baru, berakibat endpoint tertutup dan langsung terlihat
 saat dicoba, bukan endpoint terbuka yang diam-diam dapat diakses siapa saja.
 
-Urutan pendaftaran guard penting: `MakerContextGuard` didaftarkan lebih dulu agar tenant
-sudah menempel pada request sebelum `JwtStrategy` mencocokkan token dengan tenant tersebut.
+## 15. Akun dibaca ulang dari database pada setiap request
 
-## 15. Token diperiksa terhadap tenant yang aktif pada request
-
-`JwtStrategy` menolak token bila `id_maker` pemilik token berbeda dengan tenant yang sedang
-aktif. Tanpa pemeriksaan ini, token yang sah dari satu app key masih dapat dipakai sambil
-mengirim header app key milik tenant lain, sehingga isolasi data dapat ditembus tanpa perlu
-menebak password siapa pun.
-
-Akun juga dibaca ulang dari database pada setiap request, bukan dipercaya dari isi token,
+`JwtStrategy` membaca ulang akun dari database pada setiap request, bukan mempercayai isi token,
 supaya akun yang sudah dihapus berhenti berlaku seketika dan tidak menunggu masa berlaku
 token habis. Member yang sudah di-soft-delete diperlakukan sebagai akun yang tidak ada, baik
 saat login maupun saat memakai token yang sudah terbit, karena bagi admin yang menghapusnya
@@ -206,8 +206,8 @@ data member dilakukan admin lewat `/api/admin/members`. Karena itu keduanya tida
 agar cakupan pekerjaan tetap sama dengan yang diminta.
 
 Bentuk response profil sengaja berbeda dari login dan mengikuti contoh soal apa adanya:
-profil hanya memuat kunci yang relevan dengan role pengguna, tanpa `maker_id` dan tanpa
-kunci lawannya yang bernilai null, sedangkan login memuat `maker_id` beserta kedua kunci.
+profil hanya memuat kunci yang relevan dengan role pengguna, tanpa kunci lawannya yang
+bernilai null, sedangkan login memuat keduanya.
 
 ## 18. Pembatasan laju hanya pada endpoint auth, dengan batas yang longgar
 
@@ -228,8 +228,7 @@ pesan ini akan tampil langsung di form login.
 
 `JwtAuthGuard.handleRequest` mengganti balasan "Unauthorized" bawaan Passport dengan
 "Token tidak valid atau sudah kedaluwarsa!". Satu pesan dipakai untuk token yang hilang,
-rusak, kedaluwarsa, milik akun yang sudah dihapus, milik akun maker, maupun milik tenant
-lain. Membedakannya akan memberi petunjuk yang berguna bagi yang mencoba-coba, sedangkan
+rusak, kedaluwarsa, maupun milik akun yang sudah dihapus. Membedakannya akan memberi petunjuk yang berguna bagi yang mencoba-coba, sedangkan
 bagi pemakai yang sah tindakan pemulihannya sama saja, yaitu login ulang.
 
 ## 20. Endpoint upload dibuat publik mengikuti kontrak rincinya
@@ -343,16 +342,15 @@ setelah nilai yang dikirim digabung dengan nilai yang sudah tersimpan, karena so
 mencontohkan pembaruan yang hanya mengirim `tanggal_akhir` saja untuk memperpanjang promo.
 Tanpa penggabungan itu, pembaruan sebagian tidak akan pernah dapat diperiksa kewajarannya.
 
-## 30. Member bersifat per tenant, bukan per admin
+## 30. Member bersifat global, bukan per admin
 
 Berbeda dari `space` dan `diskon`, tabel `member` tidak memiliki `id_owner`, sehingga daftar
-member pada panel admin mencakup seluruh member pada tenant yang sama. Ini mengikuti sifat
-datanya: member mendaftar ke aplikasi, bukan ke satu lokasi coworking tertentu, dan satu
-member dapat memesan space milik pengelola mana pun.
+member pada panel admin mencakup seluruh member aplikasi. Ini mengikuti sifat datanya:
+member mendaftar ke aplikasi, bukan ke satu lokasi coworking tertentu, dan satu member dapat
+memesan space milik pengelola mana pun.
 
-Konsekuensinya, dua admin pada tenant yang sama melihat daftar member yang sama. Pada
-pemakaian nyata project ini hanya ada satu tenant dengan satu pengelola, sehingga perbedaan
-itu tidak terasa.
+Konsekuensinya, dua admin melihat daftar member yang sama. Pada pemakaian nyata project ini
+hanya ada satu pengelola, sehingga perbedaan itu tidak terasa.
 
 ## 31. Username member tidak dapat diubah admin
 
@@ -545,7 +543,7 @@ di-check-in lewat `POST /api/admin/reservasi/{id}/check-in` yang memang ada. Ked
 itu tidak dibuat, sejalan dengan `status_berlaku` dan `availability/slots` yang juga tidak
 ada di soal.
 
-## 48. Seeder bersifat idempoten dan mengisi maker bawaan
+## 48. Seeder bersifat idempoten
 
 `prisma/seed.ts` mencari setiap baris berdasarkan kunci alaminya lebih dulu, lalu membuatnya
 bila belum ada dan menyesuaikannya bila sudah. Reservasi dikenali dari kombinasi space,
@@ -553,25 +551,23 @@ tanggal, dan jam mulainya. Dengan begitu `npm run seed` dapat dijalankan berkali
 menggandakan data maupun menghapus data yang sudah ada, yang penting karena seed dijalankan
 pada database yang sama dengan yang dipakai mengembangkan.
 
-Datanya dimasukkan ke maker bawaan `mk_default_ukk_2026`, yaitu tenant yang dipakai ketika
-request tidak menyertakan header `x-maker-key`, sehingga hasil seed langsung terlihat tanpa
-konfigurasi apa pun di frontend.
-
 Isinya 2 pengelola, 5 member, 6 space, 4 kode promo, dan 25 reservasi yang tersebar dari dua
 bulan lalu sampai bulan depan dengan status bermacam-macam, supaya laporan bulanan dan histori
 member langsung memiliki angka yang dapat dilihat.
 
-## 49. Pengujian e2e berjalan di dalam tenantnya sendiri
+## 49. Pengujian e2e memisahkan datanya lewat akhiran waktu pada nama akun
 
-Setiap kali dijalankan, `test/alur-utama.e2e-spec.ts` mendaftarkan akun App Maker baru dan
-bekerja sepenuhnya di dalam tenant tersebut. Mekanisme multi-tenancy yang memang sudah ada
-dipakai sekaligus sebagai pemisah data pengujian, sehingga pengujian tidak pernah bercampur
-dengan data seed maupun sisa pengujian sebelumnya, dan dapat dijalankan berulang kali tanpa
-menyiapkan database khusus.
+Setiap kali dijalankan, `test/alur-utama.e2e-spec.ts` membuat akun dan space dengan akhiran
+`Date.now()` pada namanya, lalu di akhir hanya menghapus baris milik jalannya sendiri.
+Dengan begitu pengujian tidak pernah bercampur dengan data seed maupun sisa pengujian
+sebelumnya, dan dapat dijalankan berulang kali tanpa menyiapkan database khusus.
+Pembersihan yang sama juga dijalankan di `beforeAll`, supaya jalan yang sebelumnya berhenti
+di tengah tidak menyisakan baris yang mengganggu.
 
-Pembersihannya dilakukan berurutan dari anak ke induk, bukan mengandalkan cascade dari
-`maker`, karena `reservasi` merujuk `member` tanpa cascade sehingga urutan penghapusan yang
-dipilih database sendiri dapat melanggar foreign key tersebut.
+Pembersihannya dilakukan berurutan dari anak ke induk karena `reservasi` merujuk `member`
+tanpa cascade, sehingga urutan penghapusan yang dipilih database sendiri dapat melanggar
+foreign key tersebut. Titik awal penelusurannya adalah akun yang dibuat jalan itu, lalu
+profil dan data turunannya dicari dari sana.
 
 Urutan pengujiannya sengaja berurutan karena yang diperiksa memang alurnya: space harus ada
 sebelum dapat dipesan, dan reservasi harus disetujui sebelum dapat di-check-in.
@@ -689,3 +685,35 @@ membiarkannya berarti pengelola menanggung potongan harga yang tidak pernah ia t
 Frontend memanggil `/api/diskon/active?id_space=<id>` pada form pemesanan dan mengirim
 `id_space` ke `/api/diskon/check`, sehingga daftar promo yang ditawarkan sudah tersaring
 sebelum pengguna memilih.
+
+Setelah keputusan 56, filter `id_maker` pada poin pertama tidak ada lagi; penyaringnya kini
+hanya `id_owner`, yang memang sejak awal merupakan bagian yang memperbaiki bug ini.
+
+## 56. App Maker ditiadakan karena bukan bagian dari paket Fullstack
+
+Seluruh mekanisme App Maker dibuang: model `Maker`, kolom `id_maker` pada enam tabel,
+`src/maker/`, `MakerContextGuard` beserta decorator pendampingnya, header `x-maker-key`, dan
+kelima endpoint `/api/maker/*`. `users.username` dan `reservasi.kode_booking` dikembalikan
+menjadi unik global lewat migrasi
+`20260917000000_remove_app_maker_multi_tenancy`.
+
+Alasannya ada pada pembagian paket soal itu sendiri. Lampiran B (Backend) yang mewajibkan
+"seluruh endpoint pada Kontrak API (Bagian III)", dan Kontrak API itulah yang memuat App
+Maker. Lampiran A (Fullstack), yaitu paket yang dikerjakan project ini, merujuk Bagian II
+(Gambar Kerja) saja. Jadi App Maker adalah kewajiban paket Backend, bukan paket Fullstack.
+Sebelumnya fitur itu dibuat karena Kontrak API dibaca sebagai berlaku untuk semua paket.
+
+Konsekuensi yang perlu dicatat:
+
+- Jumlah endpoint turun dari 50 menjadi 45. Yang hilang seluruhnya `/api/maker/*`, dan tidak
+  ada endpoint Gambar Kerja yang ikut terbuang.
+- Isolasi data antar pengelola kini sepenuhnya bertumpu pada `id_owner`, yang memang sudah
+  ada sejak awal pada `space`, `diskon`, dan `reservasi`. Karena lapisan di atasnya hilang,
+  pemisahan itu diuji langsung pada pengujian e2e nomor 13, yang memastikan pengelola kedua
+  tidak melihat maupun dapat mengubah data pengelola pertama.
+- `JwtStrategy` menjadi jauh lebih sederhana: tidak lagi memerlukan `passReqToCallback`,
+  tidak memeriksa klaim `type`, dan tidak mencocokkan tenant. Yang tersisa adalah pembacaan
+  ulang akun dan penolakan member yang sudah di-soft-delete (keputusan 15).
+- Payload QR e-ticket berubah dari `VERIFY-RESERVASI-<id>-<app_key>` menjadi
+  `VERIFY-RESERVASI-<id>`, karena id reservasi kini sudah unik secara global.
+- Frontend tidak lagi menyimpan `NEXT_PUBLIC_APP_KEY` maupun mengirim header `x-maker-key`.
