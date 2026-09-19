@@ -660,24 +660,44 @@ tingkat grup karena tidak ada satu pun halamannya yang memanggil `notFound()`.
 Daftar `/reservasi` milik member sudah memakai `Suspense` di dalam halamannya
 sendiri sejak awal, jadi tidak ditambahi apa pun.
 
-## 52. Masalah terbuka: `/spaces/[id]` membalas 200 untuk space yang tidak ada
+## 52. `/spaces/[id]` sempat membalas 200, sebabnya `loading.tsx` milik induknya
 
 Dari empat rute yang memanggil `notFound()`, tiga membalas 404 dengan benar
-(`reservasi/[id]`, `tiket/[id]`, `reservasi/baru`) sedangkan `spaces/[id]`
-membalas 200. Perilaku ini sudah ada sebelum fase polesan dan tetap muncul pada
-build produksi, jadi bukan gejala mode pengembangan.
+sedangkan `spaces/[id]` membalas 200, termasuk pada build produksi. Masalah ini
+sempat dicatat sebagai masalah terbuka pada fase polesan setelah dua dugaan
+gugur, dan baru terpecahkan pada review akhir.
 
-Dua dugaan sudah diuji dan keduanya terbantah: membuang `loading.tsx` milik rute
-itu tidak mengubah apa pun, dan membuang `notFound()` dari `generateMetadata`,
-bahkan membuang `generateMetadata` seluruhnya, juga tidak. Komentar yang ada di
-`app/(member)/spaces/[id]/page.tsx` menjelaskan perilaku ini secara keliru:
-komentar itu menyatakan pemanggilan `notFound()` di `generateMetadata` mencegah
-status yang salah, padahal pengukuran menunjukkan sebaliknya.
+Penyebabnya bukan `generateMetadata` maupun `loading.tsx` milik rute itu
+sendiri, melainkan **`app/(member)/spaces/loading.tsx` di tingkat induknya**.
+`loading.tsx` berlaku untuk segmen tempatnya berada beserta seluruh rute
+anaknya, sehingga kerangka muat milik katalog ikut menyalakan streaming pada
+halaman detail. Diagnosis sebelumnya meleset karena hanya membuang
+`spaces/[id]/loading.tsx` dan tidak pernah menyentuh yang di tingkat induk,
+sehingga setiap dugaan tampak terbantah padahal penyebab aslinya tidak pernah
+ikut dibuang.
 
-Dampaknya terbatas. Halamannya tetap merender antarmuka tidak-ditemukan yang
-benar, dan Next menyisipkan `<meta name="robots" content="noindex">` sehingga
-mesin pencari tidak mengindeksnya. Yang keliru hanya kode statusnya. Dicatat di
-sini sebagai masalah terbuka alih-alih ditambal dengan tebakan.
+Perbaikannya memakai pola yang sama seperti `/tiket` pada keputusan 51: halaman
+katalog dipindahkan ke grup rute `spaces/(katalog)/` bersama `loading.tsx`-nya,
+dan `spaces/[id]/loading.tsx` dihapus. Katalog tetap memperoleh kerangka muat,
+sedangkan halaman detail tidak lagi di-stream.
+
+Hasilnya diperiksa pada build produksi. Keempat rute `notFound()` kini membalas
+404, dan seluruh halaman normal tetap 200:
+
+```
+/spaces/99999 404 · /reservasi/99999 404 · /tiket/99999 404 · /reservasi/baru 404
+/spaces 200 · /spaces/1 200 · /tiket 200 · /reservasi 200
+```
+
+Satu pengamatan yang membantah dugaan lama sekaligus: `Transfer-Encoding:
+chunked` muncul pada `/spaces/99999` **maupun** `/reservasi/99999`, padahal yang
+kedua membalas 404. Jadi yang menentukan bukan sekadar ada tidaknya
+`Transfer-Encoding: chunked`, melainkan apakah batas Suspense dari `loading.tsx`
+membuat respons sudah dikirim sebelum `notFound()` terjadi.
+
+Komentar di `app/(member)/spaces/[id]/page.tsx` yang menjelaskan perilaku ini
+secara keliru — menyatakan pemanggilan `notFound()` di `generateMetadata`
+mencegah status yang salah — ikut diperbaiki.
 
 ## 53. Penangkap kesalahan per bagian, bukan hanya di akar
 
@@ -766,3 +786,57 @@ bergantung padanya, sehingga menaikkannya ke `^24` sekaligus memperbaiki
 ketidakcocokan yang sudah ada, bukan sekadar menyiasati konflik peer dependency.
 `npm run lint`, `npx tsc --noEmit`, dan `npm run build` diperiksa ulang setelah
 kenaikan itu dan seluruhnya tetap lolos.
+
+## 59. Hasil review akhir terhadap Lampiran A
+
+Seluruh kebutuhan pada Langkah Kerja Lampiran A diperiksa satu per satu terhadap
+aplikasi yang berjalan pada build produksi: ketujuh fitur Member dan kesembilan
+fitur Admin seluruhnya terpenuhi dan membalas 200.
+
+Review ini menemukan satu kebutuhan yang belum terpenuhi, yaitu butir Admin
+nomor 8, "lihat semua reservasi **per bulan**". Halaman `/admin/reservasi`
+sebelumnya hanya menyediakan penyaringan status dan space, padahal backend sudah
+menerima parameter `month` dan `year` sejak awal. Penyaringan per bulan karena
+itu ditambahkan; lihat keputusan 60.
+
+Sekaligus dipastikan bahwa Lampiran A tidak mewajibkan PHP. Tabel ringkasan
+kategori pada halaman awal soal menyebut "Minimal menggunakan framework PHP",
+tetapi Lampiran A yang lebih spesifik — dan yang memang diinstruksikan untuk
+diikuti sesuai kategori — menyebut Tools Utama "PHP (Laravel), native PHP, node
+express, **atau framework lain**". NestJS dan Next.js karena itu sah dipakai.
+
+Berkas wajib Lampiran A juga sudah lengkap: source code, skrip migrasi beserta
+`database/schema.sql`, dan dokumen singkat berisi framework yang dipakai serta
+cara menjalankan aplikasi, yaitu `README.md` di akar repositori beserta README
+masing-masing paket.
+
+## 60. Penyaringan reservasi per bulan pada panel pengelola
+
+`/admin/reservasi` kini menyediakan pemilih bulan beserta tahunnya, meneruskan
+`month` dan `year` ke backend. Bawaannya "Semua bulan", karena pengelola lebih
+sering mencari pemesanan yang sedang berjalan daripada merekap satu bulan
+tertentu, sementara rekap bulanan sudah punya halamannya sendiri di
+`/admin/laporan`.
+
+Pemilih tahun hanya muncul setelah sebuah bulan dipilih, supaya bilah penyaring
+tidak penuh oleh kendali yang belum berguna. Bulan dan tahun selalu disetel dan
+dibersihkan bersama-sama, karena backend menolak salah satunya saja sedangkan
+tanpa keduanya ia mengembalikan seluruh pemesanan.
+
+Nilai bulan atau tahun yang tidak masuk akal pada URL diabaikan, bukan
+diteruskan, sehingga `?month=99` jatuh ke tampilan seluruh pemesanan alih-alih
+berujung 400. Hasilnya sudah dicocokkan dengan backend: Agustus 2026 enam
+pemesanan, September 2026 empat, Januari 2026 nol, sama persis dengan
+`GET /api/admin/reservasi?month=…&year=…`.
+
+## 61. Pembersihan kode mati pada review akhir
+
+`components/layout/segera.tsx` dihapus. Komponen itu menandai halaman yang
+kerangkanya sudah ada tetapi isinya belum dikerjakan, dan sudah tidak dipakai
+sejak halaman terakhir terisi pada fase laporan. Folder kosong `app/(dev)/` yang
+tidak pernah berisi apa pun juga dibuang.
+
+Halaman `/design-system` sengaja dipertahankan. Isinya katalog token dan
+komponen yang berguna saat mendemonstrasikan sistem desain, dan halaman itu
+sudah menjaga dirinya sendiri dengan memanggil `notFound()` ketika
+`NODE_ENV === 'production'`, sehingga tidak ikut terekspos pada build produksi.
