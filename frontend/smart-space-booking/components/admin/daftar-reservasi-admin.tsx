@@ -21,11 +21,16 @@ import {
   type FilterReservasiAdmin,
 } from '@/lib/api/admin-reservasi';
 import { LABEL_STATUS, URUTAN_STATUS } from '@/lib/constants';
+import { DAFTAR_BULAN } from '@/lib/format';
 import { qk } from '@/lib/query-keys';
 import { cn } from '@/lib/utils';
 import type { ReservasiAdmin, Space, StatusReservasi } from '@/types/entities';
 
 const SEMUA = 'semua';
+
+/** Rentang tahun yang ditawarkan, sama seperti pada MonthPicker. */
+const MUNDUR = 2;
+const MAJU = 1;
 
 /**
  * Daftar pemesanan pada panel pengelola.
@@ -39,6 +44,11 @@ const SEMUA = 'semua';
  * Nilai filter disimpan di URL supaya tampilan tertentu dapat ditautkan; kotak
  * pencarian juga, sehingga tautan dari dashboard yang membawa `?kode=` langsung
  * menyorot pemesanan yang dimaksud.
+ *
+ * Penyaringan per bulan diwajibkan Gambar Kerja butir Admin nomor 8. Bawaannya
+ * "Semua bulan" karena pengelola lebih sering mencari pemesanan yang sedang
+ * berjalan daripada merekap satu bulan tertentu; rekap bulanan sendiri sudah
+ * punya halamannya sendiri di `/admin/laporan`.
  */
 export function DaftarReservasiAdmin({
   awal,
@@ -55,6 +65,12 @@ export function DaftarReservasiAdmin({
   const pathname = usePathname();
   const params = useSearchParams();
   const [teks, setTeks] = useState(kodeAwal);
+
+  const tahunIni = new Date().getFullYear();
+  const pilihanTahun = Array.from(
+    { length: MUNDUR + MAJU + 1 },
+    (_, i) => tahunIni - MUNDUR + i,
+  );
 
   const { data: daftar } = useQuery({
     queryKey: qk.admin.reservasi.list(filter),
@@ -162,6 +178,59 @@ export function DaftarReservasiAdmin({
               ))}
             </SelectContent>
           </Select>
+
+          <Select
+            value={filter.month ? String(filter.month) : SEMUA}
+            onValueChange={(nilai) => {
+              if (!nilai) {
+                return;
+              }
+
+              // Bulan tanpa tahun akan ditolak backend, jadi keduanya selalu
+              // disetel dan dibersihkan bersama-sama.
+              ubahUrl(
+                nilai === SEMUA
+                  ? { month: null, year: null }
+                  : { month: nilai, year: String(filter.year ?? tahunIni) },
+              );
+            }}
+          >
+            <SelectTrigger className="w-[10rem]" aria-label="Filter bulan">
+              <SelectValue>
+                {() =>
+                  filter.month
+                    ? (DAFTAR_BULAN[filter.month - 1]?.nama ?? 'Semua bulan')
+                    : 'Semua bulan'
+                }
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={SEMUA}>Semua bulan</SelectItem>
+              {DAFTAR_BULAN.map((bulan) => (
+                <SelectItem key={bulan.nilai} value={String(bulan.nilai)}>
+                  {bulan.nama}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {filter.month ? (
+            <Select
+              value={String(filter.year ?? tahunIni)}
+              onValueChange={(nilai) => nilai && ubahUrl({ year: nilai })}
+            >
+              <SelectTrigger className="w-[6.5rem]" aria-label="Filter tahun">
+                <SelectValue>{() => filter.year ?? tahunIni}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {pilihanTahun.map((tahun) => (
+                  <SelectItem key={tahun} value={String(tahun)}>
+                    {tahun}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : null}
         </div>
       </div>
 

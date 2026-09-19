@@ -20,9 +20,10 @@ function satu(nilai: string | string[] | undefined): string | undefined {
 /**
  * Daftar pemesanan beserta pengelolaan statusnya.
  *
- * Filter status dan space dibaca dari URL lalu diteruskan ke backend, sehingga
- * tampilan tertentu dapat ditautkan. Tanpa filter tanggal, backend mengembalikan
- * seluruh pemesanan milik pengelola ini, bukan hanya bulan berjalan.
+ * Filter status, space, dan bulan dibaca dari URL lalu diteruskan ke backend,
+ * sehingga tampilan tertentu dapat ditautkan. Tanpa filter bulan, backend
+ * mengembalikan seluruh pemesanan milik pengelola ini, bukan hanya bulan
+ * berjalan — itulah bawaannya di sini.
  */
 export default async function ReservasiAdminPage({
   searchParams,
@@ -32,6 +33,18 @@ export default async function ReservasiAdminPage({
 
   const statusMentah = satu(sp.status);
   const idSpaceMentah = Number(satu(sp.id_space));
+  const bulanMentah = Number(satu(sp.month));
+  const tahunMentah = Number(satu(sp.year));
+
+  // Bulan hanya diteruskan bila tahunnya juga sah; backend menolak salah satunya
+  // saja, dan tanpa keduanya ia mengembalikan seluruh pemesanan.
+  const punyaBulan =
+    Number.isInteger(bulanMentah) &&
+    bulanMentah >= 1 &&
+    bulanMentah <= 12 &&
+    Number.isInteger(tahunMentah) &&
+    tahunMentah >= 2000 &&
+    tahunMentah <= 2100;
 
   const filter: FilterReservasiAdmin = {
     // Nilai yang tidak dikenal diabaikan, bukan diteruskan, supaya salah ketik
@@ -42,6 +55,7 @@ export default async function ReservasiAdminPage({
     ...(Number.isInteger(idSpaceMentah) && idSpaceMentah > 0
       ? { id_space: idSpaceMentah }
       : {}),
+    ...(punyaBulan ? { month: bulanMentah, year: tahunMentah } : {}),
   };
 
   const [daftar, spaces] = await Promise.all([
