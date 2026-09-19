@@ -37,9 +37,10 @@ export async function generateMetadata({ params }: PageProps<'/spaces/[id]'>) {
   const { id } = await params;
   const space = await ambilSpace(Number(id));
 
-  // notFound() dipanggil juga di sini, bukan hanya di komponen halaman: bila
-  // metadata selesai lebih dulu dengan sukses, status 200 sudah terkirim dan
-  // halaman tidak-ditemukan akan tampil dengan status yang keliru.
+  // Dipanggil juga di sini, bukan hanya di komponen halaman, supaya judul
+  // dokumen tidak sempat terisi nama space yang tidak ada. Status 404 sendiri
+  // ditentukan oleh ada tidaknya streaming pada rute ini, bukan oleh urutan
+  // metadata; lihat keputusan 52 di docs/KEPUTUSAN.md.
   if (!space) {
     notFound();
   }
