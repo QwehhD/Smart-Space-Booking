@@ -149,12 +149,12 @@ async function pastikanMember() {
 
 async function pastikanSpace(owners: { id: number }[]) {
   const daftar = [
-    { owner: 0, nama_space: 'Personal Desk - Flexi 01', harga: 20000, tipe: TipeSpace.desk, kapasitas: 1, deskripsi: 'Meja kerja individual dengan colokan listrik, WiFi 100Mbps, dan lampu meja LED.' },
-    { owner: 0, nama_space: 'Personal Desk - Flexi 02', harga: 20000, tipe: TipeSpace.desk, kapasitas: 1, deskripsi: 'Meja kerja individual dekat jendela dengan pencahayaan alami.' },
-    { owner: 0, nama_space: 'Meeting Room Alpha', harga: 100000, tipe: TipeSpace.meeting_room, kapasitas: 8, deskripsi: 'Ruang rapat kedap suara dengan Smart TV 55 inch dan whiteboard kaca.' },
-    { owner: 0, nama_space: 'Private Office Garuda', harga: 150000, tipe: TipeSpace.private_office, kapasitas: 4, deskripsi: 'Kantor privat untuk tim kecil, dilengkapi loker dan akses 24 jam.' },
-    { owner: 1, nama_space: 'Hot Desk Nusantara 01', harga: 18000, tipe: TipeSpace.desk, kapasitas: 1, deskripsi: 'Meja bebas pilih dengan free flow kopi dan teh.' },
-    { owner: 1, nama_space: 'Meeting Room Cendana', harga: 90000, tipe: TipeSpace.meeting_room, kapasitas: 6, deskripsi: 'Ruang rapat dengan proyektor dan papan tulis.' },
+    { owner: 0, nama_space: 'Personal Desk - Flexi 01', harga: 20000, tipe: TipeSpace.desk, kapasitas: 1, deskripsi: 'Meja kerja individual dengan colokan listrik, WiFi 100Mbps, dan lampu meja LED.', foto: 'desk-flexi-01.jpg' },
+    { owner: 0, nama_space: 'Personal Desk - Flexi 02', harga: 20000, tipe: TipeSpace.desk, kapasitas: 1, deskripsi: 'Meja kerja individual dekat jendela dengan pencahayaan alami.', foto: 'desk-flexi-02.jpg' },
+    { owner: 0, nama_space: 'Meeting Room Alpha', harga: 100000, tipe: TipeSpace.meeting_room, kapasitas: 8, deskripsi: 'Ruang rapat kedap suara dengan Smart TV 55 inch dan whiteboard kaca.', foto: 'meeting-alpha.jpg' },
+    { owner: 0, nama_space: 'Private Office Garuda', harga: 150000, tipe: TipeSpace.private_office, kapasitas: 4, deskripsi: 'Kantor privat untuk tim kecil, dilengkapi loker dan akses 24 jam.', foto: 'private-garuda.jpg' },
+    { owner: 1, nama_space: 'Hot Desk Nusantara 01', harga: 18000, tipe: TipeSpace.desk, kapasitas: 1, deskripsi: 'Meja bebas pilih dengan free flow kopi dan teh.', foto: 'hot-desk-nusantara.jpg' },
+    { owner: 1, nama_space: 'Meeting Room Cendana', harga: 90000, tipe: TipeSpace.meeting_room, kapasitas: 6, deskripsi: 'Ruang rapat dengan proyektor dan papan tulis.', foto: 'meeting-cendana.jpg' },
   ];
 
   const hasil = [];
@@ -173,6 +173,7 @@ async function pastikanSpace(owners: { id: number }[]) {
               harga_per_jam: data.harga,
               kapasitas: data.kapasitas,
               deskripsi: data.deskripsi,
+              foto: data.foto,
               deleted_at: null,
             },
           })
@@ -183,6 +184,7 @@ async function pastikanSpace(owners: { id: number }[]) {
               tipe: data.tipe,
               kapasitas: data.kapasitas,
               deskripsi: data.deskripsi,
+              foto: data.foto,
               id_owner: idOwner,
             },
           }),
