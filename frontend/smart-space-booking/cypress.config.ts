@@ -26,10 +26,23 @@ export default defineConfig({
     supportFile: 'cypress/support/e2e.ts',
     fixturesFolder: false,
 
-    // Video dan tangkapan layar dimatikan supaya repositori tidak terisi berkas
-    // besar; kegagalan sudah cukup dijelaskan oleh pesan dan jejaknya di konsol.
+    /**
+     * Tangkapan layar dinyalakan supaya setiap jalan menghasilkan bukti
+     * bergambar yang dapat dilampirkan ke dokumentasi UKK, bukan sekadar
+     * keterangan lolos di terminal.
+     *
+     * Gambar yang diberi nama sendiri lewat `cy.screenshot('...')` menjadi
+     * dokumentasi alurnya; gambar saat gagal menjadi petunjuk saat menelusuri
+     * kesalahan. Keduanya masuk `cypress/screenshots/` yang tidak ikut
+     * di-commit, dan dibuat ulang setiap kali suite dijalankan.
+     */
+    screenshotsFolder: 'cypress/screenshots',
+    screenshotOnRunFailure: true,
+    trashAssetsBeforeRuns: true,
+
+    // Rekaman video dibiarkan mati: berkasnya besar, sementara rangkaian
+    // tangkapan layar sudah cukup menjelaskan alurnya langkah demi langkah.
     video: false,
-    screenshotOnRunFailure: false,
 
     viewportWidth: 1280,
     viewportHeight: 800,

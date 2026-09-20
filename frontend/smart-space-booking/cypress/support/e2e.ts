@@ -22,6 +22,8 @@ declare global {
       buatSpace(nama: string): Chainable<number>;
       /** Menghapus space (soft delete di backend). */
       hapusSpace(id: number): Chainable<void>;
+      /** Tangkapan layar berdokumentasi, dinomori urut sesuai langkahnya. */
+      potret(judul: string): Chainable<void>;
     }
   }
 }
@@ -122,5 +124,32 @@ Cypress.Commands.add('hapusSpace', (id: number) => {
       headers: { Authorization: `Bearer ${cookie?.value}` },
       failOnStatusCode: false,
     });
+  });
+});
+
+/**
+ * Tangkapan layar untuk dokumentasi.
+ *
+ * Berkasnya dinomori menurut urutan pemanggilan, supaya ketika dibuka berurutan
+ * gambarnya menceritakan alurnya dari awal sampai akhir. Tanpa penomoran, urutan
+ * berkas mengikuti abjad dan alurnya jadi teracak.
+ *
+ * Nomornya menerus untuk satu berkas spec, bukan disetel ulang tiap pengujian,
+ * karena seluruh gambar dalam satu spec ditaruh Cypress di dalam satu folder
+ * yang sama. Penomoran per pengujian akan menghasilkan beberapa berkas bernomor
+ * "01" yang lalu terurut menurut judulnya, bukan menurut alurnya.
+ */
+let langkah = 0;
+
+Cypress.Commands.add('potret', (judul: string) => {
+  langkah += 1;
+  const nomor = String(langkah).padStart(2, '0');
+
+  // Halaman dibiarkan tenang sejenak supaya animasi masuk dan gambar yang
+  // sedang dimuat tidak terpotret setengah jalan.
+  cy.wait(250);
+  cy.screenshot(`${nomor} ${judul}`, {
+    capture: 'viewport',
+    overwrite: true,
   });
 });
