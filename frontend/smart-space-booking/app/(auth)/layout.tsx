@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { Merek } from '@/components/layout/merek';
+import { PilihTema } from '@/components/layout/pilih-tema';
 
 /**
  * Bingkai halaman masuk dan daftar.
@@ -22,7 +23,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         className="from-accent/60 pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(70%_55%_at_50%_0%,var(--tw-gradient-from),transparent_70%)]"
       />
 
-      <header className="px-5 py-5">
+      <header className="flex items-center justify-between px-5 py-5">
         <Link
           href="/"
           aria-label="Smart Space Booking, ke beranda"
@@ -30,6 +31,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         >
           <Merek />
         </Link>
+        <PilihTema />
       </header>
 
       <main className="flex flex-1 items-center justify-center px-4 pt-2 pb-16">

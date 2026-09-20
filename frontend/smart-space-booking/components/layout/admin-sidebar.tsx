@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { Merek } from '@/components/layout/merek';
+import { PilihTema } from '@/components/layout/pilih-tema';
 import { menuAktif, NAV_ADMIN } from '@/components/layout/nav-items';
 import { UserMenu } from '@/components/layout/user-menu';
 import { Button } from '@/components/ui/button';
@@ -71,11 +72,16 @@ export function AdminSidebar() {
         <DaftarMenu />
       </div>
 
-      {namaTampilan ? (
-        <div className="text-muted-foreground border-t px-4 py-3 text-xs">
-          <span className="line-clamp-2">{namaTampilan}</span>
-        </div>
-      ) : null}
+      <div className="flex items-center gap-2 border-t px-3 py-2.5">
+        {namaTampilan ? (
+          <span className="text-muted-foreground line-clamp-2 min-w-0 flex-1 text-xs">
+            {namaTampilan}
+          </span>
+        ) : (
+          <span className="flex-1" />
+        )}
+        <PilihTema />
+      </div>
     </aside>
   );
 }
@@ -109,7 +115,8 @@ export function AdminTopbar() {
 
       <Merek />
 
-      <div className="ml-auto">
+      <div className="ml-auto flex items-center gap-1">
+        <PilihTema />
         <UserMenu />
       </div>
     </header>

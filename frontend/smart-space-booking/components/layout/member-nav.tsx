@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Merek } from '@/components/layout/merek';
+import { PilihTema } from '@/components/layout/pilih-tema';
 import { menuAktif, NAV_MEMBER } from '@/components/layout/nav-items';
 import { UserMenu } from '@/components/layout/user-menu';
 import { cn } from '@/lib/utils';
@@ -47,7 +48,8 @@ export function MemberNav() {
           </ul>
         </nav>
 
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-1">
+          <PilihTema />
           <UserMenu />
         </div>
       </div>
