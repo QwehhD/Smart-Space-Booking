@@ -78,7 +78,7 @@ export function PanelCheckIn({
 
   return (
     <>
-      <div className="bg-card grid gap-3 rounded-lg border p-4">
+      <div className="bg-card shadow-xs grid gap-3 rounded-xl border p-4">
         <label htmlFor="isian-checkin" className="text-sm font-medium">
           Kode booking atau hasil pindaian QR
         </label>

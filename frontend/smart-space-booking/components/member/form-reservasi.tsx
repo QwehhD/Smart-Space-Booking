@@ -305,7 +305,7 @@ export function FormReservasi({ space }: { space: SpacePublik }) {
             nonaktif={mutasi.isPending}
           />
 
-          <div className="bg-card grid gap-3 rounded-lg border p-4">
+          <div className="bg-card shadow-xs grid gap-3 rounded-xl border p-4">
             <RingkasanHarga rincian={rincian} namaPromo={promo?.nama_diskon} />
           </div>
 

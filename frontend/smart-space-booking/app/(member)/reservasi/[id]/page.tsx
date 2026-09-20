@@ -71,7 +71,7 @@ export default async function DetailReservasiPage({
 
       <PageHeader judul="Detail Reservasi" />
 
-      <div className="bg-card grid gap-4 rounded-lg border p-5">
+      <div className="bg-card shadow-xs grid gap-4 rounded-xl border p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="text-muted-foreground text-xs">Kode booking</p>
@@ -94,7 +94,7 @@ export default async function DetailReservasiPage({
         </dl>
       </div>
 
-      <section className="bg-card grid gap-3 rounded-lg border p-5">
+      <section className="bg-card shadow-xs grid gap-3 rounded-xl border p-5">
         <h2 className="font-semibold">Rincian pembayaran</h2>
         <dl className="grid gap-2 text-sm">
           {rincian ? (
@@ -125,7 +125,7 @@ export default async function DetailReservasiPage({
       </section>
 
       {tiket ? (
-        <section className="bg-card grid gap-2 rounded-lg border p-5">
+        <section className="bg-card shadow-xs grid gap-2 rounded-xl border p-5">
           <h2 className="font-semibold">Lokasi</h2>
           <p className="flex items-center gap-1.5 text-sm">
             <Building2 className="text-muted-foreground size-3.5 shrink-0" />

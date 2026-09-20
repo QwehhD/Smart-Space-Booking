@@ -56,7 +56,7 @@ export default async function ETicketPage({ params }: PageProps<'/tiket/[id]'>) 
         }
       />
 
-      <article className="cetak-tiket bg-card mx-auto w-full max-w-md overflow-hidden rounded-lg border">
+      <article className="cetak-tiket bg-card shadow-xs mx-auto w-full max-w-md overflow-hidden rounded-xl border">
         <header className="border-b px-5 py-4 text-center">
           <p className="text-muted-foreground font-mono text-[11px] tracking-widest uppercase">
             E-Ticket Reservasi

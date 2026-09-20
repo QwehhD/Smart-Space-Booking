@@ -21,7 +21,7 @@ export function PanelDaftar({
   children: ReactNode;
 }) {
   return (
-    <section className="bg-card grid gap-1 rounded-lg border p-4">
+    <section className="bg-card shadow-xs grid gap-1 rounded-xl border p-4">
       <div className="flex items-start justify-between gap-3 px-1 pb-2">
         <div className="grid gap-0.5">
           <h2 className="font-semibold">{judul}</h2>

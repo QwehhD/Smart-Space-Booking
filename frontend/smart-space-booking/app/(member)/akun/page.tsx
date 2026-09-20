@@ -30,7 +30,7 @@ export default async function AkunPage() {
     <div className="grid gap-6">
       <PageHeader judul="Akun" keterangan="Data dirimu di aplikasi ini." />
 
-      <div className="bg-card grid gap-4 rounded-lg border p-5">
+      <div className="bg-card shadow-xs grid gap-4 rounded-xl border p-5">
         <div className="flex items-center gap-4">
           <Avatar className="size-16">
             {member.foto_url ? (

@@ -109,7 +109,7 @@ export function DaftarDiskon({ awal }: { awal: Diskon[] }) {
           }
         />
       ) : (
-        <div className="bg-card overflow-x-auto rounded-lg border">
+        <div className="bg-card shadow-xs overflow-x-auto rounded-xl border">
           <Table>
             <TableHeader>
               <TableRow>

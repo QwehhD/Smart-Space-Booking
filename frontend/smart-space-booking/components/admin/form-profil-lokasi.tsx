@@ -115,7 +115,7 @@ export function FormProfilLokasi({ profil }: { profil: SpaceOwner }) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit((nilai) => mutasi.mutate(nilai))}
-        className="bg-card grid gap-4 rounded-lg border p-5"
+        className="bg-card shadow-xs grid gap-4 rounded-xl border p-5"
         noValidate
       >
         <FormField

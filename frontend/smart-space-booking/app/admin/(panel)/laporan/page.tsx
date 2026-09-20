@@ -97,7 +97,7 @@ export default async function LaporanPage({
           />
         </section>
 
-        <section className="bg-card grid gap-4 rounded-lg border p-4">
+        <section className="bg-card shadow-xs grid gap-4 rounded-xl border p-4">
           <div className="grid gap-0.5 px-1">
             <h2 className="font-semibold">Pendapatan per hari</h2>
             <p className="text-muted-foreground text-xs">
@@ -108,7 +108,7 @@ export default async function LaporanPage({
           <GrafikPendapatan data={laporan.pendapatan_per_hari} />
         </section>
 
-        <section className="bg-card grid gap-3 rounded-lg border p-4">
+        <section className="bg-card shadow-xs grid gap-3 rounded-xl border p-4">
           <div className="grid gap-0.5 px-1">
             <h2 className="font-semibold">Rincian per tipe space</h2>
             <p className="text-muted-foreground text-xs">

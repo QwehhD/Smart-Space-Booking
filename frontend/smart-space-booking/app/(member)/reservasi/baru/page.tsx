@@ -75,7 +75,7 @@ export default async function ReservasiBaruPage({
       />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-start">
-        <aside className="bg-card grid gap-3 rounded-lg border p-4 lg:sticky lg:top-20">
+        <aside className="bg-card shadow-xs grid gap-3 rounded-xl border p-4 lg:sticky lg:top-20">
           <SpaceImage
             url={space.foto_url}
             nama={space.nama_space}

@@ -89,7 +89,7 @@ export function DaftarSpace({ awal }: { awal: Space[] }) {
           {spaces.map((space) => (
             <li
               key={space.id}
-              className="bg-card flex flex-col overflow-hidden rounded-lg border"
+              className="bg-card shadow-xs flex flex-col overflow-hidden rounded-xl border"
             >
               <SpaceImage
                 url={space.foto_url}

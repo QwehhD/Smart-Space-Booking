@@ -57,13 +57,13 @@ export default async function HistoriPage({
       />
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="bg-card rounded-lg border p-4">
+        <div className="bg-card shadow-xs rounded-xl border p-4">
           <p className="text-muted-foreground text-xs">Total reservasi</p>
           <p className="mt-1 text-2xl font-semibold tabular-nums">
             {histori.total_reservasi}
           </p>
         </div>
-        <div className="bg-card rounded-lg border p-4">
+        <div className="bg-card shadow-xs rounded-xl border p-4">
           <p className="text-muted-foreground text-xs">Total pengeluaran</p>
           <p className="mt-1 text-2xl font-semibold">
             <Rupiah nilai={histori.total_pengeluaran} />
@@ -83,7 +83,7 @@ export default async function HistoriPage({
             <li key={item.id}>
               <Link
                 href={`/reservasi/${item.id}`}
-                className="bg-card hover:bg-muted/40 focus-visible:ring-ring grid gap-2 rounded-lg border p-4 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                className="bg-card shadow-xs hover:bg-muted/40 focus-visible:ring-ring grid gap-2 rounded-xl border p-4 transition-colors focus-visible:ring-2 focus-visible:outline-none"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">

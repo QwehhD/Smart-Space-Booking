@@ -45,7 +45,7 @@ export default async function DaftarTiketPage() {
             <li key={r.id}>
               <Link
                 href={`/tiket/${r.id}`}
-                className="bg-card hover:bg-muted/40 focus-visible:ring-ring grid h-full gap-2 rounded-lg border p-4 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                className="bg-card shadow-xs hover:bg-muted/40 focus-visible:ring-ring grid h-full gap-2 rounded-xl border p-4 transition-colors focus-visible:ring-2 focus-visible:outline-none"
               >
                 <div className="flex items-start justify-between gap-3">
                   <p className="font-mono text-sm">{r.kode_booking}</p>

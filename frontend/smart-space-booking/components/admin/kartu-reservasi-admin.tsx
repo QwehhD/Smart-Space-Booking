@@ -25,7 +25,7 @@ export function KartuReservasiAdmin({
   aksi?: ReactNode;
 }) {
   return (
-    <article className="bg-card grid gap-3 rounded-lg border p-4">
+    <article className="bg-card shadow-xs grid gap-3 rounded-xl border p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="font-mono text-sm font-medium">{reservasi.kode_booking}</p>
