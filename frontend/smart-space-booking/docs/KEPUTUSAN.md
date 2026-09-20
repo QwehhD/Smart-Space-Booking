@@ -1063,3 +1063,78 @@ Hal ini terbukti saat menyiapkan Cypress: di Electron bawaannya, seluruh rute
 yang punya `loading.tsx` terbaca kosong padahal `curl` menemukan seluruh isinya.
 Yang benar-benar membuktikan halaman tampil adalah memeriksanya di peramban —
 atau, seperti sekarang, melihat tangkapan layarnya.
+
+## 79. Tema gelap akhirnya dapat dipilih pengguna
+
+Token tema gelap sudah ada sejak fase fondasi dan varian `dark` sudah
+terdaftar, tetapi tidak pernah ada yang menyalakannya: `next-themes` terpasang
+sebagai dependency namun tidak dipakai sama sekali, sehingga tema gelap hanya
+dapat dilihat dengan mengubah kelas secara manual.
+
+Sekarang `ThemeProvider` dipasang di `app/providers.tsx` dengan
+`attribute="class"`, sesuai varian `@custom-variant dark (&:is(.dark *))` di
+`globals.css`. Pilihannya tiga: terang, gelap, dan mengikuti sistem — bukan
+hanya dua — karena pengguna yang perangkatnya sudah berpindah sendiri antara
+siang dan malam tidak perlu mengaturnya dua kali sehari.
+
+Beberapa hal yang perlu diperhatikan dan sudah ditangani:
+
+- `suppressHydrationWarning` dipasang pada elemen `html`, karena `next-themes`
+  menulis kelas tema di sana sebelum halaman digambar sehingga atributnya
+  berbeda dari yang dirender server. Skrip itu pula yang mencegah kedipan putih
+  saat memuat ulang dalam tema gelap.
+- `disableTransitionOnChange` dinyalakan. Tanpa itu setiap permukaan beranimasi
+  sendiri-sendiri dengan durasi berbeda dan perpindahan temanya terlihat
+  berantakan alih-alih serentak.
+- Ikon pada tombol pemilih baru dapat ditentukan setelah komponen berjalan di
+  peramban, karena pilihannya tersimpan di `localStorage`. Sebelum itu
+  ditampilkan bentuk tombol yang sama dengan ikon tetap, memakai
+  `useSyncExternalStore`, supaya tata letak tidak bergeser dan tidak ada
+  ketidakcocokan hidrasi.
+- Sonner merender notifikasinya di portal di luar pohon aplikasi, sehingga kelas
+  `dark` pada `html` tidak otomatis mengenainya. Temanya karena itu diteruskan
+  sebagai prop dari `useTheme()`.
+
+Keempatnya diuji di `cypress/e2e/tema.cy.ts`, dan yang diperiksa bukan sekadar
+ada tidaknya kelas `dark` melainkan **kecerahan warna yang benar-benar dihitung
+peramban**. Tanpa itu, token yang tidak terdefinisi pada salah satu tema akan
+lolos tanpa gejala.
+
+## 80. Gerak dibuat singkat dan berjarak pendek
+
+Ditambahkan dua utilitas di `globals.css`: `.masuk` untuk isi halaman yang
+muncul sekali, dan `.masuk-berurut` untuk daftar yang muncul satu per satu.
+Keduanya memakai satu animasi yang sama — naik setengah rem sambil memudar
+masuk — dengan kurva yang melambat di akhir sehingga gerakannya berhenti lembut.
+
+Durasinya sekitar sepertiga detik dan jaraknya pendek. Tujuannya menjelaskan
+dari mana sesuatu datang, bukan menarik perhatian; animasi yang panjang justru
+membuat antarmuka terasa lambat setelah dipakai beberapa kali.
+
+Jeda pada daftar berurutan dibatasi sampai anak kedelapan. Setelah itu jedanya
+tidak lagi terbaca sebagai urutan, hanya sebagai keterlambatan, sehingga seluruh
+anak berikutnya memakai jeda yang sama.
+
+Transisi pada elemen interaktif diperluas dari hanya warna menjadi warna,
+bayangan, dan posisi, karena ketiganya yang dipakai menandai keadaan sentuh dan
+tekan. Kolom isian ikut diberi transisi supaya cincin fokusnya tumbuh, bukan
+muncul mendadak.
+
+Seluruhnya dimatikan di bawah `prefers-reduced-motion: reduce`, termasuk
+`scroll-behavior: smooth`.
+
+## 81. Data sisa pengujian dibersihkan, dan cara membersihkannya
+
+Sepuluh kali menjalankan suite e2e meninggalkan 60 reservasi dan sembilan space
+uji, yang membuat dashboard pengelola tampak penuh oleh data yang tidak berarti
+— 33 transaksi dan 40 pemesanan menunggu konfirmasi, semuanya buatan pengujian.
+Itu baru terlihat setelah dashboardnya dipotret.
+
+Sisa itu sudah dihapus sehingga database kembali persis ke keadaan seed: 25
+reservasi, 6 space seed. Yang bukan buatan pengujian dibiarkan apa adanya.
+
+Setiap jalan berikutnya tetap meninggalkan sekitar enam reservasi, karena
+backend memang tidak menyediakan penghapusan reservasi. Space ujinya sendiri
+selalu dihapus sehingga katalog tidak pernah ikut kotor. Bila suatu saat perlu
+dibersihkan lagi, hapus reservasi yang menempel pada space bernama `Uji E2E%`
+beserta space-nya, atau jalankan ulang seed pada database bersih.

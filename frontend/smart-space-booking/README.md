@@ -15,6 +15,7 @@ mengarang endpoint atau field yang tidak ada di sana.
 | Framework | Next.js 16 (App Router) |
 | Bahasa | TypeScript 5, strict mode |
 | UI | React 19, Tailwind CSS 4, shadcn/ui di atas base-ui |
+| Tema | Terang, gelap, dan mengikuti sistem (next-themes) |
 | HTTP client | axios |
 | Data server | TanStack Query 5 |
 | Form | react-hook-form 7 + zod 4 |
@@ -110,9 +111,14 @@ reservasi. Lihat keputusan 55–58 di `docs/KEPUTUSAN.md`.
 ### Ujung ke ujung — Cypress
 
 ```bash
-npm run e2e       # 16 pengujian di peramban sungguhan
+npm run e2e       # 20 pengujian di peramban sungguhan
 npm run e2e:open  # mode interaktif
+npm run e2e:docs  # jalankan + susun tangkapan layarnya jadi satu halaman
 ```
+
+`npm run e2e:docs` menghasilkan `cypress/screenshots/index.html` berisi 25
+tangkapan layar yang tersusun menurut alurnya, siap dibuka di peramban atau
+dicetak ke PDF sebagai lampiran dokumentasi.
 
 **Backend dan frontend harus sudah berjalan lebih dulu**; Cypress tidak
 menyalakannya sendiri. Yang diuji adalah alur yang dipakai pengguna: masuk,
@@ -162,3 +168,4 @@ docs/           catatan keputusan teknis
 | `npm run test:watch` | Pengujian unit, mode pemantauan |
 | `npm run e2e` | Pengujian ujung ke ujung di Chrome |
 | `npm run e2e:open` | Pengujian ujung ke ujung, mode interaktif |
+| `npm run e2e:docs` | Pengujian ujung ke ujung beserta dokumentasi bergambar |
