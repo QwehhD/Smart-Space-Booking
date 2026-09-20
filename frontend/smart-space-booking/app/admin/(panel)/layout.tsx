@@ -20,7 +20,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
         <main
           id="konten-utama"
-          className="mx-auto w-full max-w-6xl flex-1 px-4 pt-6 pb-24 md:px-6 md:pb-10"
+          className="mx-auto w-full max-w-6xl flex-1 overflow-x-clip px-4 pt-6 pb-24 md:px-6 md:pb-10"
         >
           {children}
         </main>
