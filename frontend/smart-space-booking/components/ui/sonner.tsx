@@ -1,19 +1,23 @@
 "use client"
 
+import { useTheme } from "next-themes"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from "lucide-react"
 
 /**
  * Notifikasi aplikasi.
  *
- * Temanya dibiarkan mengikuti sistem, bukan lewat next-themes, karena aplikasi
- * ini tidak menyediakan pengalih tema dan seluruh warnanya sudah ditentukan
- * token CSS yang ikut berubah sendiri di mode gelap.
+ * Temanya mengikuti pilihan pengguna lewat next-themes, bukan selalu mengikuti
+ * sistem. Sonner merender notifikasinya di portal tersendiri di luar pohon
+ * aplikasi, sehingga kelas `dark` pada elemen html tidak otomatis mengenainya
+ * dan temanya perlu diteruskan sebagai prop.
  */
 const Toaster = ({ ...props }: ToasterProps) => {
+  const { resolvedTheme } = useTheme()
+
   return (
     <Sonner
-      theme="system"
+      theme={(resolvedTheme as ToasterProps["theme"]) ?? "system"}
       className="toaster group"
       icons={{
         success: (

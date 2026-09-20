@@ -52,6 +52,9 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html
       lang="id"
+      // next-themes menulis kelas tema pada elemen ini sebelum halaman digambar,
+      // sehingga React akan melihat atribut yang tidak dirender server.
+      suppressHydrationWarning
       className={`${sans.variable} ${mono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
