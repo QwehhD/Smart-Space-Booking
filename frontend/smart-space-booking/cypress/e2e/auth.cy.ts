@@ -9,13 +9,17 @@
 describe('Autentikasi', () => {
   it('member dapat masuk lewat form dan diantar ke katalog', () => {
     cy.visit('/login');
+    cy.potret('Halaman masuk member');
 
     cy.get('input[name="username"]').type('budi');
     cy.get('input[name="password"]').type('Secret123!');
+    cy.potret('Form masuk terisi');
+
     cy.contains('button', 'Masuk').click();
 
     cy.location('pathname').should('eq', '/spaces');
     cy.contains('Ketersediaan Space').should('exist');
+    cy.potret('Katalog setelah berhasil masuk');
   });
 
   it('admin space dapat masuk dan diantar ke dashboard', () => {
@@ -27,6 +31,7 @@ describe('Autentikasi', () => {
 
     cy.location('pathname').should('eq', '/admin/dashboard');
     cy.contains('Moklet Hub Coworking Space').should('exist');
+    cy.potret('Dashboard pengelola');
   });
 
   it('menolak password yang salah dan tetap di halaman masuk', () => {
@@ -40,6 +45,7 @@ describe('Autentikasi', () => {
     cy.contains('[data-sonner-toast]', 'Username atau Password salah!').should(
       'exist',
     );
+    cy.potret('Penolakan password salah');
     cy.location('pathname').should('eq', '/login');
   });
 

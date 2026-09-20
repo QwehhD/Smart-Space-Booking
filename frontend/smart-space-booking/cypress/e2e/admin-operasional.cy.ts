@@ -49,18 +49,22 @@ describe('Operasional pengelola', () => {
 
       cy.contains(reservasi.kode_booking).should('exist');
       cy.contains('Belum Dikonfirmasi').should('exist');
+      cy.potret('Pemesanan masuk menunggu konfirmasi');
 
       // Sebelum disetujui, check-in memang belum boleh ditawarkan.
       cy.contains('button', 'Check-in').should('not.exist');
 
       cy.contains('button', 'Setujui').click();
       cy.contains('Disetujui', { timeout: 10_000 }).should('exist');
+      cy.potret('Setelah disetujui');
 
       cy.contains('button', 'Check-in').click();
       cy.contains('Aktif', { timeout: 10_000 }).should('exist');
+      cy.potret('Setelah check-in tamu datang');
 
       cy.contains('button', 'Check-out').click();
       cy.contains('Selesai', { timeout: 10_000 }).should('exist');
+      cy.potret('Setelah check-out selesai');
 
       // Status akhir tidak menyisakan tindakan apa pun.
       cy.contains('button', 'Setujui').should('not.exist');
@@ -78,10 +82,13 @@ describe('Operasional pengelola', () => {
       cy.contains('Disetujui', { timeout: 10_000 }).should('exist');
 
       cy.visit('/admin/check-in');
+      cy.potret('Halaman check-in');
+
       cy.get('#isian-checkin').type(reservasi.kode_booking);
 
       cy.contains(reservasi.kode_booking).should('exist');
       cy.contains('Budi Raharjo').should('exist');
+      cy.potret('Tamu ditemukan lewat kode booking');
     });
   });
 
@@ -101,6 +108,7 @@ describe('Operasional pengelola', () => {
       cy.get('#isian-checkin').type(`VERIFY-RESERVASI-${reservasi.id}`);
 
       cy.contains(reservasi.kode_booking).should('exist');
+      cy.potret('Tamu ditemukan lewat hasil pindaian QR');
     });
   });
 
@@ -112,6 +120,7 @@ describe('Operasional pengelola', () => {
 
     cy.visit('/admin/reservasi?month=8&year=2026');
     cy.contains('6 pemesanan').should('exist');
+    cy.potret('Daftar reservasi tersaring bulan Agustus');
   });
 
   /**
@@ -131,5 +140,6 @@ describe('Operasional pengelola', () => {
     // Baris jumlah pada tabel rincian memakai angka backend, bukan hasil
     // penjumlahan di klien, sehingga keduanya harus cocok.
     cy.contains('tr', 'Jumlah').should('contain', 'Rp 446.000');
+    cy.potret('Rekapitulasi pendapatan bulanan');
   });
 });
