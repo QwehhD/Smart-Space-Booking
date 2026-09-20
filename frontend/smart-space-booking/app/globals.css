@@ -17,9 +17,17 @@
   --color-status-gagal-bg: var(--status-gagal-bg);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-sans: var(--font-sans-loaded), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-loaded), ui-monospace, monospace;
+  --font-heading: var(--font-sans-loaded), ui-sans-serif, system-ui, sans-serif;
+
+  /* Kedalaman. Bayangan dibuat rendah dan rapat supaya kartu terangkat tipis
+     dari latar, bukan melayang; nuansanya diambil dari warna latar, bukan hitam
+     murni, agar tidak terlihat kotor di atas permukaan berwarna. */
+  --shadow-xs: 0 1px 2px 0 oklch(0.15 0.01 240 / 0.04);
+  --shadow-sm: 0 1px 2px 0 oklch(0.15 0.01 240 / 0.05), 0 1px 6px -1px oklch(0.15 0.01 240 / 0.04);
+  --shadow-md: 0 2px 4px -1px oklch(0.15 0.01 240 / 0.06), 0 6px 16px -4px oklch(0.15 0.01 240 / 0.08);
+  --shadow-lg: 0 4px 8px -2px oklch(0.15 0.01 240 / 0.06), 0 12px 32px -8px oklch(0.15 0.01 240 / 0.10);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -59,24 +67,27 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  /* Latar halaman sengaja bukan putih murni. Kartu yang putih di atasnya jadi
+     terbaca sebagai permukaan yang terangkat tanpa perlu bayangan tebal, dan
+     layar terang terasa lebih teduh saat dipandang lama. */
+  --background: oklch(0.985 0.002 100);
+  --foreground: oklch(0.21 0.008 250);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.21 0.008 250);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.21 0.008 250);
   /* Satu-satunya warna beraksen pada palet yang selebihnya netral. */
   --primary: oklch(0.52 0.082 205);
   --primary-foreground: oklch(0.99 0.004 205);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.968 0.003 250);
+  --secondary-foreground: oklch(0.28 0.008 250);
+  --muted: oklch(0.968 0.003 250);
+  --muted-foreground: oklch(0.53 0.012 250);
+  --accent: oklch(0.955 0.006 205);
+  --accent-foreground: oklch(0.32 0.03 205);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
+  --border: oklch(0.915 0.004 250);
+  --input: oklch(0.905 0.004 250);
   --ring: oklch(0.52 0.082 205);
   --chart-1: oklch(0.52 0.082 205);
   --chart-2: oklch(0.62 0.105 60);
@@ -95,37 +106,40 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
+  --background: oklch(0.155 0.005 250);
+  --foreground: oklch(0.96 0.003 250);
+  /* Kartu dibuat lebih terang daripada latar, kebalikan dari tema terang, supaya
+     hierarkinya tetap terbaca tanpa mengandalkan bayangan yang tak terlihat di
+     atas permukaan gelap. */
+  --card: oklch(0.215 0.006 250);
+  --card-foreground: oklch(0.96 0.003 250);
+  --popover: oklch(0.235 0.006 250);
+  --popover-foreground: oklch(0.96 0.003 250);
   --primary: oklch(0.74 0.088 205);
   --primary-foreground: oklch(0.17 0.02 205);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.27 0.006 250);
+  --secondary-foreground: oklch(0.96 0.003 250);
+  --muted: oklch(0.27 0.006 250);
+  --muted-foreground: oklch(0.70 0.012 250);
+  --accent: oklch(0.29 0.014 205);
+  --accent-foreground: oklch(0.93 0.02 205);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
+  --border: oklch(1 0 0 / 9%);
+  --input: oklch(1 0 0 / 13%);
   --ring: oklch(0.62 0.075 205);
   --chart-1: oklch(0.74 0.088 205);
   --chart-2: oklch(0.76 0.115 60);
   --chart-3: oklch(0.68 0.08 285);
   --chart-4: oklch(0.74 0.07 150);
   --chart-5: oklch(0.72 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar: oklch(0.185 0.006 250);
+  --sidebar-foreground: oklch(0.96 0.003 250);
+  --sidebar-primary: oklch(0.74 0.088 205);
+  --sidebar-primary-foreground: oklch(0.17 0.02 205);
+  --sidebar-accent: oklch(0.27 0.01 205);
+  --sidebar-accent-foreground: oklch(0.93 0.02 205);
+  --sidebar-border: oklch(1 0 0 / 9%);
+  --sidebar-ring: oklch(0.62 0.075 205);
 }
 
 /**
@@ -168,9 +182,52 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Angka dibuat sama lebar di seluruh aplikasi. Hampir setiap layar memuat
+       rupiah, jam, atau hitungan, dan kolom yang lurus jauh lebih mudah dipindai
+       daripada angka yang bergeser-geser. */
+    font-variant-numeric: tabular-nums;
   }
   html {
     @apply font-sans;
+  }
+
+  /* Judul dirapatkan sedikit. Pada ukuran besar, jarak huruf bawaan terasa
+     renggang dan membuat halaman terlihat seperti dokumen, bukan antarmuka. */
+  h1,
+  h2,
+  h3 {
+    @apply font-semibold tracking-tight;
+    text-wrap: balance;
+  }
+
+  /* Paragraf panjang tidak menyisakan satu kata sendirian di baris terakhir. */
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Kode booking dan nomor e-ticket. Angka nol diberi garis miring oleh
+     JetBrains Mono sehingga tidak tertukar dengan huruf O saat dibacakan. */
+  .font-mono {
+    font-feature-settings: 'zero' 1;
+    letter-spacing: -0.01em;
+  }
+
+  /* Transisi halus hanya untuk yang benar-benar berubah saat disentuh, bukan
+     transisi menyeluruh yang membuat perubahan tata letak ikut melambat. */
+  a,
+  button,
+  [role='button'] {
+    @apply transition-colors duration-150;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 /**
