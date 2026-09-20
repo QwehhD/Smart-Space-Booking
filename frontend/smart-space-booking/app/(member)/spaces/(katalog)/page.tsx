@@ -88,7 +88,7 @@ export default async function KatalogPage({
           <p className="text-muted-foreground text-sm" aria-live="polite">
             {spaces.length} space tersedia
           </p>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="masuk-berurut grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {spaces.map((space) => (
               <SpaceCard key={space.id} space={space} />
             ))}

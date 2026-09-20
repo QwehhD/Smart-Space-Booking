@@ -124,7 +124,7 @@ export function DaftarMember({ awal }: { awal: Member[] }) {
           }
         />
       ) : (
-        <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <ul className="masuk-berurut grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {daftar.map((member) => (
             <li key={member.id} className="bg-card shadow-xs grid gap-3 rounded-xl border p-4">
               <div className="flex items-center gap-3">

@@ -70,7 +70,7 @@ export default async function LaporanPage({
           </p>
         </header>
 
-        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <section className="masuk-berurut grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <KartuStatistik
             label="Pendapatan bersih"
             nilai={rupiah(laporan.realisasi_pendapatan_bersih)}

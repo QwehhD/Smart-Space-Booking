@@ -141,7 +141,7 @@ export function PanelCheckIn({
           }
         />
       ) : (
-        <ul className="grid gap-3 lg:grid-cols-2">
+        <ul className="masuk-berurut grid gap-3 lg:grid-cols-2">
           {ditampilkan.map((reservasi) => (
             <li key={reservasi.id}>
               <KartuReservasiAdmin

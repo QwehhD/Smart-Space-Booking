@@ -85,7 +85,7 @@ export function DaftarSpace({ awal }: { awal: Space[] }) {
           }
         />
       ) : (
-        <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <ul className="masuk-berurut grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {spaces.map((space) => (
             <li
               key={space.id}
