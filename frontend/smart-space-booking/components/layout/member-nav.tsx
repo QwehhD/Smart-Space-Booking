@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Merek } from '@/components/layout/merek';
 import { menuAktif, NAV_MEMBER } from '@/components/layout/nav-items';
 import { UserMenu } from '@/components/layout/user-menu';
 import { cn } from '@/lib/utils';
@@ -15,9 +16,10 @@ export function MemberNav() {
       <div className="mx-auto flex h-14 w-full max-w-5xl items-center gap-6 px-4">
         <Link
           href="/spaces"
-          className="text-primary shrink-0 font-mono text-xs tracking-widest uppercase"
+          aria-label="Smart Space Booking, ke katalog"
+          className="focus-visible:ring-ring shrink-0 rounded-md focus-visible:ring-2 focus-visible:outline-none"
         >
-          Smart Space
+          <Merek />
         </Link>
 
         <nav aria-label="Navigasi utama" className="hidden md:block">
@@ -31,8 +33,10 @@ export function MemberNav() {
                     href={item.href}
                     aria-current={aktif ? 'page' : undefined}
                     className={cn(
-                      'hover:bg-muted focus-visible:ring-ring rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none',
-                      aktif ? 'bg-muted text-foreground' : 'text-muted-foreground',
+                      'hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none',
+                      aktif
+                        ? 'bg-accent text-accent-foreground'
+                        : 'text-muted-foreground',
                     )}
                   >
                     {item.label}
