@@ -840,3 +840,103 @@ Halaman `/design-system` sengaja dipertahankan. Isinya katalog token dan
 komponen yang berguna saat mendemonstrasikan sistem desain, dan halaman itu
 sudah menjaga dirinya sendiri dengan memanggil `notFound()` ketika
 `NODE_ENV === 'production'`, sehingga tidak ikut terekspos pada build produksi.
+
+## 62. Huruf akhirnya benar-benar dimuat
+
+Sampai fase ini tidak ada huruf yang dimuat sama sekali. Token `--font-sans`
+menunjuk pada dirinya sendiri (`--font-sans: var(--font-sans)`), sehingga
+nilainya tidak pernah terisi dan seluruh aplikasi jatuh ke huruf bawaan sistem
+operasi. Inilah sebab terbesar tampilannya terasa mentah, dan ia tidak terlihat
+dari kode mana pun kecuali dengan membaca definisi tokennya.
+
+Sekarang dimuat lewat `next/font/google`:
+
+- **Plus Jakarta Sans** sebagai huruf utama. Bentuknya tegas dan netral sehingga
+  cocok untuk antarmuka yang banyak memuat angka dan tabel, dan huruf ini memang
+  dirancang di Jakarta sehingga terasa selaras dengan aplikasi berbahasa
+  Indonesia tanpa perlu ornamen apa pun.
+- **JetBrains Mono** untuk kode booking dan nomor e-ticket. Angka nolnya bergaris
+  miring sehingga tidak tertukar dengan huruf O saat dibacakan di meja depan.
+
+`next/font` mengunduh dan meng-host huruf itu sendiri saat build, jadi tidak ada
+permintaan ke domain pihak ketiga saat halaman dibuka dan tidak ada kedipan huruf
+pengganti yang bergeser.
+
+## 63. Angka dibuat sama lebar di seluruh aplikasi
+
+`font-variant-numeric: tabular-nums` dipasang pada `body`, bukan ditempelkan satu
+per satu pada komponen yang menampilkan angka. Hampir setiap layar memuat rupiah,
+jam, atau hitungan, dan kolom nominal yang lurus jauh lebih mudah dipindai
+daripada angka yang bergeser setiap kali nilainya berubah.
+
+## 64. Kedalaman dibuat sebagai token, bukan ditempel per komponen
+
+Sebelumnya seluruh permukaan hanya dibedakan oleh garis tepi, sehingga halaman
+terbaca datar. Ditambahkan empat token bayangan (`--shadow-xs` sampai
+`--shadow-lg`) yang dipakai seragam oleh kedua puluh dua permukaan kartu.
+
+Bayangannya sengaja rendah dan rapat supaya kartu terangkat tipis, bukan
+melayang, dan nuansanya diambil dari warna latar alih-alih hitam murni agar tidak
+terlihat kotor. Sudut kartu juga dinaikkan dari `rounded-lg` ke `rounded-xl`.
+
+Pada tema gelap bayangan hampir tak terlihat, jadi hierarkinya dibalik: kartu
+dibuat **lebih terang** daripada latar, kebalikan dari tema terang.
+
+## 65. Latar halaman bukan putih murni
+
+`--background` diubah dari `oklch(1 0 0)` menjadi `oklch(0.985 0.002 100)`,
+sementara `--card` tetap putih. Selisih tipis itu membuat kartu terbaca sebagai
+permukaan yang terangkat tanpa perlu bayangan tebal, dan layar terang terasa
+lebih teduh saat dipandang lama. Tema gelap diperlakukan sama: latarnya diangkat
+sedikit dari hitam murni.
+
+Sekaligus diperbaiki satu warna bawaan shadcn yang lolos sejak awal:
+`--sidebar-primary` pada tema gelap masih ungu (`oklch(0.488 0.243 264.376)`),
+bertabrakan dengan aksen petrol yang dipakai seluruh aplikasi.
+
+## 66. Tombol utama tidak lagi memudar saat disentuh
+
+Varian `default` memakai `hover:bg-primary/80`, yang membuat tombol menjadi
+**lebih pucat** ketika disentuh sehingga terbaca seperti sedang dinonaktifkan.
+Diganti dengan `color-mix` yang memekatkan warnanya di tema terang dan
+mencerahkannya di tema gelap, sehingga arah perubahannya selalu terasa sebagai
+"aktif".
+
+Tingginya juga dinaikkan satu tingkat: bawaan dari `h-8` menjadi `h-9`, `lg` dari
+`h-9` menjadi `h-10`. Ukuran lama terasa sempit sebagai sasaran sentuh dan
+membuat bilah aksi terlihat rapat.
+
+## 67. Lambang merek menggantikan teks polos
+
+Nama aplikasi sebelumnya hanya teks monospace huruf besar. Dibuat komponen
+`Merek` berisi lambang SVG sederhana — satu bidang ruang dengan meja di dalamnya
+— beserta nama dua barisnya, lalu dipakai di navigasi member, sidebar pengelola,
+drawer mobile, dan halaman masuk.
+
+Bentuknya digambar sendiri, bukan diambil dari pustaka ikon, supaya tidak
+tertukar dengan ikon lain yang juga dipakai di antarmuka.
+
+## 68. Halaman masuk diletakkan di atas kartu
+
+Form masuk dan daftar sebelumnya mengambang langsung di atas latar halaman.
+Sekarang dibungkus kartu terangkat yang terpusat secara vertikal, dengan gradasi
+radial aksen yang sangat tipis di belakangnya sekadar untuk mengarahkan pandang
+ke tengah layar. Halaman masuk adalah hal pertama yang dilihat penguji, dan
+bentuk berkartu membuatnya terbaca sebagai satu tugas yang berdiri sendiri.
+
+## 69. Penanda menu aktif pada sidebar
+
+Menu aktif sebelumnya hanya dibedakan oleh latar abu-abu, yang pada daftar
+delapan menu sulit ditemukan sekilas. Ditambahkan garis pendek beraksen di tepi
+kiri menu yang sedang dibuka, memakai `before:` sehingga tidak menambah elemen ke
+pohon aksesibilitas — `aria-current="page"` yang sudah ada tetap menjadi penanda
+resminya bagi pembaca layar.
+
+## 70. Gerak dihormati, bukan dipaksakan
+
+Transisi hanya dipasang pada elemen yang memang berubah saat disentuh — tautan,
+tombol, dan elemen ber-`role="button"` — bukan sebagai transisi menyeluruh yang
+membuat perubahan tata letak ikut melambat. Kartu space mendapat angkatan halus
+dan gambarnya membesar sedikit saat disentuh.
+
+Seluruhnya dimatikan di bawah `prefers-reduced-motion: reduce`.
