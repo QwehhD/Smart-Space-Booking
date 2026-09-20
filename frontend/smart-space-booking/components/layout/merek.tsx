@@ -49,7 +49,22 @@ export function Merek({
           </span>
           <span className="mt-0.5 flex items-center gap-1 text-[0.62rem] font-bold tracking-[0.16em] uppercase text-primary/80">
             <span>Booking</span>
-            <span className="inline-block size-1 rounded-full bg-primary animate-pulse" />
+
+            {/* Penanda hidup: satu titik yang berkeliling pada cincin tipis.
+                Dipilih menggantikan kedipan, yang mudah terbaca sebagai sesuatu
+                yang meminta ditindaklanjuti. */}
+            <span aria-hidden className="relative inline-block size-2.5 shrink-0">
+              {/* Cincin dibuat sangat tipis supaya terbaca sebagai lintasan,
+                  bukan sebagai bingkai. */}
+              <span className="border-primary/20 absolute inset-0 rounded-full border-[0.5px]" />
+
+              {/* Titiknya kecil dan pusatnya tepat di atas garis lintasan; bila
+                  menyembul keluar, bentuknya terbaca sebagai gagang pemutar
+                  seperti pada indikator memuat. */}
+              <span className="orbit absolute inset-0">
+                <span className="bg-foreground absolute top-0 left-1/2 size-[3px] -translate-x-1/2 -translate-y-1/2 rounded-full" />
+              </span>
+            </span>
           </span>
         </span>
       ) : null}
