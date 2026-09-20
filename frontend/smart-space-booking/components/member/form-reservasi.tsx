@@ -6,13 +6,15 @@ import {
   CalendarCheck,
   CircleAlert,
   CircleCheck,
+  Copy,
   Loader2,
   Receipt,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
+import confetti from 'canvas-confetti';
 import {
   PilihPromo,
   type PromoTerpilih,
@@ -388,29 +390,30 @@ function StatusKetersediaan({
 }) {
   if (memuat) {
     return (
-      <p className="text-muted-foreground flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
-        <Loader2 className="size-4 animate-spin" />
-        Memeriksa ketersediaan…
-      </p>
+      <div className="flex items-center gap-2 rounded-xl border border-border/80 bg-muted/30 px-3.5 py-2.5 text-xs text-muted-foreground animate-pulse">
+        <Loader2 className="size-3.5 animate-spin text-primary" />
+        <span>Memeriksa ketersediaan jadwal…</span>
+      </div>
     );
   }
 
   if (tersedia) {
     return (
-      <p className="text-status-berhasil bg-status-berhasil-bg flex items-center gap-2 rounded-md px-3 py-2 text-sm">
-        <CircleCheck className="size-4 shrink-0" />
-        Tersedia pada {jamMulai}&ndash;
-        {hitungJamSelesai(jamMulai || '00:00', durasi || 1)}
-      </p>
+      <div className="flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-2.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 shadow-2xs">
+        <CircleCheck className="size-4 shrink-0 text-emerald-500" />
+        <span>
+          Jadwal tersedia: <strong className="font-semibold">{jamMulai} &ndash; {hitungJamSelesai(jamMulai || '00:00', durasi || 1)}</strong>
+        </span>
+      </div>
     );
   }
 
   if (pesanBentrok) {
     return (
-      <p className="text-status-gagal bg-status-gagal-bg flex items-center gap-2 rounded-md px-3 py-2 text-sm">
-        <CircleAlert className="size-4 shrink-0" />
-        {pesanBentrok}
-      </p>
+      <div className="flex items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-3.5 py-2.5 text-xs font-medium text-rose-600 dark:text-rose-400 shadow-2xs">
+        <CircleAlert className="size-4 shrink-0 text-rose-500" />
+        <span>{pesanBentrok}</span>
+      </div>
     );
   }
 
@@ -430,27 +433,62 @@ function PemesananBerhasil({
   hasil: ReservasiBaru;
   namaSpace: string;
 }) {
+  useEffect(() => {
+    try {
+      void confetti({
+        particleCount: 75,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#0ea5e9', '#10b981', '#6366f1', '#f59e0b'],
+      });
+    } catch {
+      // Abaikan jika confetti tidak dapat dijalankan di lingkungan saat ini
+    }
+  }, []);
+
+  function salinKode() {
+    void navigator.clipboard.writeText(hasil.kode_booking);
+    toast.success('Kode booking disalin ke papan klip!');
+  }
+
   return (
-    <div className="grid gap-5">
-      <div className="border-status-berhasil bg-status-berhasil-bg grid gap-2 rounded-lg border p-5 text-center">
-        <CircleCheck className="text-status-berhasil mx-auto size-8" />
-        <h2 className="text-lg font-semibold">Reservasi berhasil dibuat</h2>
-        <p className="text-muted-foreground text-sm">
-          Silakan tunggu konfirmasi dari pengelola.
-        </p>
-        <p className="mt-1 font-mono text-lg font-semibold tracking-wide">
-          {hasil.kode_booking}
-        </p>
+    <div className="grid gap-6 masuk">
+      <div className="border border-status-berhasil/40 bg-status-berhasil-bg/60 shadow-lg glow-emerald grid gap-3 rounded-2xl p-6 text-center">
+        <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-status-berhasil text-white shadow-md shadow-emerald-500/30">
+          <CircleCheck className="size-6" />
+        </div>
+        <div className="grid gap-1">
+          <h2 className="text-xl font-bold tracking-tight text-foreground">
+            Reservasi Berhasil Dibuat!
+          </h2>
+          <p className="text-muted-foreground text-xs sm:text-sm">
+            Permintaanmu telah tercatat. Silakan tunggu konfirmasi dari pengelola.
+          </p>
+        </div>
+
+        <div className="mx-auto mt-2 inline-flex items-center gap-2 rounded-xl border border-status-berhasil/40 bg-background/80 px-4 py-2 shadow-xs backdrop-blur-xs">
+          <span className="font-mono text-base sm:text-lg font-bold tracking-wider text-foreground">
+            {hasil.kode_booking}
+          </span>
+          <button
+            type="button"
+            onClick={salinKode}
+            title="Salin kode booking"
+            className="text-muted-foreground hover:text-foreground transition-colors p-1"
+          >
+            <Copy className="size-4" />
+          </button>
+        </div>
       </div>
 
-      <dl className="grid gap-2 rounded-lg border p-4 text-sm">
+      <dl className="grid gap-2.5 rounded-2xl border border-border/75 bg-card p-5 text-sm shadow-xs">
         <div className="flex justify-between gap-4">
           <dt className="text-muted-foreground">Space</dt>
-          <dd className="text-right font-medium">{namaSpace}</dd>
+          <dd className="text-right font-bold text-foreground">{namaSpace}</dd>
         </div>
         <div className="flex justify-between gap-4">
           <dt className="text-muted-foreground">Jadwal</dt>
-          <dd className="text-right">
+          <dd className="text-right font-medium">
             {tanggalDanJam(
               hasil.tanggal_reservasi,
               hasil.jam_mulai,
@@ -466,26 +504,35 @@ function PemesananBerhasil({
         </div>
         {hasil.potongan_diskon > 0 ? (
           <div className="flex justify-between gap-4">
-            <dt className="text-muted-foreground">Potongan</dt>
-            <dd className="text-status-berhasil tabular-nums">
+            <dt className="text-muted-foreground">Potongan Diskon</dt>
+            <dd className="text-status-berhasil font-semibold tabular-nums">
               &minus;<Rupiah nilai={hasil.potongan_diskon} />
             </dd>
           </div>
         ) : null}
-        <div className="flex justify-between gap-4 border-t pt-2 font-semibold">
-          <dt>Total bayar</dt>
-          <dd>
+        <div className="flex justify-between gap-4 border-t border-border/70 pt-3 font-bold text-base">
+          <dt className="text-foreground">Total Bayar</dt>
+          <dd className="text-primary text-lg">
             <Rupiah nilai={hasil.total_bayar} />
           </dd>
         </div>
       </dl>
 
-      <div className="grid gap-2 sm:grid-cols-2">
-        <Button render={<Link href={`/reservasi/${hasil.id}`}>
-          <Receipt />
-          Lihat detail reservasi
-        </Link>} />
-        <Button variant="outline" render={<Link href="/spaces">Pesan space lain</Link>} />
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Button
+          className="font-semibold shadow-md shadow-primary/20"
+          render={
+            <Link href={`/reservasi/${hasil.id}`} className="flex items-center gap-2">
+              <Receipt className="size-4" />
+              Lihat Detail Reservasi
+            </Link>
+          }
+        />
+        <Button
+          variant="outline"
+          className="font-semibold"
+          render={<Link href="/spaces">Pesan Space Lain</Link>}
+        />
       </div>
     </div>
   );

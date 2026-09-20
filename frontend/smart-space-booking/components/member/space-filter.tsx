@@ -70,23 +70,23 @@ export function SpaceFilter({
   }, [teks]);
 
   return (
-    <div className="grid gap-3">
+    <div className="grid gap-4">
       <div className="relative">
-        <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+        <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2" />
         <Input
           type="search"
           value={teks}
           onChange={(e) => setTeks(e.target.value)}
-          placeholder="Cari nama space atau fasilitas…"
+          placeholder="Cari nama space, coworking, atau fasilitas…"
           aria-label="Cari space"
-          className="pl-9"
+          className="h-11 rounded-2xl border-border/75 bg-card/80 pl-10 pr-10 text-sm shadow-xs backdrop-blur-xs transition-all focus-visible:border-primary/50 focus-visible:ring-primary/20"
         />
         {teks ? (
           <button
             type="button"
             onClick={() => setTeks('')}
             aria-label="Hapus pencarian"
-            className="text-muted-foreground hover:text-foreground focus-visible:ring-ring absolute top-1/2 right-2 -translate-y-1/2 rounded-sm p-1 focus-visible:ring-2 focus-visible:outline-none"
+            className="text-muted-foreground hover:text-foreground focus-visible:ring-ring absolute top-1/2 right-3 -translate-y-1/2 rounded-full p-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
           >
             <X className="size-4" />
           </button>
@@ -96,7 +96,7 @@ export function SpaceFilter({
       <div
         role="tablist"
         aria-label="Filter tipe space"
-        className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1"
+        className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-none sm:mx-0 sm:px-0"
       >
         {TAB.map((tab) => {
           const aktif = tipeAwal === tab.nilai;
@@ -108,7 +108,11 @@ export function SpaceFilter({
               aria-selected={aktif}
               size="sm"
               variant={aktif ? 'default' : 'outline'}
-              className={cn('shrink-0', menunggu && 'opacity-70')}
+              className={cn(
+                'rounded-full shrink-0 font-semibold text-xs tracking-tight transition-all',
+                aktif && 'shadow-xs',
+                menunggu && 'opacity-70',
+              )}
               onClick={() =>
                 ubahUrl({ tipe: tab.nilai === 'semua' ? null : tab.nilai })
               }

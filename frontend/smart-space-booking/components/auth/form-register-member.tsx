@@ -264,14 +264,18 @@ export function FormRegisterMember() {
           )}
         />
 
-        <Button type="submit" disabled={mutasi.isPending} className="mt-2">
-          <UserPlus />
-          {mutasi.isPending ? 'Mendaftarkan…' : 'Daftar'}
+        <Button
+          type="submit"
+          disabled={mutasi.isPending}
+          className="mt-2 h-11 text-sm font-bold shadow-md shadow-primary/25 hover:shadow-primary/35"
+        >
+          <UserPlus className="size-4" />
+          {mutasi.isPending ? 'Mendaftarkan Akun…' : 'Daftar Sebagai Member'}
         </Button>
 
-        <p className="text-muted-foreground text-center text-sm">
+        <p className="text-muted-foreground text-center text-xs sm:text-sm pt-2">
           Sudah punya akun?{' '}
-          <Link href="/login" className="text-primary font-medium hover:underline">
+          <Link href="/login" className="text-primary font-bold hover:underline">
             Masuk di sini
           </Link>
         </p>

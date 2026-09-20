@@ -85,44 +85,48 @@ export function DaftarSpace({ awal }: { awal: Space[] }) {
           }
         />
       ) : (
-        <ul className="masuk-berurut grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <ul className="masuk-berurut grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {spaces.map((space) => (
             <li
               key={space.id}
-              className="bg-card shadow-xs flex flex-col overflow-hidden rounded-xl border"
+              className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/75 bg-card shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-md"
             >
-              <SpaceImage
-                url={space.foto_url}
-                nama={space.nama_space}
-                className="aspect-[16/9] w-full max-w-full"
-              />
-
-              <div className="grid flex-1 gap-2 p-4">
-                <div className="flex items-start justify-between gap-2">
-                  <h2 className="leading-snug font-medium">{space.nama_space}</h2>
-                  <TipeBadge tipe={space.tipe} className="shrink-0" />
+              <div className="relative overflow-hidden">
+                <SpaceImage
+                  url={space.foto_url}
+                  nama={space.nama_space}
+                  className="aspect-[16/9] w-full max-w-full object-cover transition-transform duration-500 group-hover:scale-103"
+                />
+                <div className="absolute top-3 right-3 z-10">
+                  <TipeBadge tipe={space.tipe} className="shadow-md backdrop-blur-md" />
                 </div>
+              </div>
 
-                <p className="text-muted-foreground line-clamp-2 text-sm">
+              <div className="grid flex-1 gap-2 p-5">
+                <h2 className="leading-snug font-bold text-base text-foreground group-hover:text-primary transition-colors">
+                  {space.nama_space}
+                </h2>
+
+                <p className="text-muted-foreground line-clamp-2 text-xs leading-relaxed">
                   {space.deskripsi}
                 </p>
 
-                <div className="mt-auto flex items-center justify-between gap-2 pt-2">
+                <div className="mt-auto flex items-center justify-between gap-2 border-t border-border/60 pt-3">
                   <div className="grid">
-                    <Rupiah nilai={space.harga_per_jam} className="font-semibold" />
-                    <span className="text-muted-foreground text-xs">per jam</span>
+                    <Rupiah nilai={space.harga_per_jam} className="text-base font-bold text-foreground" />
+                    <span className="text-muted-foreground text-[10px]">per jam</span>
                   </div>
 
-                  <span className="text-muted-foreground inline-flex items-center gap-1 text-xs">
+                  <span className="text-muted-foreground inline-flex items-center gap-1.5 text-xs font-medium">
                     <Users className="size-3.5" />
                     {space.kapasitas} orang
                   </span>
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-1 border-t px-2 py-1.5">
-                <Button variant="ghost" size="sm" onClick={() => bukaUbah(space)}>
-                  <Pencil />
+              <div className="flex items-center justify-end gap-1.5 border-t border-border/60 bg-muted/20 px-3 py-2">
+                <Button variant="ghost" size="sm" className="font-semibold text-xs" onClick={() => bukaUbah(space)}>
+                  <Pencil className="size-3.5" />
                   Ubah
                 </Button>
 

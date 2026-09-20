@@ -44,47 +44,60 @@ export function GrafikPendapatan({ data }: { data: PendapatanHarian[] }) {
   return (
     <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={titik} margin={{ top: 4, right: 4, bottom: 4, left: 4 }}>
+        <BarChart data={titik} margin={{ top: 8, right: 8, bottom: 4, left: 4 }}>
+          <defs>
+            <linearGradient id="pendapatanGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.9} />
+              <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={0.3} />
+            </linearGradient>
+          </defs>
           <CartesianGrid
             vertical={false}
             stroke="var(--color-border)"
             strokeDasharray="3 3"
+            strokeOpacity={0.5}
           />
           <XAxis
             dataKey="hari"
-            interval={4}
+            interval={3}
             tickLine={false}
             axisLine={false}
             tick={{ fontSize: 11, fill: 'var(--color-muted-foreground)' }}
           />
           <YAxis
-            width={52}
+            width={56}
             tickLine={false}
             axisLine={false}
             tickFormatter={rupiahRingkas}
             tick={{ fontSize: 11, fill: 'var(--color-muted-foreground)' }}
           />
           <Tooltip
-            cursor={{ fill: 'var(--color-accent)' }}
+            cursor={{ fill: 'var(--color-accent)', opacity: 0.4 }}
             labelFormatter={(_, muatan) => {
               const baris = muatan?.[0]?.payload as PendapatanHarian | undefined;
               return baris ? tanggalPanjang(baris.tanggal) : '';
             }}
-            // recharts mengetik nilainya longgar karena satu tooltip dapat
-            // melayani beberapa seri; di sini hanya ada satu seri bertipe angka.
             formatter={(nilai) => [
               rupiah(typeof nilai === 'number' ? nilai : 0),
-              'Pendapatan',
+              'Pendapatan Bersih',
             ]}
             contentStyle={{
-              borderRadius: '0.5rem',
+              borderRadius: '0.875rem',
               border: '1px solid var(--color-border)',
-              background: 'var(--color-popover)',
-              color: 'var(--color-popover-foreground)',
+              background: 'var(--color-card)',
+              boxShadow: '0 8px 24px -6px rgba(0, 0, 0, 0.15)',
+              color: 'var(--color-card-foreground)',
               fontSize: '0.8125rem',
+              fontWeight: '500',
+              padding: '8px 12px',
             }}
           />
-          <Bar dataKey="total" fill="var(--color-chart-1)" radius={[3, 3, 0, 0]} />
+          <Bar
+            dataKey="total"
+            fill="url(#pendapatanGradient)"
+            radius={[6, 6, 0, 0]}
+            animationDuration={800}
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>

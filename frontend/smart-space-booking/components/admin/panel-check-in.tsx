@@ -78,37 +78,41 @@ export function PanelCheckIn({
 
   return (
     <>
-      <div className="bg-card shadow-xs grid gap-3 rounded-xl border p-4">
-        <label htmlFor="isian-checkin" className="text-sm font-medium">
-          Kode booking atau hasil pindaian QR
-        </label>
+      <div className="relative overflow-hidden rounded-2xl border border-border/75 bg-card p-6 shadow-sm backdrop-blur-xs transition-all focus-within:border-primary/50 focus-within:shadow-md focus-within:shadow-primary/10">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <ScanLine className="size-4" />
+          </span>
+          <label htmlFor="isian-checkin" className="text-sm font-bold text-foreground">
+            Terminal Check-in & Validasi QR
+          </label>
+        </div>
 
         <div className="relative">
-          <ScanLine className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+          <ScanLine className="text-primary pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2" />
           <Input
             id="isian-checkin"
             value={isian}
             onChange={(e) => setIsian(e.target.value)}
-            placeholder="BOOK-20260917-0001"
+            placeholder="Ketik kode (mis. BOOK-20260917-0001) atau tempel hasil scan QR..."
             autoComplete="off"
             autoCapitalize="characters"
-            className="pl-9 font-mono"
+            className="h-12 rounded-xl border-border/75 bg-background pl-10 pr-10 font-mono text-sm shadow-inner transition-all focus-visible:border-primary focus-visible:ring-primary/20"
           />
           {isian ? (
             <button
               type="button"
               onClick={() => setIsian('')}
               aria-label="Hapus isian"
-              className="text-muted-foreground hover:text-foreground focus-visible:ring-ring absolute top-1/2 right-2 -translate-y-1/2 rounded-sm p-1 focus-visible:ring-2 focus-visible:outline-none"
+              className="text-muted-foreground hover:text-foreground focus-visible:ring-ring absolute top-1/2 right-3 -translate-y-1/2 rounded-full p-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
             >
               <X className="size-4" />
             </button>
           ) : null}
         </div>
 
-        <p className="text-muted-foreground text-xs">
-          Pindai QR pada e-ticket dengan kamera ponsel lalu tempelkan hasilnya,
-          atau ketik kode booking maupun nama tamunya.
+        <p className="mt-2.5 text-muted-foreground text-xs leading-relaxed">
+          Pindai kode QR pada e-ticket tamu dengan kamera smartphone lalu tempelkan, atau ketik langsung kode booking / nama tamu untuk validasi cepat.
         </p>
       </div>
 

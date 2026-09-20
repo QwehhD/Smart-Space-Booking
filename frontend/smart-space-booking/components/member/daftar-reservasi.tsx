@@ -94,7 +94,7 @@ export function DaftarReservasi() {
       <div
         role="tablist"
         aria-label="Filter status pemesanan"
-        className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1"
+        className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-none sm:mx-0 sm:px-0"
       >
         {[SEMUA, ...URUTAN_STATUS].map((nilai) => {
           const aktif = tabAktif === nilai;
@@ -110,12 +110,22 @@ export function DaftarReservasi() {
               aria-selected={aktif}
               size="sm"
               variant={aktif ? 'default' : 'outline'}
-              className="shrink-0"
+              className={cn(
+                'rounded-full shrink-0 font-semibold text-xs transition-all',
+                aktif && 'shadow-xs',
+              )}
               onClick={() => pilihTab(nilai)}
             >
-              {nilai === SEMUA ? 'Semua' : LABEL_STATUS[nilai as StatusReservasi]}
+              <span>{nilai === SEMUA ? 'Semua' : LABEL_STATUS[nilai as StatusReservasi]}</span>
               {daftar.isSuccess ? (
-                <span className={cn('ml-1', !aktif && 'text-muted-foreground')}>
+                <span
+                  className={cn(
+                    'ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold tabular-nums',
+                    aktif
+                      ? 'bg-primary-foreground/20 text-primary-foreground'
+                      : 'bg-muted text-muted-foreground',
+                  )}
+                >
                   {jumlah}
                 </span>
               ) : null}

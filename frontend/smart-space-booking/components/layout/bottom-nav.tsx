@@ -26,9 +26,9 @@ export function BottomNav({ varian }: { varian: 'member' | 'admin' }) {
   return (
     <nav
       aria-label="Navigasi utama"
-      className="bg-background/95 supports-[backdrop-filter]:bg-background/80 fixed inset-x-0 bottom-0 z-40 border-t backdrop-blur md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border/60 bg-background/85 backdrop-blur-xl supports-[backdrop-filter]:bg-background/75 shadow-lg md:hidden"
     >
-      <ul className="flex items-stretch">
+      <ul className="flex items-stretch justify-around px-2 py-1">
         {items.map((item) => {
           const aktif = menuAktif(pathname, item.href);
           const Icon = item.icon;
@@ -39,12 +39,15 @@ export function BottomNav({ varian }: { varian: 'member' | 'admin' }) {
                 href={item.href}
                 aria-current={aktif ? 'page' : undefined}
                 className={cn(
-                  'focus-visible:ring-ring flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium focus-visible:ring-2 focus-visible:outline-none',
-                  aktif ? 'text-primary' : 'text-muted-foreground',
+                  'relative flex flex-col items-center gap-1 py-1.5 text-[11px] font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+                  aktif ? 'text-primary scale-105 font-semibold' : 'text-muted-foreground hover:text-foreground',
                 )}
               >
-                <Icon className="size-5" />
-                {item.label}
+                {aktif && (
+                  <span className="absolute top-0 h-0.5 w-6 rounded-full bg-primary shadow-xs shadow-primary" />
+                )}
+                <Icon className={cn('size-5 transition-transform duration-200', aktif && 'translate-y-0.5')} />
+                <span>{item.label}</span>
               </Link>
             </li>
           );

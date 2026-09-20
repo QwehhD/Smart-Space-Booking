@@ -25,72 +25,74 @@ export function KartuReservasiAdmin({
   aksi?: ReactNode;
 }) {
   return (
-    <article className="bg-card shadow-xs grid gap-3 rounded-xl border p-4">
+    <article className="group relative flex flex-col gap-3.5 rounded-2xl border border-border/75 bg-card/85 p-5 shadow-xs transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md backdrop-blur-xs">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="font-mono text-sm font-medium">{reservasi.kode_booking}</p>
-          <p className="mt-1 truncate font-medium">
+          <p className="font-mono text-xs font-bold text-primary">{reservasi.kode_booking}</p>
+          <h3 className="mt-1 truncate font-bold text-base text-foreground group-hover:text-primary transition-colors">
             {reservasi.space?.nama_space ?? 'Space sudah dihapus'}
-          </p>
+          </h3>
         </div>
         <StatusBadge status={reservasi.status} />
       </div>
 
-      <div className="text-muted-foreground grid gap-1.5 text-sm">
-        <p className="flex items-center gap-1.5">
-          <Clock className="size-3.5 shrink-0" />
-          {tanggalDanJam(
-            reservasi.tanggal_reservasi,
-            reservasi.jam_mulai,
-            reservasi.jam_selesai,
-          )}
-          <span>({reservasi.durasi_jam} jam)</span>
+      <div className="grid gap-2 text-xs text-muted-foreground">
+        <p className="flex items-center gap-1.5 font-medium">
+          <Clock className="size-3.5 shrink-0 text-primary/70" />
+          <span>
+            {tanggalDanJam(
+              reservasi.tanggal_reservasi,
+              reservasi.jam_mulai,
+              reservasi.jam_selesai,
+            )}
+          </span>
+          <span className="text-muted-foreground/80 font-normal">({reservasi.durasi_jam} jam)</span>
         </p>
 
         <p className="flex items-center gap-1.5">
-          <User className="size-3.5 shrink-0" />
-          <span className="text-foreground truncate">
+          <User className="size-3.5 shrink-0 text-muted-foreground" />
+          <span className="font-bold text-foreground truncate">
             {reservasi.member.nama_member}
           </span>
         </p>
 
         <p className="flex items-center gap-1.5">
-          <Phone className="size-3.5 shrink-0" />
+          <Phone className="size-3.5 shrink-0 text-muted-foreground" />
           <a
             href={`tel:${reservasi.member.telp}`}
-            className="hover:text-foreground focus-visible:ring-ring rounded-sm hover:underline focus-visible:ring-2 focus-visible:outline-none"
+            className="text-primary font-medium hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-xs"
           >
             {reservasi.member.telp}
           </a>
         </p>
 
         {reservasi.check_in_time ? (
-          <p className="flex items-center gap-1.5">
+          <p className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-medium">
             <LogIn className="size-3.5 shrink-0" />
-            Masuk {waktuLengkap(reservasi.check_in_time)}
+            Check-in: {waktuLengkap(reservasi.check_in_time)}
           </p>
         ) : null}
 
         {reservasi.check_out_time ? (
-          <p className="flex items-center gap-1.5">
+          <p className="flex items-center gap-1.5 text-muted-foreground">
             <LogOut className="size-3.5 shrink-0" />
-            Keluar {waktuLengkap(reservasi.check_out_time)}
+            Check-out: {waktuLengkap(reservasi.check_out_time)}
           </p>
         ) : null}
 
         {reservasi.space ? (
-          <TipeBadge tipe={reservasi.space.tipe} className="mt-0.5 w-fit" />
+          <TipeBadge tipe={reservasi.space.tipe} className="mt-1 w-fit" />
         ) : null}
       </div>
 
-      <div className="flex flex-wrap items-end justify-between gap-3 border-t pt-3">
+      <div className="mt-auto flex flex-wrap items-end justify-between gap-3 border-t border-border/60 pt-3.5">
         <div>
-          <p className="text-muted-foreground text-xs">
+          <p className="text-[11px] text-muted-foreground font-medium">
             {reservasi.potongan_diskon > 0
-              ? `Setelah potongan ${reservasi.potongan_diskon.toLocaleString('id-ID')}`
+              ? `Setelah diskon ${reservasi.potongan_diskon.toLocaleString('id-ID')}`
               : 'Total bayar'}
           </p>
-          <Rupiah nilai={reservasi.total_bayar} className="font-semibold" />
+          <Rupiah nilai={reservasi.total_bayar} className="text-base font-bold text-foreground" />
         </div>
         {aksi}
       </div>

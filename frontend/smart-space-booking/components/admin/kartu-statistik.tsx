@@ -25,30 +25,30 @@ export function KartuStatistik({
   return (
     <div
       className={cn(
-        'bg-card shadow-xs grid gap-2 rounded-xl border p-4',
+        'group relative flex flex-col justify-between gap-3 rounded-2xl border border-border/75 bg-card/85 p-5 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-md backdrop-blur-xs',
         className,
       )}
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="text-muted-foreground text-[0.8rem] font-medium">
+        <span className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
           {label}
         </span>
-        {/* Ikon diberi bidang sendiri supaya terbaca sebagai penanda, bukan
-            sebagai bagian dari teks label di sebelahnya. */}
         {icon ? (
-          <span className="bg-accent text-accent-foreground grid size-7 shrink-0 place-items-center rounded-lg">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary shadow-2xs transition-transform duration-300 group-hover:scale-110">
             {icon}
           </span>
         ) : null}
       </div>
 
-      <p className="text-[1.6rem] leading-none font-semibold tracking-tight tabular-nums">
-        {nilai}
-      </p>
+      <div className="grid gap-1">
+        <p className="text-2xl sm:text-[1.75rem] font-extrabold tracking-tight text-foreground tabular-nums">
+          {nilai}
+        </p>
 
-      {keterangan ? (
-        <p className="text-muted-foreground text-xs">{keterangan}</p>
-      ) : null}
+        {keterangan ? (
+          <p className="text-muted-foreground text-xs font-medium">{keterangan}</p>
+        ) : null}
+      </div>
     </div>
   );
 }

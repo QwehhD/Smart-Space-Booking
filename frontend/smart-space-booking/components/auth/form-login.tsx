@@ -105,9 +105,14 @@ export function FormLogin({
           name="username"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username</FormLabel>
+              <FormLabel className="font-semibold text-xs text-foreground">Username</FormLabel>
               <FormControl>
-                <Input autoComplete="username" placeholder="budi" {...field} />
+                <Input
+                  autoComplete="username"
+                  placeholder="Masukkan username"
+                  className="h-11 rounded-xl border-border/75 bg-background text-sm"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -119,20 +124,21 @@ export function FormLogin({
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel className="font-semibold text-xs text-foreground">Password</FormLabel>
               <div className="relative">
                 <FormControl>
                   <Input
                     type={lihatPassword ? 'text' : 'password'}
                     autoComplete="current-password"
-                    className="pr-10"
+                    placeholder="••••••••"
+                    className="h-11 rounded-xl border-border/75 bg-background pr-10 text-sm"
                     {...field}
                   />
                 </FormControl>
                 <button
                   type="button"
                   onClick={() => setLihatPassword((v) => !v)}
-                  className="text-muted-foreground hover:text-foreground focus-visible:ring-ring absolute inset-y-0 right-0 flex items-center px-3 focus-visible:ring-2 focus-visible:outline-none"
+                  className="text-muted-foreground hover:text-foreground focus-visible:ring-ring absolute inset-y-0 right-0 flex items-center px-3.5 focus-visible:ring-2 focus-visible:outline-none"
                   aria-label={
                     lihatPassword ? 'Sembunyikan password' : 'Tampilkan password'
                   }
@@ -149,14 +155,18 @@ export function FormLogin({
           )}
         />
 
-        <Button type="submit" disabled={mutasi.isPending} className="mt-2">
-          <LogIn />
-          {mutasi.isPending ? 'Memproses…' : 'Masuk'}
+        <Button
+          type="submit"
+          disabled={mutasi.isPending}
+          className="mt-2 h-11 text-sm font-bold shadow-md shadow-primary/25 hover:shadow-primary/35"
+        >
+          <LogIn className="size-4" />
+          {mutasi.isPending ? 'Memproses…' : 'Masuk Sekarang'}
         </Button>
 
-        <p className="text-muted-foreground text-center text-sm">
+        <p className="text-muted-foreground text-center text-xs sm:text-sm pt-2">
           Belum punya akun?{' '}
-          <Link href={tautanDaftar} className="text-primary font-medium hover:underline">
+          <Link href={tautanDaftar} className="text-primary font-bold hover:underline">
             Daftar di sini
           </Link>
         </p>

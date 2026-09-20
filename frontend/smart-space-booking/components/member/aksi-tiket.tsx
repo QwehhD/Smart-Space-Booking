@@ -40,14 +40,21 @@ export function AksiTiket({ kodeBooking }: { kodeBooking: string }) {
   }
 
   return (
-    <div className="flex flex-wrap gap-2 print:hidden">
-      <Button variant="outline" onClick={() => window.print()}>
-        <Printer />
+    <div className="flex flex-wrap items-center justify-center gap-3 print:hidden">
+      <Button
+        className="font-semibold shadow-md shadow-primary/20 hover:shadow-primary/35"
+        onClick={() => window.print()}
+      >
+        <Printer className="size-4" />
         Cetak / Simpan PDF
       </Button>
-      <Button variant="outline" onClick={() => void bagikan()}>
-        <Share2 />
-        Bagikan
+      <Button
+        variant="outline"
+        className="font-semibold"
+        onClick={() => void bagikan()}
+      >
+        <Share2 className="size-4" />
+        Bagikan Tiket
       </Button>
     </div>
   );

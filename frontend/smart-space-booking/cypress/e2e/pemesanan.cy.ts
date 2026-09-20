@@ -65,7 +65,7 @@ describe('Pemesanan space', () => {
     cy.contains('label', 'Durasi').parent().find('button').click();
     cy.contains('[role="option"]', '3 jam').click();
 
-    cy.contains('Tersedia pada 09:00', { timeout: 10_000 }).should('exist');
+    cy.contains('Jadwal tersedia', { timeout: 10_000 }).should('exist');
 
     // Sebelum promo: 20.000 x 3 jam.
     cy.contains('Total bayar').parent().should('contain', 'Rp 60.000');

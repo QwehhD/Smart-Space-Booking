@@ -273,14 +273,18 @@ export function FormRegisterAdmin() {
           )}
         />
 
-        <Button type="submit" disabled={mutasi.isPending} className="mt-2">
-          <Building2 />
-          {mutasi.isPending ? 'Mendaftarkan…' : 'Daftarkan lokasi'}
+        <Button
+          type="submit"
+          disabled={mutasi.isPending}
+          className="mt-2 h-11 text-sm font-bold shadow-md shadow-primary/25 hover:shadow-primary/35"
+        >
+          <Building2 className="size-4" />
+          {mutasi.isPending ? 'Mendaftarkan Lokasi…' : 'Daftarkan Coworking Space'}
         </Button>
 
-        <p className="text-muted-foreground text-center text-sm">
+        <p className="text-muted-foreground text-center text-xs sm:text-sm pt-2">
           Sudah punya akun pengelola?{' '}
-          <Link href="/admin/login" className="text-primary font-medium hover:underline">
+          <Link href="/admin/login" className="text-primary font-bold hover:underline">
             Masuk di sini
           </Link>
         </p>

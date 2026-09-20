@@ -35,17 +35,14 @@ function DaftarMenu({ onPilih }: { onPilih?: () => void }) {
               onClick={onPilih}
               aria-current={aktif ? 'page' : undefined}
               className={cn(
-                'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-ring relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none',
-                // Menu aktif diberi penanda garis di tepi kiri, bukan hanya
-                // latar berbeda, supaya posisi saat ini tetap terbaca sekilas
-                // pada daftar yang cukup panjang.
+                'relative flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
                 aktif
-                  ? 'bg-sidebar-accent text-sidebar-accent-foreground before:bg-sidebar-primary before:absolute before:top-1/2 before:left-0 before:h-5 before:w-[3px] before:-translate-y-1/2 before:rounded-r-full'
-                  : 'text-muted-foreground',
+                  ? 'bg-primary/10 text-primary font-semibold shadow-2xs before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-1 before:rounded-r-full before:bg-primary'
+                  : 'text-muted-foreground hover:bg-sidebar-accent hover:text-foreground hover:translate-x-0.5',
               )}
             >
-              <Icon className="size-4" />
-              {item.label}
+              <Icon className={cn('size-4 shrink-0 transition-colors', aktif ? 'text-primary' : 'text-muted-foreground')} />
+              <span>{item.label}</span>
             </Link>
           </li>
         );
@@ -59,24 +56,35 @@ export function AdminSidebar() {
   const { namaTampilan } = useSesi();
 
   return (
-    <aside className="bg-sidebar hidden w-60 shrink-0 border-r md:flex md:flex-col">
-      <div className="flex h-14 items-center border-b px-4">
+    <aside className="bg-sidebar hidden w-64 shrink-0 border-r border-border/70 md:flex md:flex-col">
+      <div className="flex h-16 items-center border-b border-border/70 px-5">
         <Merek />
       </div>
 
-      <p className="text-muted-foreground px-4 pt-3 text-[0.68rem] font-semibold tracking-[0.12em] uppercase">
-        Panel Pengelola
-      </p>
+      <div className="px-5 pt-4 pb-1 flex items-center justify-between">
+        <p className="text-muted-foreground text-[0.68rem] font-bold tracking-[0.14em] uppercase">
+          Panel Pengelola
+        </p>
+        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[0.65rem] font-semibold text-emerald-600 dark:text-emerald-400">
+          <span className="size-1 rounded-full bg-emerald-500 animate-pulse" />
+          Aktif
+        </span>
+      </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto p-3">
+      <div className="min-h-0 flex-1 overflow-y-auto px-3 py-2">
         <DaftarMenu />
       </div>
 
-      <div className="flex items-center gap-2 border-t px-3 py-2.5">
+      <div className="flex items-center gap-2 border-t border-border/70 px-4 py-3 bg-muted/20">
         {namaTampilan ? (
-          <span className="text-muted-foreground line-clamp-2 min-w-0 flex-1 text-xs">
-            {namaTampilan}
-          </span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xs font-semibold text-foreground">
+              {namaTampilan}
+            </p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+              Administrator
+            </p>
+          </div>
         ) : (
           <span className="flex-1" />
         )}

@@ -72,8 +72,8 @@ describe('Autentikasi', () => {
   it('menyambut tamu di beranda dengan ajakan yang jelas', () => {
     cy.visit('/');
 
-    cy.contains('Cari meja kerja atau ruang rapat').should('exist');
-    cy.contains('a', 'Lihat ketersediaan').should('have.attr', 'href', '/spaces');
+    cy.contains('Sewa Ruang Kerja Modern').should('exist');
+    cy.contains('a', 'Jelajahi Ruangan').should('have.attr', 'href', '/spaces');
     cy.contains('a', 'Masuk ke panel pengelola').should(
       'have.attr',
       'href',

@@ -16,13 +16,17 @@ export function Merek({
   tampilkanNama?: boolean;
 }) {
   return (
-    <span className={cn('flex items-center gap-2', className)}>
-      <span className="bg-primary text-primary-foreground shadow-xs grid size-7 shrink-0 place-items-center rounded-[0.5rem]">
+    <span className={cn('group flex items-center gap-2.5 select-none', className)}>
+      <span className="relative flex size-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary via-primary/90 to-primary/70 text-primary-foreground shadow-sm shadow-primary/25 transition-all duration-300 group-hover:scale-105 group-hover:shadow-md group-hover:shadow-primary/40">
+        <span
+          aria-hidden
+          className="absolute inset-0 rounded-xl bg-white/20 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        />
         <svg
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden
-          className="size-[1.05rem]"
+          className="size-4.5 transition-transform duration-300 group-hover:scale-110"
         >
           <rect
             x="3.25"
@@ -31,7 +35,7 @@ export function Merek({
             height="15.5"
             rx="3"
             stroke="currentColor"
-            strokeWidth="1.8"
+            strokeWidth="1.9"
           />
           <rect x="7" y="10.5" width="10" height="2.6" rx="1.3" fill="currentColor" />
           <rect x="10.7" y="13.1" width="2.6" height="3.4" rx="1" fill="currentColor" />
@@ -40,11 +44,12 @@ export function Merek({
 
       {tampilkanNama ? (
         <span className="grid leading-none">
-          <span className="text-[0.9rem] font-semibold tracking-tight">
+          <span className="text-[0.92rem] font-bold tracking-tight text-foreground transition-colors duration-200 group-hover:text-primary">
             Smart Space
           </span>
-          <span className="text-muted-foreground mt-0.5 text-[0.62rem] font-medium tracking-[0.14em] uppercase">
-            Booking
+          <span className="mt-0.5 flex items-center gap-1 text-[0.62rem] font-bold tracking-[0.16em] uppercase text-primary/80">
+            <span>Booking</span>
+            <span className="inline-block size-1 rounded-full bg-primary animate-pulse" />
           </span>
         </span>
       ) : null}

@@ -1,4 +1,4 @@
-import { ArrowLeft, Building2, Phone, Users } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Building2, Phone, Users } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
@@ -73,87 +73,115 @@ export default async function DetailSpacePage({
   const bolehPesan = role !== 'admin_space';
 
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-8 masuk max-w-5xl mx-auto pb-12">
       <Button
         variant="ghost"
         size="sm"
-        className="w-fit -ml-2"
+        className="w-fit -ml-2 text-muted-foreground hover:text-foreground font-medium"
         render={
-          <Link href="/spaces">
-            <ArrowLeft />
+          <Link href="/spaces" className="flex items-center gap-2">
+            <ArrowLeft className="size-4" />
             Kembali ke katalog
           </Link>
         }
       />
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-start">
-        <SpaceImage
-          url={space.foto_url}
-          nama={space.nama_space}
-          priority
-          className="aspect-[16/10] w-full rounded-lg border"
-        />
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2.2fr)] lg:items-start">
+        {/* Gambar Galeri Utama */}
+        <div className="group relative overflow-hidden rounded-3xl border border-border/80 bg-card shadow-lg">
+          <SpaceImage
+            url={space.foto_url}
+            nama={space.nama_space}
+            priority
+            className="aspect-[16/11] w-full object-cover transition-transform duration-500 group-hover:scale-103"
+          />
+          <div className="absolute top-4 right-4 z-10">
+            <TipeBadge tipe={space.tipe} className="shadow-lg backdrop-blur-md text-xs px-3 py-1" />
+          </div>
+        </div>
 
-        <div className="grid gap-5">
+        {/* Panel Ringkasan & Booking */}
+        <div className="flex flex-col gap-6 rounded-3xl border border-border/80 bg-card/80 p-6 shadow-sm backdrop-blur-xs">
           <div className="grid gap-2">
-            <TipeBadge tipe={space.tipe} className="w-fit" />
-            <h1 className="text-2xl font-semibold tracking-tight text-balance">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground text-balance">
               {space.nama_space}
             </h1>
-            <p className="text-muted-foreground flex items-center gap-1.5 text-sm">
-              <Building2 className="size-4 shrink-0" />
-              {space.owner.nama_coworking}
+            <p className="text-muted-foreground flex items-center gap-2 text-sm">
+              <Building2 className="size-4 shrink-0 text-primary" />
+              <span className="font-medium text-foreground">{space.owner.nama_coworking}</span>
             </p>
           </div>
 
-          <dl className="grid grid-cols-2 gap-3">
-            <div className="rounded-lg border p-3">
-              <dt className="text-muted-foreground text-xs">Harga sewa</dt>
-              <dd className="mt-0.5 font-semibold">
-                <Rupiah nilai={space.harga_per_jam} />
-                <span className="text-muted-foreground font-normal"> / jam</span>
+          <dl className="grid grid-cols-2 gap-3.5">
+            <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
+              <dt className="text-muted-foreground text-xs font-medium">Tarif Sewa</dt>
+              <dd className="mt-1">
+                <Rupiah
+                  nilai={space.harga_per_jam}
+                  className="text-xl font-extrabold text-foreground"
+                />
+                <span className="text-muted-foreground text-xs font-normal"> / jam</span>
               </dd>
             </div>
-            <div className="rounded-lg border p-3">
-              <dt className="text-muted-foreground text-xs">Kapasitas</dt>
-              <dd className="mt-0.5 flex items-center gap-1.5 font-semibold">
-                <Users className="size-4" />
-                {space.kapasitas} orang
+            <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
+              <dt className="text-muted-foreground text-xs font-medium">Kapasitas Maksimal</dt>
+              <dd className="mt-1 flex items-center gap-1.5 font-extrabold text-xl text-foreground">
+                <Users className="size-5 text-primary" />
+                <span>{space.kapasitas} <span className="text-xs font-normal text-muted-foreground">orang</span></span>
               </dd>
             </div>
           </dl>
 
           {bolehPesan ? (
-            <Button size="lg" render={<Link href={tautanPesan}>Pesan Sekarang</Link>} />
+            <Button
+              size="lg"
+              className="h-12 w-full text-base font-bold shadow-lg shadow-primary/25"
+              render={
+                <Link href={tautanPesan} className="flex items-center justify-center gap-2">
+                  Pesan Sekarang
+                  <ArrowRight className="size-4" />
+                </Link>
+              }
+            />
           ) : (
-            <p className="text-muted-foreground rounded-lg border border-dashed p-3 text-sm">
+            <div className="rounded-2xl border border-dashed border-border/80 p-4 text-xs text-muted-foreground bg-muted/20">
               Kamu sedang masuk sebagai pengelola. Pemesanan hanya dapat dilakukan
               dari akun member.
-            </p>
+            </div>
           )}
         </div>
       </div>
 
-      <section className="grid gap-2">
-        <h2 className="text-lg font-semibold">Fasilitas</h2>
-        <p className="text-muted-foreground max-w-prose leading-relaxed whitespace-pre-line">
+      {/* Deskripsi & Fasilitas */}
+      <section className="rounded-3xl border border-border/80 bg-card p-6 sm:p-7 shadow-2xs grid gap-3">
+        <h2 className="text-lg font-bold tracking-tight text-foreground">
+          Deskripsi & Fasilitas Ruang
+        </h2>
+        <p className="text-muted-foreground leading-relaxed text-sm sm:text-base whitespace-pre-line text-pretty">
           {space.deskripsi}
         </p>
       </section>
 
-      <section className="grid gap-2">
-        <h2 className="text-lg font-semibold">Pengelola</h2>
-        <div className="grid gap-1.5 rounded-lg border p-4">
-          <p className="font-medium">{space.owner.nama_coworking}</p>
-          <p className="text-muted-foreground text-sm">
-            {space.owner.nama_pemilik}
-          </p>
-          <p className="flex items-center gap-1.5 text-sm">
-            <Phone className="text-muted-foreground size-3.5" />
-            <a href={`tel:${space.owner.telp}`} className="hover:underline">
-              {space.owner.telp}
-            </a>
-          </p>
+      {/* Info Pengelola Coworking */}
+      <section className="rounded-3xl border border-border/80 bg-card p-6 sm:p-7 shadow-2xs grid gap-3">
+        <h2 className="text-lg font-bold tracking-tight text-foreground">
+          Informasi Pengelola
+        </h2>
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border/60 bg-muted/20 p-4">
+          <div className="grid gap-1">
+            <p className="font-bold text-base text-foreground">{space.owner.nama_coworking}</p>
+            <p className="text-muted-foreground text-xs">
+              Penanggung jawab: {space.owner.nama_pemilik}
+            </p>
+          </div>
+
+          <a
+            href={`tel:${space.owner.telp}`}
+            className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/10 px-4 py-2 text-xs font-semibold text-primary hover:bg-primary/20 transition-colors"
+          >
+            <Phone className="size-3.5" />
+            <span>Hubungi: {space.owner.telp}</span>
+          </a>
         </div>
       </section>
     </div>

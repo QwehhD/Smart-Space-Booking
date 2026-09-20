@@ -3,6 +3,7 @@ import {
   CalendarCheck,
   ClockAlert,
   LayoutGrid,
+  ScanLine,
   Wallet,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -57,15 +58,31 @@ export default async function DashboardPage() {
   const sedangBerlangsung = agenda.filter((r) => r.status === 'aktif').length;
 
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-6 masuk">
       <PageHeader
         judul={`Halo, ${profil.nama_coworking}`}
         keterangan={tanggalDenganHari(hariIni)}
         aksi={
-          <Button variant="outline" render={<Link href="/admin/reservasi">
-            <CalendarCheck />
-            Kelola reservasi
-          </Link>} />
+          <div className="flex items-center gap-2">
+            <Button
+              className="font-semibold shadow-sm shadow-primary/25"
+              render={
+                <Link href="/admin/check-in" className="flex items-center gap-2">
+                  <ScanLine className="size-4" />
+                  Scan Check-in
+                </Link>
+              }
+            />
+            <Button
+              variant="outline"
+              render={
+                <Link href="/admin/reservasi" className="flex items-center gap-2">
+                  <CalendarCheck className="size-4" />
+                  Kelola Reservasi
+                </Link>
+              }
+            />
+          </div>
         }
       />
 
@@ -160,32 +177,32 @@ export default async function DashboardPage() {
         </PanelDaftar>
       </div>
 
-      <section className="bg-card shadow-xs grid gap-3 rounded-xl border p-4">
+      <section className="rounded-2xl border border-border/75 bg-card/85 p-5 shadow-xs backdrop-blur-xs grid gap-4">
         <div className="flex items-center justify-between gap-3 px-1">
           <div className="grid gap-0.5">
-            <h2 className="font-semibold">Ruangan bulan ini</h2>
-            <p className="text-muted-foreground text-xs">
-              {spaces.length} ruangan aktif • {namaBulan(bulan, tahun)}
+            <h2 className="text-base font-bold text-foreground">Kinerja Ruangan Bulan Ini</h2>
+            <p className="text-muted-foreground text-xs font-medium">
+              {spaces.length} ruangan aktif terdaftar • {namaBulan(bulan, tahun)}
             </p>
           </div>
 
-          <Button variant="outline" size="sm" render={<Link href="/admin/spaces">
-            <LayoutGrid />
-            Kelola ruangan
+          <Button variant="outline" size="sm" className="font-semibold" render={<Link href="/admin/spaces" className="flex items-center gap-1.5">
+            <LayoutGrid className="size-3.5" />
+            Kelola Ruangan
           </Link>} />
         </div>
 
-        <dl className="grid gap-2 sm:grid-cols-3">
+        <dl className="grid gap-3 sm:grid-cols-3">
           {laporan.rincian_per_tipe_space.map((tipe) => (
-            <div key={tipe.tipe} className="bg-muted/40 grid gap-1 rounded-md p-3">
-              <dt className="text-muted-foreground text-xs font-medium">
+            <div key={tipe.tipe} className="group rounded-xl border border-border/60 bg-muted/25 p-4 transition-all duration-200 hover:border-primary/30 hover:bg-muted/40">
+              <dt className="text-muted-foreground text-xs font-bold uppercase tracking-wider">
                 {tipe.label}
               </dt>
-              <dd className="font-semibold tabular-nums">
+              <dd className="mt-1 font-extrabold text-lg sm:text-xl text-foreground tabular-nums">
                 {rupiah(tipe.total_pendapatan)}
               </dd>
-              <dd className="text-muted-foreground text-xs tabular-nums">
-                {tipe.total_booking} booking • {tipe.total_jam} jam
+              <dd className="text-muted-foreground text-xs tabular-nums mt-0.5 font-medium">
+                {tipe.total_booking} pemesanan • {tipe.total_jam} jam total
               </dd>
             </div>
           ))}

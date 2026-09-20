@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { FormLogin } from '@/components/auth/form-login';
 
 export const metadata = { title: 'Masuk' };
@@ -10,10 +11,24 @@ export default async function LoginMemberPage({
 
   return (
     <div className="grid gap-6">
+      <div className="flex rounded-full border border-border/75 bg-muted/40 p-1">
+        <span className="flex-1 rounded-full py-1.5 text-center text-xs font-bold bg-background text-primary shadow-xs">
+          Member
+        </span>
+        <Link
+          href="/admin/login"
+          className="flex-1 rounded-full py-1.5 text-center text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Pengelola
+        </Link>
+      </div>
+
       <div className="grid gap-1.5">
-        <h1 className="text-2xl font-semibold tracking-tight">Masuk</h1>
-        <p className="text-muted-foreground text-sm">
-          Masuk untuk memesan ruangan dan melihat status pemesananmu.
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
+          Masuk ke Akun Member
+        </h1>
+        <p className="text-muted-foreground text-xs sm:text-sm">
+          Akses riwayat pemesanan ruangan dan e-ticket QR milikmu.
         </p>
       </div>
 
@@ -23,11 +38,11 @@ export default async function LoginMemberPage({
         tautanDaftar="/register"
       />
 
-      <p className="text-muted-foreground border-t pt-4 text-center text-sm">
+      <p className="text-muted-foreground border-t border-border/70 pt-4 text-center text-xs">
         Pengelola coworking space?{' '}
-        <a href="/admin/login" className="text-primary font-medium hover:underline">
+        <Link href="/admin/login" className="text-primary font-bold hover:underline">
           Masuk sebagai pengelola
-        </a>
+        </Link>
       </p>
     </div>
   );
