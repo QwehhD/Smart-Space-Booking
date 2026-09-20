@@ -15,12 +15,18 @@ import type { SpacePublik } from '@/types/entities';
  */
 export function SpaceCard({ space }: { space: SpacePublik }) {
   return (
-    <article className="group bg-card flex flex-col overflow-hidden rounded-lg border transition-shadow hover:shadow-md">
-      <Link href={`/spaces/${space.id}`} className="block">
+    <article className="group bg-card shadow-xs hover:shadow-md hover:border-primary/25 flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:-translate-y-0.5">
+      <Link href={`/spaces/${space.id}`} className="relative block overflow-hidden">
         <SpaceImage
           url={space.foto_url}
           nama={space.nama_space}
-          className="aspect-[16/10] w-full"
+          className="aspect-[16/10] w-full transition-transform duration-300 group-hover:scale-[1.03]"
+        />
+        {/* Gradasi tipis di bawah gambar supaya batas antara foto dan kartu
+            tidak terlihat terpotong mendadak, terutama pada foto yang terang. */}
+        <div
+          aria-hidden
+          className="from-card/45 pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t to-transparent"
         />
       </Link>
 
@@ -48,15 +54,18 @@ export function SpaceCard({ space }: { space: SpacePublik }) {
           {space.deskripsi}
         </p>
 
-        <div className="mt-auto flex items-end justify-between gap-3 pt-1">
+        <div className="mt-auto flex items-end justify-between gap-3 border-t pt-3">
           <div className="grid gap-0.5">
             <p className="text-muted-foreground flex items-center gap-1.5 text-xs">
               <Users className="size-3.5" />
               {space.kapasitas} orang
             </p>
             <p className="text-sm">
-              <Rupiah nilai={space.harga_per_jam} className="font-semibold" />
-              <span className="text-muted-foreground"> / jam</span>
+              <Rupiah
+                nilai={space.harga_per_jam}
+                className="text-base font-semibold"
+              />
+              <span className="text-muted-foreground text-xs"> / jam</span>
             </p>
           </div>
 

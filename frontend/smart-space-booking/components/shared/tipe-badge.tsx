@@ -13,7 +13,7 @@ export function TipeBadge({
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium whitespace-nowrap',
+        'bg-muted/60 text-muted-foreground inline-flex items-center rounded-full border px-2.5 py-0.5 text-[0.7rem] font-medium whitespace-nowrap',
         className,
       )}
     >

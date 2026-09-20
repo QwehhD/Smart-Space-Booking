@@ -23,13 +23,28 @@ export function KartuStatistik({
   className?: string;
 }) {
   return (
-    <div className={cn('bg-card grid gap-2 rounded-lg border p-4', className)}>
-      <div className="text-muted-foreground flex items-center justify-between gap-2">
-        <span className="text-sm font-medium">{label}</span>
-        {icon}
+    <div
+      className={cn(
+        'bg-card shadow-xs grid gap-2 rounded-xl border p-4',
+        className,
+      )}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-muted-foreground text-[0.8rem] font-medium">
+          {label}
+        </span>
+        {/* Ikon diberi bidang sendiri supaya terbaca sebagai penanda, bukan
+            sebagai bagian dari teks label di sebelahnya. */}
+        {icon ? (
+          <span className="bg-accent text-accent-foreground grid size-7 shrink-0 place-items-center rounded-lg">
+            {icon}
+          </span>
+        ) : null}
       </div>
 
-      <p className="text-2xl font-semibold tabular-nums">{nilai}</p>
+      <p className="text-[1.6rem] leading-none font-semibold tracking-tight tabular-nums">
+        {nilai}
+      </p>
 
       {keterangan ? (
         <p className="text-muted-foreground text-xs">{keterangan}</p>

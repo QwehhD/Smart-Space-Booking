@@ -21,11 +21,15 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed px-6 py-12 text-center',
+        'bg-muted/30 flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed px-6 py-12 text-center',
         className,
       )}
     >
-      {icon ? <div className="text-muted-foreground">{icon}</div> : null}
+      {icon ? (
+        <div className="bg-background text-muted-foreground ring-border grid size-14 place-items-center rounded-full ring-1">
+          {icon}
+        </div>
+      ) : null}
       <div className="grid gap-1">
         <p className="font-medium">{judul}</p>
         {keterangan ? (
