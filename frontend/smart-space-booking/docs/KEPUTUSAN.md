@@ -1013,3 +1013,53 @@ Cypress, sehingga satu kesalahan tipe di spec membuat build aplikasi gagal.
 `cypress/` dan `cypress.config.ts` karena itu dikeluarkan dari `tsconfig.json`
 utama dan diberi `cypress/tsconfig.json` tersendiri, sehingga keduanya tetap
 diperiksa tipenya tanpa saling menjatuhkan.
+
+## 76. Pengujian menghasilkan dokumentasi bergambar
+
+`npm run e2e:docs` menjalankan seluruh pengujian lalu menyusun tangkapan
+layarnya menjadi satu halaman HTML di `cypress/screenshots/index.html`. Halaman
+itu dapat langsung dibuka di peramban, dan dicetak ke PDF lewat dialog cetak bila
+ingin dilampirkan ke dokumen UKK.
+
+Gambarnya diambil lewat `cy.potret('judul')`, perintah sendiri yang menomori
+berkasnya menurut urutan pemanggilan. Penomoran itu perlu karena Cypress
+menaruh seluruh gambar satu berkas spec di dalam satu folder yang sama dan
+mengurutkannya menurut abjad; tanpa nomor, alurnya teracak. Nomornya menerus
+untuk satu berkas spec, bukan disetel ulang tiap pengujian — kesalahan yang
+sempat terjadi dan membuat beberapa berkas sama-sama bernomor "01".
+
+Hasilnya 23 gambar dari 3 berkas pengujian, yang bila dibuka berurutan
+menceritakan alurnya: dari halaman masuk, katalog, pemesanan berpromo, sampai
+e-ticket ber-QR dan rekapitulasi pendapatan.
+
+Rekaman video sengaja dibiarkan mati karena berkasnya besar sementara rangkaian
+gambar sudah cukup menjelaskan. `cypress/screenshots/` tidak ikut di-commit dan
+dibuat ulang setiap kali dijalankan.
+
+## 77. Perbaikan: baris melebar menyebabkan gulungan mendatar di layar ponsel
+
+Baris tab yang sengaja melebar sampai tepi layar memakai pola `-mx-4 px-4`.
+Ketika ada bilah gulung vertikal, lebar baris itu melampaui viewport sekitar
+lima piksel, sehingga `/reservasi` dapat digulung ke samping di layar 390px —
+cacat yang tidak terlihat di layar lebar.
+
+Diperbaiki dengan `overflow-x-clip` pada elemen `main` di kedua bingkai.
+`overflow-x-clip` dipilih, bukan `overflow-x-hidden`, karena ia tidak membuat
+wadah gulung baru sehingga navigasi yang memakai `position: sticky` tetap
+bekerja.
+
+Pemeriksaan luapan kini dilakukan terukur, bukan dikira-kira: membandingkan
+`scrollWidth` dengan `clientWidth` pada sepuluh halaman di lebar 390px dan
+1280px. Seluruhnya bersih.
+
+## 78. Pelajaran: memeriksa halaman dengan curl tidak membuktikan halaman tampil
+
+Selama pengembangan, halaman berkali-kali diperiksa dengan `curl` lalu dicari
+teksnya. Cara itu ternyata tidak cukup. Next menaruh hasil streaming di dalam
+`<div hidden>` sebelum memindahkannya ke tempatnya, sehingga teks yang ditemukan
+`curl` bisa saja berada di bagian yang belum tampil.
+
+Hal ini terbukti saat menyiapkan Cypress: di Electron bawaannya, seluruh rute
+yang punya `loading.tsx` terbaca kosong padahal `curl` menemukan seluruh isinya.
+Yang benar-benar membuktikan halaman tampil adalah memeriksanya di peramban —
+atau, seperti sekarang, melihat tangkapan layarnya.
