@@ -1138,3 +1138,27 @@ backend memang tidak menyediakan penghapusan reservasi. Space ujinya sendiri
 selalu dihapus sehingga katalog tidak pernah ikut kotor. Bila suatu saat perlu
 dibersihkan lagi, hapus reservasi yang menempel pada space bernama `Uji E2E%`
 beserta space-nya, atau jalankan ulang seed pada database bersih.
+
+## 82. Beranda diganti dari halaman sementara menjadi halaman muka sungguhan
+
+`app/page.tsx` masih berisi halaman sementara dari fase fondasi, lengkap dengan
+kalimat "Halaman katalog, pemesanan, dan panel pengelola menyusul pada tahap
+berikutnya" — padahal ketiganya sudah lama selesai. Halaman itu pula yang
+pertama dilihat penguji ketika membuka alamat aplikasinya.
+
+Sekarang berisi halaman muka yang sebenarnya: ajakan utama, tiga hal yang
+membedakan aplikasi ini, sorotan space yang sedang tersedia, dan jalan masuk
+terpisah untuk pengelola.
+
+Dua hal yang disengaja:
+
+- **Space yang dipamerkan diambil dari katalog yang sama** dengan yang dilihat
+  pengunjung, bukan dari daftar yang ditulis tangan, sehingga halaman muka tidak
+  pernah menjanjikan ruangan yang sebenarnya tidak ada. Harga "mulai dari" pun
+  dihitung dari data itu. Bila backend sedang tidak dapat dihubungi, bagian itu
+  dilewati dan sisa halamannya tetap tampil — halaman muka tidak boleh gagal
+  hanya karena katalognya belum siap.
+- **Pengguna yang sudah masuk langsung diantar ke beranda miliknya**, member ke
+  katalog dan pengelola ke dashboard. Ini persis rencana yang dicatat pada
+  halaman sementara dahulu, dan baru sekarang dijalankan. Pengalihannya diuji
+  untuk kedua role.
