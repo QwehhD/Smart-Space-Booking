@@ -65,6 +65,35 @@ describe('Autentikasi', () => {
     cy.location('pathname').should('eq', '/spaces');
   });
 
+  /**
+   * Beranda hanya berguna bagi pengunjung yang belum punya sesi. Yang sudah
+   * masuk langsung diantar ke beranda miliknya masing-masing.
+   */
+  it('menyambut tamu di beranda dengan ajakan yang jelas', () => {
+    cy.visit('/');
+
+    cy.contains('Cari meja kerja atau ruang rapat').should('exist');
+    cy.contains('a', 'Lihat ketersediaan').should('have.attr', 'href', '/spaces');
+    cy.contains('a', 'Masuk ke panel pengelola').should(
+      'have.attr',
+      'href',
+      '/admin/login',
+    );
+    cy.potret('Beranda untuk pengunjung');
+  });
+
+  it('mengantar member dari beranda ke katalog', () => {
+    cy.masukSebagai('budi', 'Secret123!');
+    cy.visit('/');
+    cy.location('pathname').should('eq', '/spaces');
+  });
+
+  it('mengantar pengelola dari beranda ke dashboard', () => {
+    cy.masukSebagai('admin_moklet', 'Admin123!');
+    cy.visit('/');
+    cy.location('pathname').should('eq', '/admin/dashboard');
+  });
+
   it('mengalihkan pengguna yang sudah masuk dari halaman masuk', () => {
     cy.masukSebagai('budi', 'Secret123!');
 
