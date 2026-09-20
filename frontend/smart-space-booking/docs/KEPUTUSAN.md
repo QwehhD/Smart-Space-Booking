@@ -940,3 +940,76 @@ membuat perubahan tata letak ikut melambat. Kartu space mendapat angkatan halus
 dan gambarnya membesar sedikit saat disentuh.
 
 Seluruhnya dimatikan di bawah `prefers-reduced-motion: reduce`.
+
+## 71. Pengujian ujung ke ujung memakai Cypress, melengkapi Vitest
+
+Vitest menguji logika murni di `lib/` tanpa peramban. Cypress melengkapinya dari
+sisi lain: menjalankan aplikasi yang benar-benar berjalan beserta backend-nya,
+lalu mengisi form dan menekan tombol seperti yang dilakukan pengguna.
+
+Keenam belas pengujiannya terbagi tiga berkas: autentikasi beserta proteksi
+rute, alur pemesanan dari katalog sampai e-ticket, dan operasional pengelola
+dari persetujuan sampai check-out. Yang dijaga adalah alur yang paling merugikan
+bila diam-diam rusak, terutama harga yang ditagihkan.
+
+Backend dan frontend harus sudah berjalan sebelum `npm run e2e` dipanggil;
+Cypress tidak menyalakannya sendiri supaya jalannya cepat dan kegagalan server
+tidak tersamar sebagai kegagalan pengujian.
+
+## 72. Cypress dijalankan di Chrome, bukan Electron bawaannya
+
+Dengan Electron bawaan Cypress, **setiap rute yang memiliki `loading.tsx`
+terlihat kosong**: batas Suspense-nya tidak pernah diselesaikan, kerangka muatnya
+tetap tampil, dan konten aslinya tertinggal di dalam `<div hidden>` tempat Next
+menaruh hasil streaming sebelum memindahkannya.
+
+Ini sempat terbaca seperti regresi serius pada aplikasi. Pemeriksaan menunjukkan
+HTML yang dikirim server sudah lengkap dan benar — `$RC("B:0","S:0")` beserta
+definisinya ada — dan di Chrome sungguhan batasnya selesai dengan normal
+(`<!--$-->`, konten berada di dalam `main`). Jadi ini murni perbedaan peramban.
+
+Karena itu `npm run e2e` memakai `--browser chrome`. Perlu dicatat bahwa
+memeriksa halaman dengan `curl` lalu mencari teksnya **tidak cukup** untuk
+membuktikan halaman tampil: teks yang ditemukan bisa saja berada di dalam
+`<div hidden>` milik streaming.
+
+## 73. Sesi di-cache dengan `cy.session()` karena backend membatasi laju
+
+Backend membatasi endpoint auth pada sepuluh percobaan per menit per alamat IP
+(keputusan 18 di backend). Tanpa cache, satu kali menjalankan suite sudah cukup
+menembus batas itu dan seluruh pengujian sesudahnya gagal dengan 429 — kegagalan
+yang tidak ada hubungannya dengan yang sedang diuji.
+
+`cy.session()` menjalankan login sekali per pengguna lalu memulihkan cookienya
+pada pengujian berikutnya, sehingga jumlah permintaan auth tetap sedikit berapa
+pun banyaknya pengujian. Form login itu sendiri tetap diuji lewat antarmuka di
+`auth.cy.ts`.
+
+## 74. Pengujian membuat space sendiri agar dapat dijalankan berulang
+
+Halaman check-in hanya memuat agenda hari ini, sehingga pemesanan ujinya harus
+bertanggal hari ini — dan jadwal hari ini yang sudah terpakai tidak pernah bebas
+lagi. Percobaan pertama memakai space seed, dan jalan kedua langsung gagal
+dengan "Space tidak tersedia" karena bentrok dengan sisa jalan pertama.
+
+Sekarang spec operasional membuat **space miliknya sendiri** lewat API di awal
+lalu menghapusnya di akhir, sehingga jadwalnya selalu kosong dan katalog kembali
+seperti semula. Spec pemesanan memakai cara yang setara: tanggalnya digeser
+berdasarkan waktu jalan sehingga setiap jalan memakai hari yang berbeda.
+
+Keberulangannya sudah dibuktikan dengan menjalankan suite dua kali berturut-turut
+dan keduanya lolos penuh.
+
+Satu hal yang perlu diketahui: reservasi yang dibuat pengujian tetap tersimpan,
+karena backend tidak menyediakan penghapusan reservasi. Reservasi itu menempel
+pada space yang sudah dihapus sehingga tidak mengganggu jadwal maupun katalog,
+tetapi jumlah barisnya bertambah setiap kali suite dijalankan. Jalankan
+`npm run seed` pada database bersih bila ingin mengembalikannya.
+
+## 75. Konfigurasi TypeScript Cypress dipisah dari build aplikasi
+
+`next build` ikut memeriksa tipe seluruh berkas TypeScript, termasuk spec
+Cypress, sehingga satu kesalahan tipe di spec membuat build aplikasi gagal.
+`cypress/` dan `cypress.config.ts` karena itu dikeluarkan dari `tsconfig.json`
+utama dan diberi `cypress/tsconfig.json` tersendiri, sehingga keduanya tetap
+diperiksa tipenya tanpa saling menjatuhkan.

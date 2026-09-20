@@ -20,7 +20,7 @@ mengarang endpoint atau field yang tidak ada di sana.
 | Form | react-hook-form 7 + zod 4 |
 | Grafik | recharts |
 | Notifikasi | sonner |
-| Pengujian | Vitest |
+| Pengujian | Vitest (unit) dan Cypress (ujung ke ujung) |
 
 Alasan pemilihan versi dan keputusan teknis lain — termasuk mengapa axios
 dipakai alih-alih `fetch`, dan mengapa base-ui bukan Radix — dicatat di
@@ -94,18 +94,35 @@ admin space. Proteksi rute dan pengalihan sesuai role ditangani `proxy.ts`.
 
 ## Pengujian
 
+Ada dua lapis yang saling melengkapi.
+
+### Unit — Vitest
+
 ```bash
-npm test          # 88 pengujian unit atas logika di lib/
+npm test          # 88 pengujian atas logika di lib/
 npm run test:watch
 ```
 
 Cakupannya sengaja dibatasi pada logika yang harus sama persis dengan backend:
 rumus harga, konversi waktu WIB, jam operasional, dan salinan mesin status
-reservasi. Lihat keputusan 55–58 di `docs/KEPUTUSAN.md` untuk alasannya, dan
-mengapa pengujian komponen/e2e peramban tidak dibuat.
+reservasi. Lihat keputusan 55–58 di `docs/KEPUTUSAN.md`.
 
-Alur antarmuka lengkap diperiksa langsung terhadap backend yang berjalan pada
-setiap fase pengembangan, bukan lewat pengujian otomatis peramban.
+### Ujung ke ujung — Cypress
+
+```bash
+npm run e2e       # 16 pengujian di peramban sungguhan
+npm run e2e:open  # mode interaktif
+```
+
+**Backend dan frontend harus sudah berjalan lebih dulu**; Cypress tidak
+menyalakannya sendiri. Yang diuji adalah alur yang dipakai pengguna: masuk,
+menelusuri katalog, memesan dengan kode promo, lalu menyetujui dan mencatat
+kedatangan tamu dari sisi pengelola.
+
+Dijalankan di Chrome, bukan Electron bawaan Cypress — lihat keputusan 72 untuk
+alasannya. Suite ini dapat dijalankan berulang kali: pengujian membuat space
+sendiri lalu menghapusnya, sehingga jadwalnya tidak pernah bentrok dengan sisa
+jalan sebelumnya.
 
 ## Struktur folder
 
@@ -143,3 +160,5 @@ docs/           catatan keputusan teknis
 | `npm run typecheck` | Memeriksa tipe tanpa build |
 | `npm test` | Pengujian unit |
 | `npm run test:watch` | Pengujian unit, mode pemantauan |
+| `npm run e2e` | Pengujian ujung ke ujung di Chrome |
+| `npm run e2e:open` | Pengujian ujung ke ujung, mode interaktif |
