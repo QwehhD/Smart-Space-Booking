@@ -1,35 +1,33 @@
-import {
-  ArrowRight,
-  BadgePercent,
-  CalendarCheck,
-  CheckCircle2,
-  Compass,
-  QrCode,
-  Sparkles,
-  Star,
-  Zap,
-} from 'lucide-react';
+import { ArrowUpRight, Building2, Clock3, Globe } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { Merek } from '@/components/layout/merek';
 import { PilihTema } from '@/components/layout/pilih-tema';
 import { Rupiah } from '@/components/shared/rupiah';
 import { SpaceImage } from '@/components/shared/space-image';
-import { TipeBadge } from '@/components/shared/tipe-badge';
-import { Button } from '@/components/ui/button';
 import { daftarSpace } from '@/lib/api/spaces';
 import { ApiError } from '@/lib/api/error';
 import { sesiServer } from '@/lib/auth/server';
 import { BERANDA_ROLE, LABEL_TIPE, URUTAN_TIPE } from '@/lib/constants';
+import { rupiah, tanggalPendek, hariIniWib } from '@/lib/format';
 import type { SpacePublik } from '@/types/entities';
 
 export const dynamic = 'force-dynamic';
 
-const MAKS_SOROT = 3;
+/** Sebanyak ini yang dipamerkan; selebihnya lewat tautan ke katalog. */
+const MAKS_SOROT = 4;
 
 /**
- * Halaman muka utama untuk pengunjung:
- * Dirancang elegan, modern, dan kaya animasi dengan efek visual berkelas.
+ * Halaman muka bergaya editorial.
+ *
+ * Tata letaknya meniru halaman majalah: satu judul raksasa yang memikul seluruh
+ * perhatian, satu bidang berwarna sebagai jangkar visual, dan angka-angka besar
+ * sebagai bukti. Warnanya hemat — krem, tinta, dan satu kuning — sehingga
+ * hierarkinya dibangun oleh ukuran, bukan oleh banyak warna.
+ *
+ * Seluruh angka dan gambar yang tampil berasal dari katalog yang sama dengan
+ * yang dilihat pengunjung, bukan dari data yang ditulis tangan. Bila backend
+ * sedang tidak dapat dihubungi, bagian itu dilewati dan halamannya tetap tampil.
  */
 export default async function Beranda() {
   const { role } = await sesiServer();
@@ -38,336 +36,289 @@ export default async function Beranda() {
     redirect(BERANDA_ROLE[role]);
   }
 
-  let sorot: SpacePublik[] = [];
+  let semua: SpacePublik[] = [];
 
   try {
-    sorot = (await daftarSpace()).slice(0, MAKS_SOROT);
+    semua = await daftarSpace();
   } catch (error) {
     if (!(error instanceof ApiError)) {
       throw error;
     }
   }
 
-  const termurah = sorot.length
-    ? Math.min(...sorot.map((s) => s.harga_per_jam))
+  const sorot = semua.slice(0, MAKS_SOROT);
+  const utama = sorot[0];
+  const termurah = semua.length
+    ? Math.min(...semua.map((s) => s.harga_per_jam))
     : null;
+  const lokasi = new Set(semua.map((s) => s.owner.nama_coworking));
 
   return (
-    <div className="relative flex min-h-svh flex-col overflow-x-hidden">
-      {/* Latar Belakang Aurora Ambient Mengambang */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
-      >
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[720px] h-[480px] rounded-full bg-gradient-to-tr from-primary/20 via-sky-500/15 to-violet-500/10 blur-[120px] animate-pulse-glow" />
-        <div className="absolute top-[28%] -left-20 w-[420px] h-[360px] rounded-full bg-gradient-to-br from-primary/15 to-emerald-500/10 blur-[100px] animate-float-slow" />
-        <div className="absolute top-[48%] -right-20 w-[460px] h-[380px] rounded-full bg-gradient-to-bl from-violet-500/15 to-primary/10 blur-[110px] animate-float-reverse" />
-      </div>
+    <div className="flex min-h-svh flex-col">
+      <header className="mx-auto flex w-full max-w-6xl items-center gap-6 px-5 py-6">
+        <Merek />
 
-      {/* Navigasi Atas Glassmorphic */}
-      <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl transition-all">
-        <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6">
-          <Merek />
+        <nav aria-label="Navigasi utama" className="ml-6 hidden md:block">
+          <ul className="flex items-center gap-7 text-sm font-medium">
+            <li>
+              <Link href="/spaces" className="hover:text-primary transition-colors">
+                Ruangan
+              </Link>
+            </li>
+            <li>
+              <Link href="#cara" className="hover:text-primary transition-colors">
+                Cara kerja
+              </Link>
+            </li>
+            <li>
+              <Link href="/admin/login" className="hover:text-primary transition-colors">
+                Pengelola
+              </Link>
+            </li>
+          </ul>
+        </nav>
 
-          <div className="flex items-center gap-2">
-            <PilihTema />
-            <Button
-              variant="ghost"
-              size="sm"
-              render={<Link href="/login">Masuk</Link>}
-            />
-            <Button
-              size="sm"
-              className="hidden sm:inline-flex"
-              render={<Link href="/register">Daftar Sekarang</Link>}
-            />
-          </div>
+        <div className="ml-auto flex items-center gap-2">
+          {/* Pil kecil berisi konteks hari ini, seperti penanda tanggal pada
+              halaman majalah. Disembunyikan di layar sempit agar tidak berebut
+              ruang dengan tombol masuk. */}
+          <span className="border-foreground/15 hidden items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium sm:inline-flex">
+            <span className="bg-primary size-1.5 rounded-full" />
+            {lokasi.size} lokasi · {tanggalPendek(hariIniWib())}
+          </span>
+
+          <PilihTema />
+
+          <Link
+            href="/login"
+            className="hover:text-primary px-2 text-sm font-semibold transition-colors"
+          >
+            Masuk
+          </Link>
+
+          <Link
+            href="/register"
+            className="bg-foreground text-background hover:bg-primary hover:text-primary-foreground rounded-full px-4 py-2 text-sm font-semibold transition-colors"
+          >
+            Daftar
+          </Link>
         </div>
       </header>
 
       <main
         id="konten-utama"
-        className="mx-auto w-full max-w-6xl flex-1 px-4 sm:px-6 pb-24"
+        className="mx-auto w-full max-w-6xl flex-1 overflow-x-clip px-5 pb-24"
       >
-        {/* HERO SECTION */}
-        <section className="masuk relative grid gap-8 pt-12 pb-16 text-center sm:pt-20 sm:pb-24">
-          <div className="mx-auto flex max-w-3xl flex-col items-center gap-5">
-            {/* Pill Status Animasi */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary shadow-xs backdrop-blur-md">
-              <span className="relative flex size-2">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-75 animate-ping" />
-                <span className="relative inline-flex size-2 rounded-full bg-primary" />
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Sparkles className="size-3.5" />
-                Inovasi Coworking Space & Ruang Kerja Pintar
-              </span>
-            </div>
-
-            {/* Judul Utama dengan Gradasi Elegan */}
-            <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl text-balance leading-[1.12]">
-              Sewa Ruang Kerja Modern,{' '}
-              <span className="text-gradient-primary">Pesan Instan Per Jam</span>
+        {/* ---------- bagian utama ---------- */}
+        <section className="masuk grid items-start gap-8 pt-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10 lg:pt-10">
+          <div className="grid gap-7">
+            <h1 className="text-[3.4rem] leading-[0.88] font-extrabold tracking-[-0.045em] sm:text-[4.6rem] lg:text-[5.4rem]">
+              ruang kerja
+              <br />
+              <span className="text-primary">per jam.</span>
             </h1>
 
-            {/* Deskripsi */}
-            <p className="text-muted-foreground max-w-2xl text-base sm:text-lg leading-relaxed text-pretty">
-              Akses meja kerja fleksibel dan ruang rapat eksekutif tanpa kontrak ribet.
-              Cek jadwal real-time, klaim promo spesial, dan tunjukkan e-ticket QR langsung saat tiba.
-              {termurah !== null ? (
-                <span className="block mt-2 font-medium text-foreground">
-                  Mulai dari{' '}
-                  <span className="text-primary font-bold">
-                    <Rupiah nilai={termurah} />
-                  </span>{' '}
-                  per jam.
-                </span>
-              ) : null}
+            <p className="text-muted-foreground max-w-md text-[0.95rem] leading-relaxed text-pretty">
+              Pesan meja kerja atau ruang rapat tanpa kontrak bulanan. Jadwalnya
+              dihitung dari pemesanan yang sudah ada, harganya tampil sebelum
+              kamu menekan tombol, dan tiketnya berupa QR yang tinggal dipindai
+              saat datang.
             </p>
 
-            {/* Tombol Aksi Utama */}
-            <div className="mt-2 flex flex-wrap justify-center items-center gap-3.5">
-              <Button
-                size="lg"
-                className="h-12 px-7 text-sm font-semibold shadow-lg shadow-primary/25"
-                render={
-                  <Link href="/spaces" className="flex items-center gap-2">
-                    <Compass className="size-4" />
-                    Jelajahi Ruangan
-                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-                  </Link>
-                }
-              />
-              <Button
-                size="lg"
-                variant="outline"
-                className="h-12 px-7 text-sm font-semibold"
-                render={<Link href="/register">Buat Akun Member</Link>}
-              />
-            </div>
-
-            {/* Kepercayaan & Portal Admin */}
-            <div className="mt-3 flex flex-wrap justify-center items-center gap-6 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="size-4 text-emerald-500" />
-                Jadwal 100% Real-time
-              </span>
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="size-4 text-emerald-500" />
-                E-Ticket QR Otomatis
-              </span>
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="size-4 text-emerald-500" />
-                Tanpa Biaya Tersembunyi
-              </span>
-            </div>
-
-            <p className="text-muted-foreground text-xs pt-2">
-              Pengelola coworking space?{' '}
+            <div className="flex flex-wrap items-center gap-3">
               <Link
-                href="/admin/login"
-                className="text-primary font-medium hover:underline inline-flex items-center gap-1"
+                href="/spaces"
+                className="bg-foreground text-background hover:bg-primary hover:text-primary-foreground inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-bold transition-colors"
               >
-                Masuk ke panel pengelola &rarr;
+                Jelajahi Ruangan
+                <ArrowUpRight className="size-4" />
               </Link>
-            </p>
-          </div>
 
-          {/* VISUAL MOCKUP PREVIEW DENGAN FLOATING BADGES */}
-          <div className="relative mx-auto mt-4 w-full max-w-4xl">
-            <div className="relative rounded-2xl border border-border/80 bg-card/60 p-3 shadow-2xl backdrop-blur-xl sm:p-5">
-              <div className="overflow-hidden rounded-xl border border-border/60 bg-muted/30">
-                <div className="relative aspect-[16/8] sm:aspect-[16/7] w-full bg-gradient-to-br from-primary/10 via-background to-accent/20 flex flex-col items-center justify-center p-6 text-center">
-                  <div className="relative z-10 flex flex-col items-center gap-3">
-                    <div className="size-14 rounded-2xl bg-primary/15 text-primary grid place-items-center shadow-inner">
-                      <Zap className="size-7" />
-                    </div>
-                    <div className="grid gap-1">
-                      <p className="text-sm font-bold text-primary tracking-wide uppercase">
-                        Sistem Reservasi Generasi Baru
-                      </p>
-                      <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
-                        Cepat • Transparan • Terotomasi
-                      </h2>
-                      <p className="text-muted-foreground text-xs sm:text-sm max-w-md">
-                        Pilih slot jam yang kamu mau, dapatkan tiket QR resmi, dan nikmati fasilitas kerja berkelas dunia.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Floating Badge Kiri */}
-              <div className="absolute -top-4 -left-2 sm:-left-6 hidden sm:flex items-center gap-2.5 rounded-xl border border-border/80 bg-card/90 px-4 py-2.5 shadow-lg backdrop-blur-md animate-float-slow">
-                <span className="grid size-8 place-items-center rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
-                  <QrCode className="size-4" />
-                </span>
-                <div className="text-left">
-                  <p className="text-xs font-bold leading-none">Instant E-Ticket</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">Langsung Scan QR di Lokasi</p>
-                </div>
-              </div>
-
-              {/* Floating Badge Kanan */}
-              <div className="absolute -bottom-4 -right-2 sm:-right-6 hidden sm:flex items-center gap-2.5 rounded-xl border border-border/80 bg-card/90 px-4 py-2.5 shadow-lg backdrop-blur-md animate-float-reverse">
-                <span className="grid size-8 place-items-center rounded-lg bg-amber-500/15 text-amber-500">
-                  <Star className="size-4 fill-amber-500 text-amber-500" />
-                </span>
-                <div className="text-left">
-                  <p className="text-xs font-bold leading-none">4.9 / 5.0 Rating</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">Kepuasan Ribuan Profesional</p>
-                </div>
-              </div>
+              <Link
+                href="/register"
+                className="border-foreground/20 hover:border-foreground inline-flex items-center rounded-full border px-6 py-3.5 text-sm font-bold transition-colors"
+              >
+                Buat akun
+              </Link>
             </div>
-          </div>
-        </section>
 
-        {/* METRICS COUNTER / STATISTIK CEPAT */}
-        <section className="masuk-berurut grid grid-cols-2 gap-3 sm:grid-cols-4 py-6">
-          <StatBox nilai="100%" label="Jadwal Akurat" sub="Real-time tanpa bentrok" />
-          <StatBox nilai="0 Detik" label="Penerbitan Tiket" sub="E-ticket ber-QR langsung jadi" />
-          <StatBox nilai="Diskon" label="Promo Fleksibel" sub="Potongan harga transparan" />
-          <StatBox nilai="24/7" label="Dukungan Akses" sub="Sistem siap kapan saja" />
-        </section>
-
-        {/* FITUR UNGGULAN KARTU GLASS INTERAKTIF */}
-        <section className="grid gap-6 pt-16">
-          <div className="text-center max-w-xl mx-auto grid gap-2">
-            <p className="text-xs font-bold uppercase tracking-widest text-primary">
-              Fitur Cerdas
-            </p>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              Didesain Khusus untuk Kenyamanan Kerjamu
-            </h2>
-          </div>
-
-          <div className="masuk-berurut grid gap-4 sm:grid-cols-3 pt-4">
-            <FiturKartu
-              icon={<CalendarCheck className="size-5" />}
-              judul="Jadwal Apa Adanya"
-              keterangan="Ketersediaan dihitung langsung dari pemesanan yang ada. Jam yang kamu pilih dijamin bebas bentrok."
-              warna="primary"
-            />
-            <FiturKartu
-              icon={<BadgePercent className="size-5" />}
-              judul="Potongan Transparan"
-              keterangan="Masukkan kode voucher diskon dan lihat penghematan tarif langsung terhitung sebelum konfirmasi pesanan."
-              warna="emerald"
-            />
-            <FiturKartu
-              icon={<QrCode className="size-5" />}
-              judul="E-Ticket QR Digital"
-              keterangan="Tiket digital siap simpan, cetak, atau ditunjukkan di ponsel. Pengelola cukup scan untuk check-in instan."
-              warna="violet"
-            />
-          </div>
-        </section>
-
-        {/* 3 LANGKAH MUDAH */}
-        <section className="grid gap-6 pt-20">
-          <div className="text-center max-w-xl mx-auto grid gap-2">
-            <p className="text-xs font-bold uppercase tracking-widest text-primary">
-              Alur Reservasi
-            </p>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              3 Langkah Praktis Mulai Bekerja
-            </h2>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-3 pt-4">
-            <LangkahBox
-              nomor="01"
-              judul="Pilih Ruangan"
-              keterangan="Telusuri pilihan personal desk, private office, atau ruang meeting sesuai kebutuhan timmu."
-            />
-            <LangkahBox
-              nomor="02"
-              judul="Tentukan Waktu"
-              keterangan="Pilih tanggal dan jam sewa. Sistem memeriksa ketersediaan seketika dan menghitung total harga."
-            />
-            <LangkahBox
-              nomor="03"
-              judul="Check-in dengan QR"
-              keterangan="Dapatkan e-ticket resmi dengan kode booking dan QR code untuk validasi cepat saat tiba."
-            />
-          </div>
-        </section>
-
-        {/* SPOTLIGHT RUANG YANG TERSEDIA */}
-        {sorot.length > 0 ? (
-          <section className="grid gap-6 pt-20">
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <div className="grid gap-1">
-                <div className="flex items-center gap-2">
-                  <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <p className="text-xs font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
-                    Katalog Unggulan
-                  </p>
-                </div>
-                <h2 className="text-2xl font-bold tracking-tight">
-                  Ruang Kerja Sedang Tersedia
-                </h2>
-                <p className="text-muted-foreground text-sm">
-                  Pilihan terbaik yang siap dipesan untuk sesi kerjamu hari ini.
-                </p>
-              </div>
-
-              <Button
-                variant="outline"
-                size="sm"
-                className="font-medium"
-                render={
-                  <Link href="/spaces" className="flex items-center gap-1.5">
-                    Lihat Semua Ruangan
-                    <ArrowRight className="size-3.5" />
-                  </Link>
-                }
+            {/* Angka besar sebagai bukti, bukan hiasan: seluruhnya dihitung dari
+                katalog yang sedang berjalan. */}
+            <dl className="border-foreground/15 grid grid-cols-3 gap-4 border-t pt-6">
+              <Angka
+                nilai={`${semua.length}`}
+                label="Ruangan siap dipesan hari ini"
               />
+              <Angka
+                nilai={`${lokasi.size}`}
+                label="Lokasi coworking yang terhubung"
+              />
+              <Angka
+                nilai={termurah !== null ? rupiah(termurah).replace('Rp ', '') : '—'}
+                label="Tarif termurah per jam"
+                kecil
+              />
+            </dl>
+          </div>
+
+          {/* ---------- bidang kuning ---------- */}
+          <div className="relative">
+            <div className="bg-primary relative overflow-hidden rounded-[2rem] p-3">
+              {utama ? (
+                <SpaceImage
+                  url={utama.foto_url}
+                  nama={utama.nama_space}
+                  className="aspect-[4/5] w-full rounded-[1.5rem] object-cover sm:aspect-[5/5]"
+                />
+              ) : (
+                <div className="bg-primary-foreground/10 aspect-[4/5] w-full rounded-[1.5rem]" />
+              )}
+
+              <span className="bg-foreground text-background absolute top-6 right-6 grid size-12 place-items-center rounded-full">
+                <Globe className="size-5" />
+              </span>
+
+              {/* Tirai gelap di kaki gambar. Tanpa ini, keterangan di atasnya
+                  hilang ketika fotonya kebetulan terang di bagian bawah. */}
+              {utama ? (
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-x-3 bottom-3 h-40 rounded-b-[1.5rem] bg-gradient-to-t from-black/75 via-black/35 to-transparent"
+                />
+              ) : null}
+
+              {utama ? (
+                <div className="absolute right-6 bottom-6 left-6 flex items-end justify-between gap-3 text-white">
+                  <div className="min-w-0">
+                    <p className="text-[0.7rem] font-bold tracking-[0.14em] uppercase opacity-80">
+                      Sedang tersedia
+                    </p>
+                    <p className="truncate text-lg font-bold">
+                      {utama.nama_space}
+                    </p>
+                  </div>
+
+                  <Link
+                    href={`/spaces/${utama.id}`}
+                    aria-label={`Lihat ${utama.nama_space}`}
+                    className="bg-primary text-primary-foreground hover:bg-white hover:text-black grid size-11 shrink-0 place-items-center rounded-full transition-colors"
+                  >
+                    <ArrowUpRight className="size-5" />
+                  </Link>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </section>
+
+        {/* ---------- pita berjalan ---------- */}
+        <section
+          aria-hidden
+          className="border-foreground/15 mt-14 overflow-hidden border-y py-4"
+        >
+          <div className="pita flex w-max gap-8 text-[1.6rem] font-extrabold tracking-tight whitespace-nowrap sm:text-[2rem]">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <span key={i} className="flex items-center gap-8">
+                <span>sewa per jam</span>
+                <span className="text-primary">&bull;</span>
+                <span>e-ticket QR</span>
+                <span className="text-primary">&bull;</span>
+                <span>tanpa kontrak</span>
+                <span className="text-primary">&bull;</span>
+              </span>
+            ))}
+          </div>
+        </section>
+
+        {/* ---------- cara kerja ---------- */}
+        <section id="cara" className="scroll-mt-20 pt-16">
+          <h2 className="text-[2rem] leading-[0.95] font-extrabold tracking-[-0.03em] sm:text-[2.6rem]">
+            tiga langkah,
+            <br />
+            <span className="text-muted-foreground">selesai.</span>
+          </h2>
+
+          <ol className="masuk-berurut mt-8 grid gap-4 sm:grid-cols-3">
+            <Langkah
+              nomor="01"
+              judul="Pilih jadwalnya"
+              keterangan="Tentukan tanggal, jam mulai, dan durasinya. Jam yang sudah dipesan orang lain tidak ditawarkan."
+            />
+            <Langkah
+              nomor="02"
+              judul="Pakai kode promo"
+              keterangan="Kode diperiksa sebelum memesan, dan potongannya langsung terlihat pada rincian harga."
+            />
+            <Langkah
+              nomor="03"
+              judul="Tunjukkan QR-nya"
+              keterangan="E-ticket dapat dicetak atau ditunjukkan dari layar, lalu dipindai pengelola saat kamu datang."
+            />
+          </ol>
+        </section>
+
+        {/* ---------- sorotan ruangan ---------- */}
+        {sorot.length > 0 ? (
+          <section className="pt-16">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <h2 className="text-[2rem] leading-[0.95] font-extrabold tracking-[-0.03em] sm:text-[2.6rem]">
+                pilih ruangmu
+              </h2>
+
+              <Link
+                href="/spaces"
+                className="border-foreground/20 hover:border-foreground inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-bold transition-colors"
+              >
+                Lihat semua
+                <ArrowUpRight className="size-4" />
+              </Link>
             </div>
 
-            <ul className="masuk-berurut grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {sorot.map((space) => (
+            <ul className="masuk-berurut mt-8 grid gap-5 sm:grid-cols-2">
+              {sorot.map((space, i) => (
                 <li key={space.id}>
                   <Link
                     href={`/spaces/${space.id}`}
-                    className="group flex flex-col overflow-hidden rounded-2xl border border-border/70 bg-card shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                    className="group focus-visible:ring-ring block focus-visible:ring-2 focus-visible:outline-none"
                   >
-                    <div className="relative overflow-hidden">
+                    <div className="bg-muted relative overflow-hidden rounded-[1.5rem]">
                       <SpaceImage
                         url={space.foto_url}
                         nama={space.nama_space}
-                        className="aspect-[16/10] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        className={`w-full object-cover transition-transform duration-500 group-hover:scale-[1.04] ${
+                          i % 3 === 0 ? 'aspect-[4/3]' : 'aspect-[16/11]'
+                        }`}
                       />
-                      <div className="absolute top-3 right-3">
-                        <TipeBadge tipe={space.tipe} className="shadow-md backdrop-blur-md" />
-                      </div>
-                      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-card/80 to-transparent" />
+
+                      <span className="bg-background/90 absolute top-4 left-4 rounded-full px-3 py-1.5 text-[0.7rem] font-bold tracking-wide uppercase backdrop-blur-sm">
+                        {LABEL_TIPE[space.tipe]}
+                      </span>
+
+                      <span className="bg-foreground text-background absolute right-4 bottom-4 grid size-10 place-items-center rounded-full opacity-0 transition-opacity group-hover:opacity-100">
+                        <ArrowUpRight className="size-4" />
+                      </span>
                     </div>
 
-                    <div className="flex flex-1 flex-col gap-3 p-5">
-                      <div className="grid gap-1">
-                        <h3 className="text-base font-bold leading-snug group-hover:text-primary transition-colors">
+                    <div className="mt-4 flex items-start justify-between gap-4">
+                      <div className="min-w-0">
+                        <p className="group-hover:text-primary truncate text-lg font-bold tracking-tight transition-colors">
                           {space.nama_space}
-                        </h3>
-                        <p className="text-muted-foreground text-xs truncate">
+                        </p>
+                        <p className="text-muted-foreground mt-1 flex items-center gap-1.5 truncate text-sm">
+                          <Building2 className="size-3.5 shrink-0" />
                           {space.owner.nama_coworking}
                         </p>
                       </div>
 
-                      <div className="mt-auto flex items-center justify-between border-t border-border/60 pt-3 text-sm">
-                        <div>
-                          <p className="text-[11px] text-muted-foreground">Tarif Sewa</p>
-                          <p className="font-bold text-foreground">
-                            <Rupiah nilai={space.harga_per_jam} />
-                            <span className="text-xs text-muted-foreground font-normal"> / jam</span>
-                          </p>
-                        </div>
-
-                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary group-hover:translate-x-0.5 transition-transform">
-                          Pesan
-                          <ArrowRight className="size-3.5" />
+                      <p className="shrink-0 text-right">
+                        <Rupiah
+                          nilai={space.harga_per_jam}
+                          className="text-lg font-extrabold tracking-tight"
+                        />
+                        <span className="text-muted-foreground block text-xs">
+                          per jam
                         </span>
-                      </div>
+                      </p>
                     </div>
                   </Link>
                 </li>
@@ -376,132 +327,100 @@ export default async function Beranda() {
           </section>
         ) : null}
 
-        {/* TIPE RUANG FILTER CEPAT */}
-        <section className="grid gap-4 pt-16">
-          <h2 className="text-xl font-bold tracking-tight">
-            Cari Berdasarkan Kategori
+        {/* ---------- tipe ruang ---------- */}
+        <section className="pt-16">
+          <h2 className="text-muted-foreground text-xs font-bold tracking-[0.16em] uppercase">
+            Telusuri per tipe
           </h2>
 
-          <div className="flex flex-wrap gap-2.5">
+          <div className="mt-4 flex flex-wrap gap-2.5">
             {URUTAN_TIPE.map((tipe) => (
               <Link
                 key={tipe}
                 href={`/spaces?tipe=${tipe}`}
-                className="group flex items-center gap-2 rounded-xl border border-border/70 bg-card px-4 py-2.5 text-sm font-semibold shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-accent/40 hover:text-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                className="border-foreground/20 hover:bg-foreground hover:text-background inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-bold transition-colors"
               >
-                <span>{LABEL_TIPE[tipe]}</span>
-                <ArrowRight className="size-3.5 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-primary" />
+                {LABEL_TIPE[tipe]}
+                <ArrowUpRight className="size-3.5" />
               </Link>
             ))}
           </div>
         </section>
 
-        {/* CALL TO ACTION BANNER MEWAH */}
-        <section className="mt-20 overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/15 via-primary/5 to-background p-8 sm:p-12 text-center shadow-xl relative">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,var(--tw-gradient-from),transparent)] from-primary/25"
-          />
+        {/* ---------- ajakan penutup ---------- */}
+        <section className="bg-foreground text-background mt-16 overflow-hidden rounded-[2rem] px-7 py-12 sm:px-12 sm:py-16">
+          <div className="grid items-end gap-8 lg:grid-cols-[1.3fr_0.7fr]">
+            <div>
+              <p className="text-primary flex items-center gap-2 text-xs font-bold tracking-[0.16em] uppercase">
+                <Clock3 className="size-3.5" />
+                Mulai hari ini
+              </p>
 
-          <div className="mx-auto max-w-2xl grid gap-4">
-            <span className="mx-auto inline-flex size-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md shadow-primary/30">
-              <Sparkles className="size-6" />
-            </span>
-            <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
-              Siap Meningkatkan Produktivitasmu?
-            </h2>
-            <p className="text-muted-foreground text-sm sm:text-base text-pretty">
-              Temukan suasana kerja tenang, fasilitas internet berkecepatan tinggi, dan ruang rapat representatif hari ini.
-            </p>
-            <div className="mt-2 flex flex-wrap justify-center gap-3">
-              <Button
-                size="lg"
-                className="h-11 px-6 font-semibold shadow-md shadow-primary/20"
-                render={<Link href="/spaces">Lihat Semua Ruangan</Link>}
-              />
-              <Button
-                size="lg"
-                variant="outline"
-                className="h-11 px-6 font-semibold"
-                render={<Link href="/register">Daftar Akun Baru</Link>}
-              />
+              <h2 className="mt-4 text-[2.2rem] leading-[0.94] font-extrabold tracking-[-0.035em] sm:text-[3rem]">
+                buat akun,
+                <br />
+                <span className="text-primary">langsung pesan.</span>
+              </h2>
+            </div>
+
+            <div className="flex flex-wrap gap-3 lg:justify-end">
+              <Link
+                href="/register"
+                className="bg-primary text-primary-foreground inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-bold transition-opacity hover:opacity-90"
+              >
+                Buat akun
+                <ArrowUpRight className="size-4" />
+              </Link>
+
+              <Link
+                href="/admin/login"
+                className="border-background/25 hover:bg-background hover:text-foreground inline-flex items-center rounded-full border px-6 py-3.5 text-sm font-bold transition-colors"
+              >
+                Masuk ke panel pengelola
+              </Link>
             </div>
           </div>
         </section>
       </main>
 
-      {/* FOOTER */}
-      <footer className="border-t border-border/60 bg-muted/20 py-8 text-xs text-muted-foreground">
-        <div className="mx-auto flex w-full max-w-6xl flex-col sm:flex-row items-center justify-between gap-4 px-4 sm:px-6">
-          <Merek />
-          <p className="text-center sm:text-right">
-            Smart Space Booking — Uji Kompetensi Keahlian RPL 2026/2027
-          </p>
-          <div className="flex items-center gap-2">
-            <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Sistem Operasional Normal</span>
-          </div>
+      <footer className="border-foreground/15 mx-auto w-full max-w-6xl border-t px-5 py-7">
+        <div className="text-muted-foreground flex flex-wrap items-center justify-between gap-3 text-xs">
+          <span>Smart Space Booking — UKK RPL 2026/2027</span>
+          <span>Foto ruangan: Unsplash</span>
         </div>
       </footer>
     </div>
   );
 }
 
-function StatBox({
+/** Satu angka besar pada bagian bukti. */
+function Angka({
   nilai,
   label,
-  sub,
+  kecil,
 }: {
   nilai: string;
   label: string;
-  sub: string;
+  kecil?: boolean;
 }) {
   return (
-    <div className="rounded-2xl border border-border/70 bg-card/60 p-4 shadow-xs backdrop-blur-md transition-all duration-200 hover:border-primary/30">
-      <p className="text-xl sm:text-2xl font-extrabold tracking-tight text-primary">
-        {nilai}
-      </p>
-      <p className="mt-1 text-xs sm:text-sm font-bold text-foreground">{label}</p>
-      <p className="text-[11px] text-muted-foreground">{sub}</p>
-    </div>
-  );
-}
-
-function FiturKartu({
-  icon,
-  judul,
-  keterangan,
-  warna,
-}: {
-  icon: React.ReactNode;
-  judul: string;
-  keterangan: string;
-  warna: 'primary' | 'emerald' | 'violet';
-}) {
-  const warnaGaya = {
-    primary: 'bg-primary/10 text-primary border-primary/20',
-    emerald: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
-    violet: 'bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/20',
-  }[warna];
-
-  return (
-    <div className="group rounded-2xl border border-border/70 bg-card p-6 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg">
-      <span
-        className={`grid size-11 place-items-center rounded-xl border shadow-2xs transition-transform duration-300 group-hover:scale-110 ${warnaGaya}`}
+    <div>
+      <dt
+        className={`font-extrabold tracking-[-0.04em] ${
+          kecil ? 'text-[1.6rem] sm:text-[1.9rem]' : 'text-[2.1rem] sm:text-[2.6rem]'
+        }`}
       >
-        {icon}
-      </span>
-      <h3 className="mt-4 text-base font-bold tracking-tight text-foreground">
-        {judul}
-      </h3>
-      <p className="mt-2 text-sm text-muted-foreground leading-relaxed text-pretty">
-        {keterangan}
-      </p>
+        {nilai}
+      </dt>
+      <dd className="text-muted-foreground mt-1 text-[0.72rem] leading-snug">
+        {label}
+      </dd>
     </div>
   );
 }
 
-function LangkahBox({
+/** Satu langkah pada bagian cara kerja. */
+function Langkah({
   nomor,
   judul,
   keterangan,
@@ -511,16 +430,14 @@ function LangkahBox({
   keterangan: string;
 }) {
   return (
-    <div className="relative rounded-2xl border border-border/70 bg-card/70 p-6 shadow-xs backdrop-blur-xs transition-all duration-200 hover:border-primary/30">
-      <span className="font-mono text-xs font-bold text-primary tracking-wider">
+    <li className="border-foreground/15 hover:border-primary grid gap-3 rounded-[1.25rem] border p-6 transition-colors">
+      <span className="text-primary text-[2rem] leading-none font-extrabold tracking-[-0.04em]">
         {nomor}
       </span>
-      <h3 className="mt-2 text-base font-bold tracking-tight text-foreground">
-        {judul}
-      </h3>
-      <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed text-pretty">
+      <p className="text-lg font-bold tracking-tight">{judul}</p>
+      <p className="text-muted-foreground text-sm leading-relaxed text-pretty">
         {keterangan}
       </p>
-    </div>
+    </li>
   );
 }
