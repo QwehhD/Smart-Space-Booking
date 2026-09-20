@@ -9,7 +9,9 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "e2e": "cypress run --browser chrome",
+    "e2e:open": "cypress open --browser chrome"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
@@ -37,6 +39,7 @@
     "@types/node": "^24.13.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cypress": "^16.1.0",
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
     "tailwindcss": "^4",
