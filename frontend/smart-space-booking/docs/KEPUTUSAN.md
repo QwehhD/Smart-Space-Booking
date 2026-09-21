@@ -1162,3 +1162,27 @@ Dua hal yang disengaja:
   katalog dan pengelola ke dashboard. Ini persis rencana yang dicatat pada
   halaman sementara dahulu, dan baru sekarang dijalankan. Pengalihannya diuji
   untuk kedua role.
+
+## 83. Pemindai QR di halaman check-in, dan QR dapat diunduh dari e-ticket
+
+Sebelumnya pengelola memindai QR dengan aplikasi kamera ponsel lalu menempelkan teksnya.
+Kini halaman check-in punya dua cara membaca QR secara langsung:
+
+- **Pindai dengan kamera.** Bingkai video dibaca dengan jsQR hingga QR ditemukan, lalu
+  kamera langsung dimatikan dan hasilnya diisikan ke kolom pencarian. Kamera hanya
+  tersedia di HTTPS atau localhost. Di luar itu tombolnya menjelaskan hal ini, alih-alih
+  gagal diam-diam.
+- **Unggah gambar QR**, misalnya tangkapan layar yang dikirim tamu lewat chat.
+
+Keduanya hanya pengganti mengetik. Hasilnya dicocokkan dengan agenda hari ini oleh logika
+yang sama, jadi aturan siapa yang boleh di-check-in tidak berubah. jsQR dimuat saat tombol
+pertama kali ditekan, sehingga tidak menambah bundel halaman bagi yang cukup mengetik kode.
+
+Di e-ticket, member kini dapat **mengunduh QR-nya** sebagai PNG. Gambarnya sudah berupa
+data URI dari backend, jadi cukup tautan ber-atribut `download`. Pengujian e2e memakai
+gambar unduhan itu sebagai masukan pemindai, sehingga rantai backend → unduh → pindai
+teruji utuh.
+
+Tombol Check-in pada daftar reservasi kini hanya muncul pada tanggal sewanya, mengikuti
+backend (keputusan backend 58). Di luar tanggal itu, yang tampil adalah keterangan
+"Check-in dibuka <tanggal>" atau "Tanggal sewa sudah lewat". Check-out tidak dibatasi.

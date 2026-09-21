@@ -742,3 +742,21 @@ Foto yang sudah ada di `uploads/`, termasuk foto contoh seeder, dipindahkan deng
 `npm run foto:migrasi-cloudinary`. Skrip itu mempertahankan nama berkas dan tidak menimpa
 foto yang sudah ada, sehingga aman dijalankan berulang. Kegagalan unggah ke Cloudinary
 dijawab 503 dengan pesan umum, dan rinciannya hanya dicatat di log.
+
+## 58. Check-in kini dibatasi pada tanggal sewa secara bawaan
+
+Sebelumnya `STRICT_CHECKIN_DATE` bawaannya `false` (keputusan 44), sehingga reservasi yang
+sudah disetujui dapat di-check-in kapan saja dari daftar reservasi, termasuk untuk jadwal
+minggu depan. Itu keliru secara operasional: halaman check-in memang hanya memuat agenda
+hari ini, tetapi daftar reservasi tetap menawarkan tombolnya untuk semua tanggal.
+
+Kini bawaannya `true`, dan hanya nilai `false` yang tegas yang mematikannya. Lupa mengisi
+variabel tidak lagi diam-diam membuka check-in di luar tanggal sewa.
+
+Pembandingnya juga diperbaiki. "Hari ini" sebelumnya diambil dari `toISOString()`, yaitu
+tanggal UTC, yang tertinggal satu hari antara pukul 00.00 dan 07.00 WIB. Kini dipakai
+`tanggalHariIni()` yang membaca komponen tanggal lokal proses (Asia/Jakarta).
+
+Check-out sengaja **tidak** dibatasi tanggal. Check-out hanya mungkin setelah check-in,
+yang sudah terjaga tanggalnya, dan tamu yang lupa di-check-out harus tetap dapat ditutup
+keesokan harinya, bukan tertahan berstatus aktif selamanya.
