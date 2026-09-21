@@ -4,6 +4,10 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
 import { pasangGlobalPrefix } from './../src/common/app-prefix';
+import {
+  tanggalHariIni,
+  tanggalKeDateUtc,
+} from './../src/common/utils/waktu.util';
 import { PrismaService } from './../src/prisma/prisma.service';
 
 /**
@@ -270,6 +274,19 @@ describe('Alur utama (e2e)', () => {
       .expect(200);
     expect(setuju.body.message).toContain('disetujui');
 
+    // Tanggal sewanya bukan hari ini, jadi check-in harus ditolak.
+    const terlaluDini = await sebagai(tokenAdmin)(
+      api().post(`/api/admin/reservasi/${idReservasi}/check-in`),
+    ).expect(400);
+    expect(terlaluDini.body.message).toContain('tanggal reservasinya');
+
+    // Jadwalnya dipindah ke hari ini langsung di database, karena member tidak
+    // selalu dapat memesan hari ini: jam mulainya bisa saja sudah lewat.
+    await prisma.reservasi.update({
+      where: { id: idReservasi },
+      data: { tanggal_reservasi: tanggalKeDateUtc(tanggalHariIni()) },
+    });
+
     const masuk = await sebagai(tokenAdmin)(
       api().post(`/api/admin/reservasi/${idReservasi}/check-in`),
     ).expect(200);
@@ -279,6 +296,12 @@ describe('Alur utama (e2e)', () => {
       api().post(`/api/admin/reservasi/${idReservasi}/check-out`),
     ).expect(200);
     expect(keluar.body.data.status).toBe('selesai');
+
+    // Dikembalikan ke tanggal semula, yang dihitung laporan pada pengujian 11.
+    await prisma.reservasi.update({
+      where: { id: idReservasi },
+      data: { tanggal_reservasi: tanggalKeDateUtc(TANGGAL) },
+    });
 
     // Status akhir tidak dapat dikembalikan.
     await sebagai(tokenAdmin)(

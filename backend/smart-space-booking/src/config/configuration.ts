@@ -105,7 +105,9 @@ export const configuration = (): AppConfig => {
       buka: process.env.JAM_OPERASIONAL_BUKA ?? '07:00',
       tutup: process.env.JAM_OPERASIONAL_TUTUP ?? '22:00',
     },
-    strictCheckinDate: String(process.env.STRICT_CHECKIN_DATE) === 'true',
+    // Aktif kecuali dimatikan secara tegas, supaya lupa mengisi variabelnya
+    // tidak diam-diam membuka check-in di luar tanggal sewa.
+    strictCheckinDate: String(process.env.STRICT_CHECKIN_DATE) !== 'false',
     foto: konfigurasiFoto(process.env, appUrl),
   };
 };

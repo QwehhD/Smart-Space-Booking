@@ -21,7 +21,7 @@ export const envValidationSchema = Joi.object({
   UPLOAD_MAX_SIZE_MB: Joi.number().min(1).max(20).default(2),
   JAM_OPERASIONAL_BUKA: Joi.string().pattern(JAM_PATTERN).default('07:00'),
   JAM_OPERASIONAL_TUTUP: Joi.string().pattern(JAM_PATTERN).default('22:00'),
-  STRICT_CHECKIN_DATE: Joi.boolean().default(false),
+  STRICT_CHECKIN_DATE: Joi.boolean().default(true),
   // Kosong berarti foto disimpan di folder uploads/ lokal.
   CLOUDINARY_URL: Joi.string()
     .pattern(/^cloudinary:\/\/[^:]+:[^@]+@.+$/)

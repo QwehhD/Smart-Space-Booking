@@ -56,7 +56,7 @@ Server berjalan di `http://localhost:3000`. Dokumentasi interaktif tersedia di
 | `JWT_EXPIRES_IN` | Masa berlaku token, bawaan `1d` |
 | `UPLOAD_MAX_SIZE_MB` | Batas ukuran unggahan berkas, bawaan `2` |
 | `JAM_OPERASIONAL_BUKA` / `JAM_OPERASIONAL_TUTUP` | Rentang jam sewa yang diizinkan |
-| `STRICT_CHECKIN_DATE` | Bila `true`, check-in hanya boleh pada tanggal reservasinya |
+| `STRICT_CHECKIN_DATE` | Bawaan `true`: check-in hanya boleh pada tanggal reservasinya. Isi `false` untuk demonstrasi |
 
 ## Akun contoh
 
