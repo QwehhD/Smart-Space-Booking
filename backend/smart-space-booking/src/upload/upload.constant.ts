@@ -39,4 +39,5 @@ export const PESAN_UPLOAD = {
   TERLALU_BESAR: (maxMb: number) => `Ukuran berkas melebihi batas ${maxMb} MB!`,
   JENIS_DITOLAK: (ekstensi: string[]) =>
     `Jenis berkas tidak diizinkan. Gunakan ${ekstensi.join(', ')}.`,
+  GAGAL_MENYIMPAN: 'Foto gagal disimpan. Silakan coba beberapa saat lagi.',
 } as const;

@@ -1,36 +1,47 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { buildFotoUrl, UploadFolder } from '../common/utils/foto.util';
+import type { KonfigurasiFoto } from '../config/configuration';
+import { simpanFoto } from './penyimpanan-foto';
 import { PESAN_UPLOAD } from './upload.constant';
+import { namaBerkasBaru } from './upload.storage';
 
 @Injectable()
 export class UploadService {
+  private readonly logger = new Logger(UploadService.name);
+
   constructor(private readonly config: ConfigService) {}
 
   /**
    * Bentuk lengkap untuk unggahan gambar umum, yang menurut soal juga memuat
    * nama asli, mimetype, dan ukuran berkas.
    */
-  hasilLengkap(file: Express.Multer.File | undefined) {
+  async hasilLengkap(file: Express.Multer.File | undefined) {
     const berkas = this.pastikanAda(file);
+    const filename = await this.simpan(berkas, 'general');
 
     return {
-      filename: berkas.filename,
+      filename,
       original_name: berkas.originalname,
       mimetype: berkas.mimetype,
       size: berkas.size,
-      url: this.url('general', berkas.filename),
+      url: this.url('general', filename),
     };
   }
 
   /** Bentuk ringkas untuk foto space dan foto member. */
-  hasilRingkas(file: Express.Multer.File | undefined, folder: UploadFolder) {
-    const berkas = this.pastikanAda(file);
+  async hasilRingkas(
+    file: Express.Multer.File | undefined,
+    folder: UploadFolder,
+  ) {
+    const filename = await this.simpan(this.pastikanAda(file), folder);
 
-    return {
-      filename: berkas.filename,
-      url: this.url(folder, berkas.filename),
-    };
+    return { filename, url: this.url(folder, filename) };
   }
 
   /**
@@ -45,9 +56,34 @@ export class UploadService {
     return file;
   }
 
-  private url(folder: UploadFolder, filename: string): string {
-    const appUrl = this.config.get<string>('appUrl') ?? 'http://localhost:3000';
+  /**
+   * Kegagalan penyimpanan, misalnya Cloudinary tidak terjangkau, dilaporkan
+   * sebagai 503 dengan pesan umum. Rinciannya hanya dicatat di log karena dapat
+   * memuat nama cloud atau keterangan kredensial.
+   */
+  private async simpan(
+    berkas: Express.Multer.File,
+    folder: UploadFolder,
+  ): Promise<string> {
+    const nama = namaBerkasBaru(berkas.mimetype);
 
-    return buildFotoUrl(appUrl, folder, filename) as string;
+    try {
+      await simpanFoto(this.foto, folder, nama, berkas.buffer);
+    } catch (error) {
+      this.logger.error(
+        `Gagal menyimpan foto ${folder}/${nama}: ${(error as Error).message}`,
+      );
+      throw new ServiceUnavailableException(PESAN_UPLOAD.GAGAL_MENYIMPAN);
+    }
+
+    return nama;
+  }
+
+  private url(folder: UploadFolder, filename: string): string {
+    return buildFotoUrl(this.foto.baseUrl, folder, filename) as string;
+  }
+
+  private get foto(): KonfigurasiFoto {
+    return this.config.getOrThrow<KonfigurasiFoto>('foto');
   }
 }
