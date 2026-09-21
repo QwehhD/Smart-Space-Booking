@@ -179,7 +179,10 @@ export default async function ETicketPage({ params }: PageProps<'/tiket/[id]'>) 
       </article>
 
       <div className="mx-auto w-full max-w-md">
-        <AksiTiket kodeBooking={tiket.kode_booking} />
+        <AksiTiket
+          kodeBooking={tiket.kode_booking}
+          qrDataUrl={tiket.qr_code_data_url}
+        />
       </div>
     </div>
   );
