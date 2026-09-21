@@ -5,6 +5,7 @@ import { CalendarCheck, QrCode, ScanLine, X } from 'lucide-react';
 import { useState } from 'react';
 import { AksiReservasi } from '@/components/admin/aksi-reservasi';
 import { KartuReservasiAdmin } from '@/components/admin/kartu-reservasi-admin';
+import { PemindaiQr } from '@/components/admin/pemindai-qr';
 import { EmptyState } from '@/components/shared/empty-state';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,9 +21,8 @@ const AWALAN_QR = 'VERIFY-RESERVASI-';
  * Menerjemahkan isian menjadi pencocokan.
  *
  * Pengelola dapat mengetik kode booking, atau menempelkan hasil pindaian QR
- * e-ticket yang bentuknya `VERIFY-RESERVASI-<id>`. Keduanya diterima supaya
- * kamera ponsel biasa sudah cukup untuk memakai halaman ini, tanpa pustaka
- * pemindai apa pun.
+ * e-ticket yang bentuknya `VERIFY-RESERVASI-<id>`, baik dari PemindaiQr di
+ * halaman ini maupun dari aplikasi kamera ponsel yang hasilnya ditempel.
  */
 function cocok(reservasi: ReservasiAdmin, isian: string): boolean {
   const bersih = isian.trim().toUpperCase();
@@ -111,9 +111,11 @@ export function PanelCheckIn({
           ) : null}
         </div>
 
-        <p className="mt-2.5 text-muted-foreground text-xs leading-relaxed">
-          Pindai kode QR pada e-ticket tamu dengan kamera smartphone lalu tempelkan, atau ketik langsung kode booking / nama tamu untuk validasi cepat.
+        <p className="mt-2.5 mb-4 text-muted-foreground text-xs leading-relaxed">
+          Pindai QR pada e-ticket tamu dengan kamera, unggah gambar QR-nya, atau ketik langsung kode booking / nama tamu.
         </p>
+
+        <PemindaiQr onTerbaca={setIsian} />
       </div>
 
       <div className="flex flex-wrap items-baseline justify-between gap-2">
