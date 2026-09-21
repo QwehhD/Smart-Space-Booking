@@ -717,3 +717,28 @@ Konsekuensi yang perlu dicatat:
 - Payload QR e-ticket berubah dari `VERIFY-RESERVASI-<id>-<app_key>` menjadi
   `VERIFY-RESERVASI-<id>`, karena id reservasi kini sudah unik secara global.
 - Frontend tidak lagi menyimpan `NEXT_PUBLIC_APP_KEY` maupun mengirim header `x-maker-key`.
+
+## 57. Foto dapat disimpan di Cloudinary tanpa mengubah isi database
+
+Disk layanan hosting seperti Railway dikosongkan setiap kali deploy, sehingga foto di folder
+`uploads/` akan hilang. Karena itu foto kini dapat disimpan di Cloudinary, dipilih cukup
+dengan mengisi `CLOUDINARY_URL`. Bila variabel itu kosong, foto tetap ditulis ke `uploads/`
+seperti sebelumnya, sehingga pengembangan dan pengujian tidak memerlukan koneksi internet.
+
+Kolom `foto` pada `space`, `member`, dan `space_owner` tetap berisi **nama berkas saja**,
+bukan URL. Nama itu dipakai sebagai public_id Cloudinary
+(`<CLOUDINARY_FOLDER>/<folder>/<nama tanpa ekstensi>`), dan URL-nya dibentuk dengan
+`buildFotoUrl` yang sama dari awalan `foto.baseUrl`:
+
+- lokal: `<APP_URL>/uploads/spaces/<nama>`
+- Cloudinary: `https://res.cloudinary.com/<cloud>/image/upload/f_auto,q_auto/<folder induk>/spaces/<nama>`
+
+Dengan begitu tidak ada migrasi database, dan response upload tetap `{ filename, url }`
+sesuai kontrak. Multer kini menahan berkas di memori (batasnya hanya 2 MB), karena
+decorator `FileInterceptor` dievaluasi sebelum konfigurasi termuat dan tidak dapat memilih
+tujuan penyimpanan. Pemilihannya dilakukan di `UploadService`.
+
+Foto yang sudah ada di `uploads/`, termasuk foto contoh seeder, dipindahkan dengan
+`npm run foto:migrasi-cloudinary`. Skrip itu mempertahankan nama berkas dan tidak menimpa
+foto yang sudah ada, sehingga aman dijalankan berulang. Kegagalan unggah ke Cloudinary
+dijawab 503 dengan pesan umum, dan rinciannya hanya dicatat di log.
