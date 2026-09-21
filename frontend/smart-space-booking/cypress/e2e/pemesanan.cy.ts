@@ -132,4 +132,12 @@ describe('Pemesanan space', () => {
       cy.potret('E-ticket beserta QR code');
     });
   });
+  /** Kode promo bersifat rahasia: tidak ada daftar pilihan yang membocorkannya. */
+  it('hanya menyediakan kolom ketik untuk kode promo', () => {
+    cy.visit('/reservasi/baru?space=1');
+
+    cy.get('#promo-manual').should('have.attr', 'placeholder', 'Masukkan kode promo');
+    cy.get('#promo-katalog').should('not.exist');
+    cy.contains('DISKONHEMAT20').should('not.exist');
+  });
 });

@@ -142,4 +142,50 @@ describe('Operasional pengelola', () => {
     cy.contains('tr', 'Jumlah').should('contain', 'Rp 446.000');
     cy.potret('Rekapitulasi pendapatan bulanan');
   });
+  it('dapat keluar lewat tombol di sidebar', () => {
+    cy.masukSebagai('admin_moklet', 'Admin123!');
+    cy.visit('/admin/dashboard');
+
+    cy.get('aside').contains('button', 'Keluar').click();
+    cy.location('pathname').should('eq', '/admin/login');
+  });
+
+  /**
+   * Pratinjau foto sempat selalu tampil rusak: URL objek lokalnya dicabut
+   * sebelum elemen gambar dipasang. Permintaan unggahnya dicegat supaya
+   * pengujian ini tidak meninggalkan berkas di folder unggahan backend.
+   */
+  it('menampilkan pratinjau foto setelah diunggah', () => {
+    const PNG_1PX =
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
+
+    cy.intercept('POST', '**/upload/members', {
+      statusCode: 201,
+      body: {
+        status: true,
+        statusCode: 201,
+        message: 'Berkas berhasil diunggah',
+        data: { filename: 'uji.png', url: 'http://localhost:3000/uploads/members/uji.png' },
+        timestamp: new Date().toISOString(),
+      },
+    });
+
+    cy.masukSebagai('admin_moklet', 'Admin123!');
+    cy.visit('/admin/members');
+    cy.contains('button', 'Tambah member').first().click();
+
+    cy.get('[role="dialog"] input[type="file"]').selectFile(
+      {
+        contents: Cypress.Buffer.from(PNG_1PX, 'base64'),
+        fileName: 'uji.png',
+        mimeType: 'image/png',
+      },
+      { force: true },
+    );
+
+    cy.contains('Foto berhasil diunggah').should('exist');
+    cy.get('[role="dialog"] img').should(($img) => {
+      expect(($img[0] as HTMLImageElement).naturalWidth).to.be.greaterThan(0);
+    });
+  });
 });
