@@ -47,6 +47,19 @@ export function tanggalKeDateUtc(tanggal: string): Date {
   return new Date(Date.UTC(tahun, bulan - 1, hari));
 }
 
+/**
+ * Tanggal hari ini `YYYY-MM-DD` menurut zona proses, yaitu Asia/Jakarta
+ * (dipasang di main.ts). Tidak memakai `toISOString()`, karena itu tanggal UTC
+ * yang tertinggal satu hari antara pukul 00.00 dan 07.00 WIB.
+ */
+export function tanggalHariIni(sekarang: Date = new Date()): string {
+  return [
+    sekarang.getFullYear(),
+    String(sekarang.getMonth() + 1).padStart(2, '0'),
+    String(sekarang.getDate()).padStart(2, '0'),
+  ].join('-');
+}
+
 /** Kebalikan `tanggalKeDateUtc`, selalu membaca dari komponen UTC. */
 export function dateUtcKeTanggal(tanggal: Date): string {
   return tanggal.toISOString().slice(0, 10);

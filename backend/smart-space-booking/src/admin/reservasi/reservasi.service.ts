@@ -9,6 +9,7 @@ import { AuthenticatedUser } from '../../auth/interfaces/authenticated-user.inte
 import { serializeReservasiAdmin } from '../../common/serializers/reservasi.serializer';
 import {
   dateUtcKeTanggal,
+  tanggalHariIni,
   tanggalKeDateUtc,
 } from '../../common/utils/waktu.util';
 import { denganPesan } from '../../common/responses/pesan-dinamis';
@@ -134,19 +135,19 @@ export class AdminReservasiService {
   }
 
   /**
-   * Bila `STRICT_CHECKIN_DATE` aktif, check-in hanya boleh pada hari sewanya.
-   * Bawaannya dimatikan agar pengujian dan demonstrasi tidak terhalang tanggal.
+   * Check-in hanya boleh pada hari sewanya, supaya tamu tidak dapat dicatat
+   * datang untuk jadwal yang belum atau sudah lewat. Aturan ini dapat dimatikan
+   * dengan `STRICT_CHECKIN_DATE=false`, misalnya untuk demonstrasi.
+   *
+   * Check-out sengaja tidak dibatasi tanggal: tamu yang lupa di-check-out harus
+   * tetap dapat ditutup keesokan harinya, bukan tertahan aktif selamanya.
    */
   private pastikanTanggalCheckIn(tanggalReservasi: Date): void {
     if (!this.config.get<boolean>('strictCheckinDate')) {
       return;
     }
 
-    const hariIni = dateUtcKeTanggal(
-      tanggalKeDateUtc(new Date().toISOString().slice(0, 10)),
-    );
-
-    if (dateUtcKeTanggal(tanggalReservasi) !== hariIni) {
+    if (dateUtcKeTanggal(tanggalReservasi) !== tanggalHariIni()) {
       throw new BadRequestException(
         'Check-in hanya dapat dilakukan pada tanggal reservasinya!',
       );

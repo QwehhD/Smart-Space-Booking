@@ -3,6 +3,7 @@ import {
   hitungJamSelesai,
   jamKeMenit,
   menitKeJam,
+  tanggalHariIni,
   tanggalKeDateUtc,
 } from './waktu.util';
 
@@ -48,5 +49,11 @@ describe('util waktu', () => {
     for (const tanggal of ['2026-01-01', '2026-06-15', '2026-12-31']) {
       expect(dateUtcKeTanggal(tanggalKeDateUtc(tanggal))).toBe(tanggal);
     }
+  });
+
+  it('membaca tanggal hari ini dari jam lokal, bukan dari UTC', () => {
+    // Pukul 03.00 waktu lokal; di WIB, toISOString() masih menunjuk hari kemarin.
+    expect(tanggalHariIni(new Date(2026, 8, 22, 3, 0))).toBe('2026-09-22');
+    expect(tanggalHariIni(new Date(2026, 0, 5, 23, 59))).toBe('2026-01-05');
   });
 });
