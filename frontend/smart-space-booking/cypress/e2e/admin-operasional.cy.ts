@@ -112,6 +112,66 @@ describe('Operasional pengelola', () => {
     });
   });
 
+  /**
+   * QR yang dipakai di sini adalah gambar asli dari e-ticket member, sehingga
+   * yang diuji adalah rantai lengkapnya: backend membentuk QR, member
+   * mengunduhnya, lalu pemindai di halaman check-in membacanya kembali.
+   */
+  it('membaca QR dari gambar e-ticket yang diunggah', () => {
+    pesanHariIni('11:00').then((reservasi) => {
+      cy.visit(`/tiket/${reservasi.id}`);
+      cy.contains('a', 'Unduh QR')
+        .should('have.attr', 'download', `QR-${reservasi.kode_booking}.png`)
+        .invoke('attr', 'href')
+        .then((href) => {
+          expect(href).to.match(/^data:image\/png;base64,/);
+          const qrPng = Cypress.Buffer.from(String(href).split(',')[1], 'base64');
+
+          cy.masukSebagai('admin_moklet', 'Admin123!');
+          cy.visit(`/admin/reservasi?kode=${reservasi.kode_booking}`);
+          cy.contains('button', 'Setujui').click();
+          cy.contains('Disetujui', { timeout: 10_000 }).should('exist');
+
+          cy.visit('/admin/check-in');
+          cy.get('#unggah-qr').selectFile(
+            { contents: qrPng, fileName: 'qr.png', mimeType: 'image/png' },
+            { force: true },
+          );
+
+          cy.get('#isian-checkin').should(
+            'have.value',
+            `VERIFY-RESERVASI-${reservasi.id}`,
+          );
+          cy.contains(reservasi.kode_booking).should('exist');
+          cy.contains('button', 'Check-in').should('exist');
+          cy.potret('Tamu ditemukan dari gambar QR yang diunggah');
+        });
+    });
+  });
+
+  it('tidak menawarkan check-in di luar tanggal sewa', () => {
+    const besok = new Date(Date.now() + 86_400_000).toLocaleDateString('en-CA', {
+      timeZone: 'Asia/Jakarta',
+    });
+
+    cy.masukSebagai('budi', 'Secret123!');
+    cy.buatReservasi({
+      id_space: idSpace,
+      tanggal_reservasi: besok,
+      jam_mulai: '12:00',
+      durasi_jam: 1,
+    }).then((reservasi) => {
+      cy.masukSebagai('admin_moklet', 'Admin123!');
+      cy.visit(`/admin/reservasi?kode=${reservasi.kode_booking}`);
+      cy.contains('button', 'Setujui').click();
+      cy.contains('Disetujui', { timeout: 10_000 }).should('exist');
+
+      cy.contains('Check-in dibuka').should('exist');
+      cy.contains('button', 'Check-in').should('not.exist');
+      cy.potret('Check-in belum dibuka sebelum hari sewa');
+    });
+  });
+
   it('menyaring daftar reservasi per bulan', () => {
     cy.masukSebagai('admin_moklet', 'Admin123!');
 
