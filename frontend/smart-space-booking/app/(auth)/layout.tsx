@@ -1,3 +1,4 @@
+import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { Merek } from '@/components/layout/merek';
@@ -35,7 +36,23 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         >
           <Merek />
         </Link>
-        <PilihTema />
+        <div className="flex items-center gap-2">
+          {/* Jalan pulang yang jelas. Lambang di sebelah kiri memang menaut ke
+              beranda, tetapi tautan pada logo bukan sesuatu yang semua orang
+              menduga, jadi disediakan tombol tersendiri. Teksnya disembunyikan
+              di layar sempit, sementara namanya tetap terbaca pembaca layar
+              lewat aria-label. */}
+          <Link
+            href="/"
+            aria-label="Kembali ke beranda"
+            className="border-border/80 hover:border-foreground/40 hover:bg-accent focus-visible:ring-ring inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none sm:px-4"
+          >
+            <ArrowLeft className="size-4" aria-hidden />
+            <span className="hidden sm:inline">Beranda</span>
+          </Link>
+
+          <PilihTema />
+        </div>
       </header>
 
       <main className="flex flex-1 items-center justify-center px-4 pt-2 pb-16 masuk">
