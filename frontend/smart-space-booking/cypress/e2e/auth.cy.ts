@@ -100,4 +100,23 @@ describe('Autentikasi', () => {
     cy.visit('/login');
     cy.location('pathname').should('eq', '/spaces');
   });
+
+  it('membuka menu profil di pojok kanan atas lalu keluar lewat menu itu', () => {
+    cy.masukSebagai('budi', 'Secret123!');
+    cy.visit('/spaces');
+
+    // Tombol tema di header juga pemicu dropdown, jadi yang dipilih adalah
+    // pemicu yang memuat avatar.
+    cy.get('header [data-slot="dropdown-menu-trigger"]')
+      .filter(':has([data-slot="avatar"])')
+      .click();
+    cy.get('[data-slot="dropdown-menu-content"]')
+      .should('be.visible')
+      .within(() => {
+        cy.contains('@budi').should('exist');
+        cy.contains('[role="menuitem"]', 'Keluar').click();
+      });
+
+    cy.location('pathname').should('eq', '/login');
+  });
 });
