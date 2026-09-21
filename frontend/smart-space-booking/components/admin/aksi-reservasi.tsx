@@ -22,6 +22,7 @@ import {
 } from '@/lib/api/admin-reservasi';
 import { ApiError } from '@/lib/api/error';
 import { bolehCheckIn, bolehCheckOut, bolehPindahStatus } from '@/lib/constants';
+import { bandingkanTanggal, hariIniWib, tanggalPendek } from '@/lib/format';
 import { kunciTerdampakStatus } from '@/lib/query-keys';
 import type { ReservasiAdmin } from '@/types/entities';
 
@@ -32,6 +33,11 @@ import type { ReservasiAdmin } from '@/types/entities';
  * sehingga pengelola tidak pernah disodori tindakan yang pasti ditolak backend.
  * Salinan itu hanya menentukan apa yang terlihat; keputusan sebenarnya tetap di
  * backend, dan pesan penolakannya ditampilkan apa adanya bila ternyata berbeda.
+ *
+ * Check-in hanya ditawarkan pada tanggal sewanya, sama dengan aturan backend
+ * (`STRICT_CHECKIN_DATE`). Di luar hari itu, yang tampil adalah keterangan
+ * kapan check-in dibuka. Check-out tidak dibatasi tanggal, supaya tamu yang lupa
+ * di-check-out tetap dapat ditutup keesokan harinya.
  *
  * Pembatalan diberi konfirmasi karena statusnya bersifat akhir dan tidak dapat
  * dikembalikan, sedangkan persetujuan serta check-in tidak, supaya alur di meja
@@ -102,17 +108,33 @@ export function AksiReservasi({
 
   const bolehSetujui = bolehPindahStatus(reservasi.status, 'disetujui');
   const bolehBatalkan = bolehPindahStatus(reservasi.status, 'dibatalkan');
-  const bolehMasuk = bolehCheckIn(reservasi.status);
+  const selisihHari = bandingkanTanggal(reservasi.tanggal_reservasi, hariIniWib());
+  const menungguHariH = bolehCheckIn(reservasi.status) && selisihHari !== 0;
+  const bolehMasuk = bolehCheckIn(reservasi.status) && selisihHari === 0;
   const bolehKeluar = bolehCheckOut(reservasi.status);
 
   // Status akhir tidak menyisakan tindakan apa pun.
-  if (!bolehSetujui && !bolehBatalkan && !bolehMasuk && !bolehKeluar) {
+  if (
+    !bolehSetujui &&
+    !bolehBatalkan &&
+    !bolehMasuk &&
+    !bolehKeluar &&
+    !menungguHariH
+  ) {
     return null;
   }
 
   return (
     <>
       <div className="flex flex-wrap items-center justify-end gap-2">
+        {menungguHariH ? (
+          <p className="text-muted-foreground text-xs">
+            {selisihHari > 0
+              ? `Check-in dibuka ${tanggalPendek(reservasi.tanggal_reservasi)}`
+              : 'Tanggal sewa sudah lewat'}
+          </p>
+        ) : null}
+
         {bolehSetujui ? (
           <Button
             size={ukuran}
