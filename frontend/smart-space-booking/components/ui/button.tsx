@@ -1,4 +1,5 @@
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
+import { isValidElement } from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "cn"
 
@@ -17,7 +18,7 @@ const buttonVariants = cva(
           "hover:bg-accent/50 hover:text-accent-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-white/5",
         destructive:
           "bg-destructive/10 text-destructive shadow-2xs hover:bg-destructive/20 hover:-translate-y-0.5 active:translate-y-0 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
-        link: "text-primary underline-offset-4 hover:underline",
+        link: "text-aksen underline-offset-4 hover:underline",
       },
       size: {
         default:
@@ -40,16 +41,34 @@ const buttonVariants = cva(
   }
 )
 
+/**
+ * Tombol aplikasi.
+ *
+ * Tombol ini sering dirender sebagai tautan lewat `render={<Link … />}`. Base UI
+ * menganggap tombolnya `<button>` asli kecuali diberi tahu sebaliknya, lalu
+ * memperingatkan di konsol setiap kali yang dirender ternyata `<a>`. Karena itu
+ * `nativeButton` ditentukan otomatis: benar hanya bila tidak ada `render`, atau
+ * bila yang dirender memang `<button>`. Pemanggil tetap dapat menimpanya.
+ */
 function Button({
   className,
   variant = "default",
   size = "default",
+  render,
+  nativeButton,
   ...props
 }: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+  const tombolAsli =
+    nativeButton ??
+    (render === undefined ||
+      (isValidElement(render) && render.type === "button"))
+
   return (
     <ButtonPrimitive
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
+      render={render}
+      nativeButton={tombolAsli}
       {...props}
     />
   )
