@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -61,14 +62,18 @@ export function UserMenu() {
       />
 
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel className="grid gap-0.5">
-          <span className="truncate font-medium">{nama}</span>
-          {profil?.username ? (
-            <span className="text-muted-foreground text-xs font-normal">
-              @{profil.username}
-            </span>
-          ) : null}
-        </DropdownMenuLabel>
+        {/* Label menu base-ui wajib berada di dalam Group; tanpa itu menunya
+            melempar galat saat dibuka dan tampak seperti tidak dapat ditekan. */}
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="grid gap-0.5">
+            <span className="truncate font-medium">{nama}</span>
+            {profil?.username ? (
+              <span className="text-muted-foreground text-xs font-normal">
+                @{profil.username}
+              </span>
+            ) : null}
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => logout(role)}>
           <LogOut />
