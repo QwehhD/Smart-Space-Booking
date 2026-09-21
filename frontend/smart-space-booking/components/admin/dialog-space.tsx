@@ -39,7 +39,7 @@ import { unggahFotoSpace } from '@/lib/api/upload';
 import { LABEL_TIPE, URUTAN_TIPE } from '@/lib/constants';
 import { qk } from '@/lib/query-keys';
 import { skemaSpace, type NilaiSpace } from '@/lib/validations/admin';
-import type { Space } from '@/types/entities';
+import type { Space, TipeSpace } from '@/types/entities';
 
 const FIELD_BACKEND = [
   'nama_space',
@@ -198,7 +198,11 @@ export function DialogSpace({
                     >
                       <FormControl>
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Pilih tipe" />
+                          <SelectValue placeholder="Pilih tipe">
+                            {(nilai: TipeSpace | null) =>
+                              nilai ? LABEL_TIPE[nilai] : 'Pilih tipe'
+                            }
+                          </SelectValue>
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>

@@ -167,7 +167,12 @@ export function DaftarReservasiAdmin({
             }
           >
             <SelectTrigger className="w-[13rem]" aria-label="Filter space">
-              <SelectValue />
+              <SelectValue>
+                {() =>
+                  spaces.find((s) => s.id === filter.id_space)?.nama_space ??
+                  'Semua space'
+                }
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value={SEMUA}>Semua space</SelectItem>

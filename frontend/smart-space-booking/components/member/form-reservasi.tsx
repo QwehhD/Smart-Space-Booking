@@ -269,7 +269,11 @@ export function FormReservasi({ space }: { space: SpacePublik }) {
                   >
                     <FormControl>
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Pilih durasi" />
+                        <SelectValue placeholder="Pilih durasi">
+                          {(nilai: string | null) =>
+                            nilai ? `${nilai} jam` : 'Pilih durasi'
+                          }
+                        </SelectValue>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -391,7 +395,7 @@ function StatusKetersediaan({
   if (memuat) {
     return (
       <div className="flex items-center gap-2 rounded-xl border border-border/80 bg-muted/30 px-3.5 py-2.5 text-xs text-muted-foreground animate-pulse">
-        <Loader2 className="size-3.5 animate-spin text-primary" />
+        <Loader2 className="size-3.5 animate-spin text-aksen" />
         <span>Memeriksa ketersediaan jadwal…</span>
       </div>
     );
@@ -512,7 +516,7 @@ function PemesananBerhasil({
         ) : null}
         <div className="flex justify-between gap-4 border-t border-border/70 pt-3 font-bold text-base">
           <dt className="text-foreground">Total Bayar</dt>
-          <dd className="text-primary text-lg">
+          <dd className="text-aksen text-lg">
             <Rupiah nilai={hasil.total_bayar} />
           </dd>
         </div>
