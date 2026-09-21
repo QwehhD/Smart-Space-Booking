@@ -32,7 +32,7 @@ export function PanelDaftar({
 
         <Link
           href={href}
-          className="text-primary inline-flex shrink-0 items-center gap-1 text-sm font-medium hover:underline"
+          className="text-aksen inline-flex shrink-0 items-center gap-1 text-sm font-medium hover:underline"
         >
           {labelTautan}
           <ArrowRight className="size-3.5" />

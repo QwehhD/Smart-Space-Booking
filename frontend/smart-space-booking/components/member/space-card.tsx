@@ -36,14 +36,14 @@ export function SpaceCard({ space }: { space: SpacePublik }) {
           <h3 className="text-base font-bold leading-snug">
             <Link
               href={`/spaces/${space.id}`}
-              className="focus-visible:ring-ring rounded-sm transition-colors group-hover:text-primary focus-visible:ring-2 focus-visible:outline-none"
+              className="focus-visible:ring-ring rounded-sm transition-colors group-hover:text-aksen focus-visible:ring-2 focus-visible:outline-none"
             >
               {space.nama_space}
             </Link>
           </h3>
 
           <p className="text-muted-foreground flex items-center gap-1.5 text-xs">
-            <Building2 className="size-3.5 shrink-0 text-primary/70" />
+            <Building2 className="size-3.5 shrink-0 text-aksen/70" />
             <span className="truncate">{space.owner.nama_coworking}</span>
           </p>
         </div>

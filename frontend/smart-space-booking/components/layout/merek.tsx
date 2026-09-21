@@ -44,10 +44,10 @@ export function Merek({
 
       {tampilkanNama ? (
         <span className="grid leading-none">
-          <span className="text-[0.92rem] font-bold tracking-tight text-foreground transition-colors duration-200 group-hover:text-primary">
+          <span className="text-[0.92rem] font-bold tracking-tight text-foreground transition-colors duration-200 group-hover:text-aksen">
             Smart Space
           </span>
-          <span className="mt-0.5 flex items-center gap-1 text-[0.62rem] font-bold tracking-[0.16em] uppercase text-primary/80">
+          <span className="mt-0.5 flex items-center gap-1 text-[0.62rem] font-bold tracking-[0.16em] uppercase text-aksen/80">
             <span>Booking</span>
 
             {/* Penanda hidup: satu titik yang berkeliling pada cincin tipis.

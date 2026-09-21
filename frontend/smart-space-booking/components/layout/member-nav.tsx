@@ -36,7 +36,7 @@ export function MemberNav() {
                     className={cn(
                       'relative flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold tracking-tight transition-all duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
                       aktif
-                        ? 'bg-background text-primary shadow-xs'
+                        ? 'bg-background text-aksen shadow-xs'
                         : 'text-muted-foreground hover:text-foreground hover:bg-background/40',
                     )}
                   >

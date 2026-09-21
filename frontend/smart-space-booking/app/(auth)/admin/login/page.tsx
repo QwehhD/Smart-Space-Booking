@@ -17,7 +17,7 @@ export default async function LoginAdminPage({
         >
           Member
         </Link>
-        <span className="flex-1 rounded-full py-1.5 text-center text-xs font-bold bg-background text-primary shadow-xs">
+        <span className="flex-1 rounded-full py-1.5 text-center text-xs font-bold bg-background text-aksen shadow-xs">
           Pengelola
         </span>
       </div>
@@ -39,7 +39,7 @@ export default async function LoginAdminPage({
 
       <p className="text-muted-foreground border-t border-border/70 pt-4 text-center text-xs">
         Ingin memesan ruangan?{' '}
-        <Link href="/login" className="text-primary font-bold hover:underline">
+        <Link href="/login" className="text-aksen font-bold hover:underline">
           Masuk sebagai member
         </Link>
       </p>

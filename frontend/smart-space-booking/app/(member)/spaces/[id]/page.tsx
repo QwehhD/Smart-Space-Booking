@@ -107,7 +107,7 @@ export default async function DetailSpacePage({
               {space.nama_space}
             </h1>
             <p className="text-muted-foreground flex items-center gap-2 text-sm">
-              <Building2 className="size-4 shrink-0 text-primary" />
+              <Building2 className="size-4 shrink-0 text-aksen" />
               <span className="font-medium text-foreground">{space.owner.nama_coworking}</span>
             </p>
           </div>
@@ -126,7 +126,7 @@ export default async function DetailSpacePage({
             <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
               <dt className="text-muted-foreground text-xs font-medium">Kapasitas Maksimal</dt>
               <dd className="mt-1 flex items-center gap-1.5 font-extrabold text-xl text-foreground">
-                <Users className="size-5 text-primary" />
+                <Users className="size-5 text-aksen" />
                 <span>{space.kapasitas} <span className="text-xs font-normal text-muted-foreground">orang</span></span>
               </dd>
             </div>
@@ -177,7 +177,7 @@ export default async function DetailSpacePage({
 
           <a
             href={`tel:${space.owner.telp}`}
-            className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/10 px-4 py-2 text-xs font-semibold text-primary hover:bg-primary/20 transition-colors"
+            className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/10 px-4 py-2 text-xs font-semibold text-aksen hover:bg-primary/20 transition-colors"
           >
             <Phone className="size-3.5" />
             <span>Hubungi: {space.owner.telp}</span>

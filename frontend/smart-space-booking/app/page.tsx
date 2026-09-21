@@ -61,17 +61,17 @@ export default async function Beranda() {
         <nav aria-label="Navigasi utama" className="ml-6 hidden md:block">
           <ul className="flex items-center gap-7 text-sm font-medium">
             <li>
-              <Link href="/spaces" className="hover:text-primary transition-colors">
+              <Link href="/spaces" className="hover:text-aksen transition-colors">
                 Ruangan
               </Link>
             </li>
             <li>
-              <Link href="#cara" className="hover:text-primary transition-colors">
+              <Link href="#cara" className="hover:text-aksen transition-colors">
                 Cara kerja
               </Link>
             </li>
             <li>
-              <Link href="/admin/login" className="hover:text-primary transition-colors">
+              <Link href="/admin/login" className="hover:text-aksen transition-colors">
                 Pengelola
               </Link>
             </li>
@@ -91,7 +91,7 @@ export default async function Beranda() {
 
           <Link
             href="/login"
-            className="hover:text-primary px-2 text-sm font-semibold transition-colors"
+            className="hover:text-aksen px-2 text-sm font-semibold transition-colors"
           >
             Masuk
           </Link>
@@ -301,7 +301,7 @@ export default async function Beranda() {
 
                     <div className="mt-4 flex items-start justify-between gap-4">
                       <div className="min-w-0">
-                        <p className="group-hover:text-primary truncate text-lg font-bold tracking-tight transition-colors">
+                        <p className="group-hover:text-aksen truncate text-lg font-bold tracking-tight transition-colors">
                           {space.nama_space}
                         </p>
                         <p className="text-muted-foreground mt-1 flex items-center gap-1.5 truncate text-sm">

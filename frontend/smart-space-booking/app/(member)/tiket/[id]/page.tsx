@@ -59,7 +59,7 @@ export default async function ETicketPage({ params }: PageProps<'/tiket/[id]'>) 
       <article className="cetak-tiket relative bg-card shadow-lg hover:shadow-xl transition-shadow mx-auto w-full max-w-md overflow-hidden rounded-3xl border border-border/80">
         {/* Header Tiket */}
         <header className="relative bg-gradient-to-b from-primary/10 via-accent/20 to-transparent border-b border-border/70 px-6 py-5 text-center">
-          <div className="mx-auto mb-2 inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-3 py-0.5 text-[10px] font-bold font-mono tracking-widest uppercase text-primary">
+          <div className="mx-auto mb-2 inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-3 py-0.5 text-[10px] font-bold font-mono tracking-widest uppercase text-aksen">
             E-Ticket Resmi
           </div>
           <h1 className="text-xl font-bold tracking-tight text-foreground text-balance">
@@ -144,7 +144,7 @@ export default async function ETicketPage({ params }: PageProps<'/tiket/[id]'>) 
           ) : null}
           <div className="flex items-center justify-between gap-4 border-t border-border/70 pt-3 text-base font-bold">
             <dt className="text-foreground">Total Dibayar</dt>
-            <dd className="text-primary font-extrabold text-lg">
+            <dd className="text-aksen font-extrabold text-lg">
               <Rupiah nilai={tiket.rincian_pembayaran.total_dibayar} />
             </dd>
           </div>

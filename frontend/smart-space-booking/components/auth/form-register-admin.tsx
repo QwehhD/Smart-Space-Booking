@@ -284,7 +284,7 @@ export function FormRegisterAdmin() {
 
         <p className="text-muted-foreground text-center text-xs sm:text-sm pt-2">
           Sudah punya akun pengelola?{' '}
-          <Link href="/admin/login" className="text-primary font-bold hover:underline">
+          <Link href="/admin/login" className="text-aksen font-bold hover:underline">
             Masuk di sini
           </Link>
         </p>

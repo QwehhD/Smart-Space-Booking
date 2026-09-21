@@ -25,11 +25,11 @@ export function ReservasiCard({
         <div className="min-w-0">
           <Link
             href={`/reservasi/${reservasi.id}`}
-            className="focus-visible:ring-ring inline-flex items-center gap-1 rounded-sm font-mono text-xs font-bold text-primary hover:underline focus-visible:ring-2 focus-visible:outline-none"
+            className="focus-visible:ring-ring inline-flex items-center gap-1 rounded-sm font-mono text-xs font-bold text-aksen hover:underline focus-visible:ring-2 focus-visible:outline-none"
           >
             {reservasi.kode_booking}
           </Link>
-          <h3 className="mt-1 truncate font-bold text-base text-foreground group-hover:text-primary transition-colors">
+          <h3 className="mt-1 truncate font-bold text-base text-foreground group-hover:text-aksen transition-colors">
             {reservasi.space?.nama_space ?? 'Space tidak diketahui'}
           </h3>
         </div>
@@ -38,7 +38,7 @@ export function ReservasiCard({
 
       <div className="grid gap-1.5 text-xs text-muted-foreground">
         <p className="flex items-center gap-1.5 font-medium">
-          <Clock className="size-3.5 shrink-0 text-primary/70" />
+          <Clock className="size-3.5 shrink-0 text-aksen/70" />
           <span>
             {tanggalDanJam(
               reservasi.tanggal_reservasi,

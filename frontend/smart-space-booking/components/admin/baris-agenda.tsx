@@ -26,7 +26,7 @@ export function BarisAgenda({ item }: { item: ReservasiAdmin }) {
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-bold text-foreground group-hover:text-primary transition-colors">
+        <p className="truncate text-sm font-bold text-foreground group-hover:text-aksen transition-colors">
           {item.space?.nama_space ?? 'Space sudah dihapus'}
         </p>
         <p className="text-muted-foreground truncate text-xs mt-0.5 font-medium">

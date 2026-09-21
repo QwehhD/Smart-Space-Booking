@@ -103,7 +103,7 @@ export function DaftarSpace({ awal }: { awal: Space[] }) {
               </div>
 
               <div className="grid flex-1 gap-2 p-5">
-                <h2 className="leading-snug font-bold text-base text-foreground group-hover:text-primary transition-colors">
+                <h2 className="leading-snug font-bold text-base text-foreground group-hover:text-aksen transition-colors">
                   {space.nama_space}
                 </h2>
 

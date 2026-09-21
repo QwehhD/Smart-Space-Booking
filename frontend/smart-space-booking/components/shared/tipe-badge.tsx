@@ -10,7 +10,7 @@ const IKON_TIPE: Record<TipeSpace, typeof Users> = {
 };
 
 const GAYA_TIPE: Record<TipeSpace, string> = {
-  desk: 'bg-primary/10 text-primary border-primary/20',
+  desk: 'bg-primary/10 text-aksen border-primary/20',
   private_office: 'bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/20',
   meeting_room: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
 };

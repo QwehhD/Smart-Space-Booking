@@ -12,7 +12,7 @@ export default async function LoginMemberPage({
   return (
     <div className="grid gap-6">
       <div className="flex rounded-full border border-border/75 bg-muted/40 p-1">
-        <span className="flex-1 rounded-full py-1.5 text-center text-xs font-bold bg-background text-primary shadow-xs">
+        <span className="flex-1 rounded-full py-1.5 text-center text-xs font-bold bg-background text-aksen shadow-xs">
           Member
         </span>
         <Link
@@ -40,7 +40,7 @@ export default async function LoginMemberPage({
 
       <p className="text-muted-foreground border-t border-border/70 pt-4 text-center text-xs">
         Pengelola coworking space?{' '}
-        <Link href="/admin/login" className="text-primary font-bold hover:underline">
+        <Link href="/admin/login" className="text-aksen font-bold hover:underline">
           Masuk sebagai pengelola
         </Link>
       </p>

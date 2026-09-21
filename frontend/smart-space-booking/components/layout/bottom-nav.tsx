@@ -40,7 +40,7 @@ export function BottomNav({ varian }: { varian: 'member' | 'admin' }) {
                 aria-current={aktif ? 'page' : undefined}
                 className={cn(
                   'relative flex flex-col items-center gap-1 py-1.5 text-[11px] font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
-                  aktif ? 'text-primary scale-105 font-semibold' : 'text-muted-foreground hover:text-foreground',
+                  aktif ? 'text-aksen scale-105 font-semibold' : 'text-muted-foreground hover:text-foreground',
                 )}
               >
                 {aktif && (

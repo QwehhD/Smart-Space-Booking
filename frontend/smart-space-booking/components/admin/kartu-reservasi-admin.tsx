@@ -28,8 +28,8 @@ export function KartuReservasiAdmin({
     <article className="group relative flex flex-col gap-3.5 rounded-2xl border border-border/75 bg-card/85 p-5 shadow-xs transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md backdrop-blur-xs">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="font-mono text-xs font-bold text-primary">{reservasi.kode_booking}</p>
-          <h3 className="mt-1 truncate font-bold text-base text-foreground group-hover:text-primary transition-colors">
+          <p className="font-mono text-xs font-bold text-aksen">{reservasi.kode_booking}</p>
+          <h3 className="mt-1 truncate font-bold text-base text-foreground group-hover:text-aksen transition-colors">
             {reservasi.space?.nama_space ?? 'Space sudah dihapus'}
           </h3>
         </div>
@@ -38,7 +38,7 @@ export function KartuReservasiAdmin({
 
       <div className="grid gap-2 text-xs text-muted-foreground">
         <p className="flex items-center gap-1.5 font-medium">
-          <Clock className="size-3.5 shrink-0 text-primary/70" />
+          <Clock className="size-3.5 shrink-0 text-aksen/70" />
           <span>
             {tanggalDanJam(
               reservasi.tanggal_reservasi,
@@ -60,7 +60,7 @@ export function KartuReservasiAdmin({
           <Phone className="size-3.5 shrink-0 text-muted-foreground" />
           <a
             href={`tel:${reservasi.member.telp}`}
-            className="text-primary font-medium hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-xs"
+            className="text-aksen font-medium hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-xs"
           >
             {reservasi.member.telp}
           </a>

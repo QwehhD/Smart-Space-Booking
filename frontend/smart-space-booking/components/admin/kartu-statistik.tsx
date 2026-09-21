@@ -34,7 +34,7 @@ export function KartuStatistik({
           {label}
         </span>
         {icon ? (
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary shadow-2xs transition-transform duration-300 group-hover:scale-110">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-aksen shadow-2xs transition-transform duration-300 group-hover:scale-110">
             {icon}
           </span>
         ) : null}

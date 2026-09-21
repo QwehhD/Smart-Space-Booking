@@ -166,7 +166,7 @@ export function FormLogin({
 
         <p className="text-muted-foreground text-center text-xs sm:text-sm pt-2">
           Belum punya akun?{' '}
-          <Link href={tautanDaftar} className="text-primary font-bold hover:underline">
+          <Link href={tautanDaftar} className="text-aksen font-bold hover:underline">
             Daftar di sini
           </Link>
         </p>

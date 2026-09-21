@@ -80,7 +80,7 @@ export function PanelCheckIn({
     <>
       <div className="relative overflow-hidden rounded-2xl border border-border/75 bg-card p-6 shadow-sm backdrop-blur-xs transition-all focus-within:border-primary/50 focus-within:shadow-md focus-within:shadow-primary/10">
         <div className="flex items-center gap-2 mb-3">
-          <span className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <span className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-aksen">
             <ScanLine className="size-4" />
           </span>
           <label htmlFor="isian-checkin" className="text-sm font-bold text-foreground">
@@ -89,7 +89,7 @@ export function PanelCheckIn({
         </div>
 
         <div className="relative">
-          <ScanLine className="text-primary pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2" />
+          <ScanLine className="text-aksen pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2" />
           <Input
             id="isian-checkin"
             value={isian}

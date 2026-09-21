@@ -65,7 +65,7 @@ export default function DesignSystemPage() {
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10">
       <header className="border-b pb-6">
-        <p className="text-primary font-mono text-xs tracking-widest uppercase">
+        <p className="text-aksen font-mono text-xs tracking-widest uppercase">
           Internal · hanya mode pengembangan
         </p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">
