@@ -22,6 +22,16 @@ export const envValidationSchema = Joi.object({
   JAM_OPERASIONAL_BUKA: Joi.string().pattern(JAM_PATTERN).default('07:00'),
   JAM_OPERASIONAL_TUTUP: Joi.string().pattern(JAM_PATTERN).default('22:00'),
   STRICT_CHECKIN_DATE: Joi.boolean().default(false),
+  // Kosong berarti foto disimpan di folder uploads/ lokal.
+  CLOUDINARY_URL: Joi.string()
+    .pattern(/^cloudinary:\/\/[^:]+:[^@]+@.+$/)
+    .allow('')
+    .optional()
+    .messages({
+      'string.pattern.base':
+        'CLOUDINARY_URL harus berbentuk cloudinary://<api_key>:<api_secret>@<cloud_name>',
+    }),
+  CLOUDINARY_FOLDER: Joi.string().default('smart-space-booking'),
 }).custom((value: Record<string, string>, helpers) => {
   if (value.JAM_OPERASIONAL_BUKA >= value.JAM_OPERASIONAL_TUTUP) {
     return helpers.message({
