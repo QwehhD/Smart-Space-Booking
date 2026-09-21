@@ -1,7 +1,7 @@
 'use client';
 
 import { ImagePlus, Loader2, Trash2 } from 'lucide-react';
-import { useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { ApiError } from '@/lib/api/error';
@@ -52,6 +52,26 @@ export function ImageUpload({
   const [pratinjau, setPratinjau] = useState<string | null>(previewUrl ?? null);
   const [mengunggah, setMengunggah] = useState(false);
 
+  /**
+   * URL objek lokal yang sedang dipakai sebagai pratinjau.
+   *
+   * URL ini baru boleh dicabut ketika sudah tidak ditampilkan lagi: saat diganti
+   * berkas lain, saat fotonya dihapus, atau saat komponen dilepas. Sebelumnya ia
+   * dicabut tepat setelah unggahan selesai, padahal selama mengunggah yang tampil
+   * adalah spinner — sehingga `<img>` baru dipasang sesudah alamatnya tidak sah
+   * lagi, dan pratinjau selalu tampil rusak.
+   */
+  const urlLokal = useRef<string | null>(null);
+
+  function gantiUrlLokal(baru: string | null) {
+    if (urlLokal.current) {
+      URL.revokeObjectURL(urlLokal.current);
+    }
+    urlLokal.current = baru;
+  }
+
+  useEffect(() => () => gantiUrlLokal(null), []);
+
   async function pilihBerkas(berkas: File) {
     if (berkas.size > MAKS_BYTE) {
       toast.error('Ukuran foto melebihi 2 MB.');
@@ -59,6 +79,7 @@ export function ImageUpload({
     }
 
     const lokal = URL.createObjectURL(berkas);
+    gantiUrlLokal(lokal);
     setPratinjau(lokal);
     setMengunggah(true);
 
@@ -69,18 +90,19 @@ export function ImageUpload({
     } catch (error) {
       // Pratinjau dikembalikan ke keadaan sebelumnya agar tidak menampilkan
       // gambar yang sebenarnya gagal tersimpan.
+      gantiUrlLokal(null);
       setPratinjau(previewUrl ?? null);
       onChange(null, null);
       toast.error(
         error instanceof ApiError ? error.message : 'Gagal mengunggah foto.',
       );
     } finally {
-      URL.revokeObjectURL(lokal);
       setMengunggah(false);
     }
   }
 
   function hapus() {
+    gantiUrlLokal(null);
     setPratinjau(null);
     onChange(null, null);
 
