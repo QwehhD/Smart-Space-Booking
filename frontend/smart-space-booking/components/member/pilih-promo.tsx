@@ -1,22 +1,14 @@
 'use client';
 
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { Check, Tag, X } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { diskonAktif, periksaPromo } from '@/lib/api/diskon';
+import { periksaPromo } from '@/lib/api/diskon';
 import { ApiError } from '@/lib/api/error';
-import { qk } from '@/lib/query-keys';
 
 /**
  * Promo yang sedang dipakai.
@@ -32,17 +24,18 @@ export interface PromoTerpilih {
   persentase_diskon: number;
 }
 
-const TANPA_PROMO = 'tanpa-promo';
-
 /**
- * Pemilihan kode promo.
+ * Pemakaian kode promo, hanya lewat ketikan.
  *
- * Daftarnya diambil dengan `?id_space`, sehingga hanya promo milik pengelola
- * space tersebut yang ditawarkan. Backend menolak promo terbitan pengelola lain,
- * jadi menyaringnya di sini mencegah pengguna memilih sesuatu yang pasti gagal.
+ * Sebelumnya tersedia juga daftar pilihan berisi seluruh promo aktif, tetapi
+ * daftar itu membuat kode promo terbaca oleh siapa saja yang membuka form.
+ * Pengelola ingin kodenya bersifat rahasia — hanya dipakai oleh yang memang
+ * diberi tahu — sehingga yang tersisa hanya kolom ketik. Placeholder-nya pun
+ * sengaja bukan contoh kode sungguhan.
  *
- * Kode manual juga dikirim beserta `id_space` agar hasil pengecekannya sama
- * persis dengan yang nanti diterapkan saat memesan.
+ * Kode dikirim beserta `id_space` agar hasil pengecekannya sama persis dengan
+ * yang nanti diterapkan saat memesan, termasuk penolakan promo milik pengelola
+ * lain.
  */
 export function PilihPromo({
   idSpace,
@@ -56,11 +49,6 @@ export function PilihPromo({
   nonaktif?: boolean;
 }) {
   const [kode, setKode] = useState('');
-
-  const daftar = useQuery({
-    queryKey: qk.diskon.aktif(idSpace),
-    queryFn: () => diskonAktif(idSpace),
-  });
 
   const periksa = useMutation({
     mutationFn: (nama: string) => periksaPromo(nama, idSpace),
@@ -79,11 +67,6 @@ export function PilihPromo({
       );
     },
   });
-
-  // Dua cara memilih promo tidak boleh aktif bersamaan: memilih dari katalog
-  // mengosongkan kode manual, dan sebaliknya.
-  const dariKatalog = value?.id_diskon !== undefined;
-  const nilaiSelect = dariKatalog ? String(value.id_diskon) : TANPA_PROMO;
 
   if (value) {
     return (
@@ -115,77 +98,45 @@ export function PilihPromo({
   }
 
   return (
-    <div className="grid gap-3">
-      <div className="grid gap-2">
-        <Label htmlFor="promo-katalog">Kode promo</Label>
-        <Select
-          value={nilaiSelect}
-          onValueChange={(nilai) => {
-            if (nilai === TANPA_PROMO) {
-              onChange(null);
-              return;
-            }
-
-            const promo = daftar.data?.find((d) => String(d.id) === nilai);
-
-            if (promo) {
-              onChange({
-                id_diskon: promo.id,
-                nama_diskon: promo.nama_diskon,
-                persentase_diskon: promo.persentase_diskon,
-              });
-              setKode('');
+    <div className="grid gap-2">
+      <Label htmlFor="promo-manual">
+        Kode promo{' '}
+        <span className="text-muted-foreground font-normal">(opsional)</span>
+      </Label>
+      <div className="flex gap-2">
+        <Input
+          id="promo-manual"
+          value={kode}
+          // Kode promo di backend hanya berisi huruf kapital dan angka.
+          onChange={(e) => setKode(e.target.value.toUpperCase().replace(/\s/g, ''))}
+          onKeyDown={(e) => {
+            // Enter memakai kode, bukan mengirim seluruh form pemesanan.
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              if (kode && !periksa.isPending) {
+                periksa.mutate(kode);
+              }
             }
           }}
-          disabled={nonaktif || daftar.isLoading}
+          placeholder="Masukkan kode promo"
+          autoComplete="off"
+          spellCheck={false}
+          disabled={nonaktif}
+          className="font-mono uppercase placeholder:font-sans placeholder:normal-case"
+        />
+        <Button
+          type="button"
+          variant="outline"
+          disabled={nonaktif || !kode || periksa.isPending}
+          onClick={() => periksa.mutate(kode)}
         >
-          <SelectTrigger id="promo-katalog" className="w-full">
-            <SelectValue
-              placeholder={
-                daftar.isLoading ? 'Memuat promo…' : 'Pilih promo yang tersedia'
-              }
-            />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={TANPA_PROMO}>Tanpa promo</SelectItem>
-            {(daftar.data ?? []).map((promo) => (
-              <SelectItem key={promo.id} value={String(promo.id)}>
-                {promo.nama_diskon} — {promo.persentase_diskon}%
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {daftar.data?.length === 0 ? (
-          <p className="text-muted-foreground text-xs">
-            Belum ada promo aktif untuk lokasi ini.
-          </p>
-        ) : null}
+          <Tag />
+          {periksa.isPending ? 'Memeriksa…' : 'Pakai'}
+        </Button>
       </div>
-
-      <div className="grid gap-2">
-        <Label htmlFor="promo-manual">Atau masukkan kode</Label>
-        <div className="flex gap-2">
-          <Input
-            id="promo-manual"
-            value={kode}
-            // Kode promo di backend hanya berisi huruf kapital dan angka.
-            onChange={(e) => setKode(e.target.value.toUpperCase().replace(/\s/g, ''))}
-            placeholder="DISKONHEMAT20"
-            disabled={nonaktif}
-            className="font-mono uppercase"
-          />
-          <Button
-            type="button"
-            variant="outline"
-            disabled={nonaktif || !kode || periksa.isPending}
-            onClick={() => periksa.mutate(kode)}
-          >
-            <Tag />
-            {periksa.isPending ? 'Memeriksa…' : 'Pakai'}
-          </Button>
-        </div>
-      </div>
+      <p className="text-muted-foreground text-xs">
+        Punya kode dari pengelola? Ketik di sini untuk mendapat potongan.
+      </p>
     </div>
   );
 }
