@@ -64,7 +64,7 @@ export class SpacesService {
   private tampilkan(space: Space & { owner: SpaceOwner }) {
     return serializeSpacePublik(
       space,
-      this.config.get<string>('appUrl') ?? 'http://localhost:3000',
+      this.config.getOrThrow<string>('foto.baseUrl'),
     );
   }
 }

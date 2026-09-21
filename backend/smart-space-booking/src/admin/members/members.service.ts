@@ -154,7 +154,7 @@ export class AdminMembersService {
   private tampilkan(member: Member) {
     return serializeMember(
       member,
-      this.config.get<string>('appUrl') ?? 'http://localhost:3000',
+      this.config.getOrThrow<string>('foto.baseUrl'),
     );
   }
 }

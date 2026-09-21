@@ -11,7 +11,7 @@ import { buildFotoUrl } from '../utils/foto.util';
  * field pada contoh tetap bekerja, sementara bentuk yang berbeda-beda justru
  * menyulitkan frontend memakai ulang komponen yang sama.
  */
-export const serializeSpace = (space: Space, appUrl: string) => ({
+export const serializeSpace = (space: Space, fotoBaseUrl: string) => ({
   id: space.id,
   nama_space: space.nama_space,
   harga_per_jam: space.harga_per_jam,
@@ -19,7 +19,7 @@ export const serializeSpace = (space: Space, appUrl: string) => ({
   kapasitas: space.kapasitas,
   deskripsi: space.deskripsi,
   foto: space.foto,
-  foto_url: buildFotoUrl(appUrl, 'spaces', space.foto),
+  foto_url: buildFotoUrl(fotoBaseUrl, 'spaces', space.foto),
   id_owner: space.id_owner,
 });
 
@@ -33,9 +33,9 @@ export const serializeSpace = (space: Space, appUrl: string) => ({
  */
 export const serializeSpacePublik = (
   space: Space & { owner: SpaceOwner },
-  appUrl: string,
+  fotoBaseUrl: string,
 ) => ({
-  ...serializeSpace(space, appUrl),
+  ...serializeSpace(space, fotoBaseUrl),
   owner: {
     id: space.owner.id,
     nama_coworking: space.owner.nama_coworking,

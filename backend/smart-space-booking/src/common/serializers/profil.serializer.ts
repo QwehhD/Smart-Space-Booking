@@ -6,20 +6,23 @@
 import { Member, SpaceOwner } from '@prisma/client';
 import { buildFotoUrl } from '../utils/foto.util';
 
-export const serializeMember = (member: Member, appUrl: string) => ({
+export const serializeMember = (member: Member, fotoBaseUrl: string) => ({
   id: member.id,
   nama_member: member.nama_member,
   instansi: member.instansi,
   alamat: member.alamat,
   telp: member.telp,
   foto: member.foto,
-  foto_url: buildFotoUrl(appUrl, 'members', member.foto),
+  foto_url: buildFotoUrl(fotoBaseUrl, 'members', member.foto),
   // Disertakan karena daftar member pada panel admin membutuhkannya, dan satu
   // bentuk yang sama memudahkan frontend memakai ulang komponen profil.
   created_at: member.created_at,
 });
 
-export const serializeSpaceOwner = (owner: SpaceOwner, appUrl: string) => ({
+export const serializeSpaceOwner = (
+  owner: SpaceOwner,
+  fotoBaseUrl: string,
+) => ({
   id: owner.id,
   nama_coworking: owner.nama_coworking,
   nama_pemilik: owner.nama_pemilik,
@@ -27,5 +30,5 @@ export const serializeSpaceOwner = (owner: SpaceOwner, appUrl: string) => ({
   alamat: owner.alamat,
   deskripsi: owner.deskripsi,
   foto: owner.foto,
-  foto_url: buildFotoUrl(appUrl, 'general', owner.foto),
+  foto_url: buildFotoUrl(fotoBaseUrl, 'general', owner.foto),
 });

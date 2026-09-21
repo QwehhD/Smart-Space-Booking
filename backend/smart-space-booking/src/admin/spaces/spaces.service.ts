@@ -113,7 +113,7 @@ export class AdminSpacesService {
   private tampilkan(space: Space) {
     return serializeSpace(
       space,
-      this.config.get<string>('appUrl') ?? 'http://localhost:3000',
+      this.config.getOrThrow<string>('foto.baseUrl'),
     );
   }
 }

@@ -16,7 +16,7 @@ export class AdminProfileService {
       where: { id: idOwner },
     });
 
-    return serializeSpaceOwner(owner, this.appUrl);
+    return serializeSpaceOwner(owner, this.fotoBaseUrl);
   }
 
   /**
@@ -37,10 +37,10 @@ export class AdminProfileService {
       },
     });
 
-    return serializeSpaceOwner(owner, this.appUrl);
+    return serializeSpaceOwner(owner, this.fotoBaseUrl);
   }
 
-  private get appUrl(): string {
-    return this.config.get<string>('appUrl') ?? 'http://localhost:3000';
+  private get fotoBaseUrl(): string {
+    return this.config.getOrThrow<string>('foto.baseUrl');
   }
 }

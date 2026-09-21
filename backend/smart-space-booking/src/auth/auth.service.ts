@@ -68,7 +68,7 @@ export class AuthService {
       id: user.id,
       username: user.username,
       role: user.role,
-      member: serializeMember(member, this.appUrl),
+      member: serializeMember(member, this.fotoBaseUrl),
       access_token: this.terbitkanToken({
         sub: user.id,
         username: user.username,
@@ -111,7 +111,7 @@ export class AuthService {
       id: user.id,
       username: user.username,
       role: user.role,
-      space_owner: serializeSpaceOwner(owner, this.appUrl),
+      space_owner: serializeSpaceOwner(owner, this.fotoBaseUrl),
       access_token: this.terbitkanToken({
         sub: user.id,
         username: user.username,
@@ -144,9 +144,11 @@ export class AuthService {
       role: user.role,
       // Soal mencontohkan kedua kunci selalu ada pada response login, yang tidak
       // relevan bernilai null, sehingga frontend tidak perlu memeriksa role dulu.
-      member: user.member ? serializeMember(user.member, this.appUrl) : null,
+      member: user.member
+        ? serializeMember(user.member, this.fotoBaseUrl)
+        : null,
       space_owner: user.space_owner
-        ? serializeSpaceOwner(user.space_owner, this.appUrl)
+        ? serializeSpaceOwner(user.space_owner, this.fotoBaseUrl)
         : null,
       access_token: this.terbitkanToken({
         sub: user.id,
@@ -174,16 +176,16 @@ export class AuthService {
       username: user.username,
       role: user.role,
       ...(user.member && {
-        member: serializeMember(user.member, this.appUrl),
+        member: serializeMember(user.member, this.fotoBaseUrl),
       }),
       ...(user.space_owner && {
-        space_owner: serializeSpaceOwner(user.space_owner, this.appUrl),
+        space_owner: serializeSpaceOwner(user.space_owner, this.fotoBaseUrl),
       }),
     };
   }
 
-  private get appUrl(): string {
-    return this.config.get<string>('appUrl') ?? 'http://localhost:3000';
+  private get fotoBaseUrl(): string {
+    return this.config.getOrThrow<string>('foto.baseUrl');
   }
 
   private hashPassword(password: string): Promise<string> {
