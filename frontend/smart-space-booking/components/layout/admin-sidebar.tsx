@@ -1,6 +1,6 @@
 'use client';
 
-import { Menu } from 'lucide-react';
+import { LogOut, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
@@ -16,7 +16,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { useSesi } from '@/lib/auth/use-session';
+import { useLogout, useSesi } from '@/lib/auth/use-session';
 import { cn } from '@/lib/utils';
 
 function DaftarMenu({ onPilih }: { onPilih?: () => void }) {
@@ -37,11 +37,11 @@ function DaftarMenu({ onPilih }: { onPilih?: () => void }) {
               className={cn(
                 'relative flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
                 aktif
-                  ? 'bg-primary/10 text-primary font-semibold shadow-2xs before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-1 before:rounded-r-full before:bg-primary'
+                  ? 'bg-primary/10 text-aksen font-semibold shadow-2xs before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-1 before:rounded-r-full before:bg-primary'
                   : 'text-muted-foreground hover:bg-sidebar-accent hover:text-foreground hover:translate-x-0.5',
               )}
             >
-              <Icon className={cn('size-4 shrink-0 transition-colors', aktif ? 'text-primary' : 'text-muted-foreground')} />
+              <Icon className={cn('size-4 shrink-0 transition-colors', aktif ? 'text-aksen' : 'text-muted-foreground')} />
               <span>{item.label}</span>
             </Link>
           </li>
@@ -54,6 +54,7 @@ function DaftarMenu({ onPilih }: { onPilih?: () => void }) {
 /** Sidebar tetap di desktop; di mobile isinya dipindah ke drawer. */
 export function AdminSidebar() {
   const { namaTampilan } = useSesi();
+  const logout = useLogout();
 
   return (
     <aside className="bg-sidebar hidden w-64 shrink-0 border-r border-border/70 md:flex md:flex-col">
@@ -75,20 +76,35 @@ export function AdminSidebar() {
         <DaftarMenu />
       </div>
 
-      <div className="flex items-center gap-2 border-t border-border/70 px-4 py-3 bg-muted/20">
-        {namaTampilan ? (
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-semibold text-foreground">
-              {namaTampilan}
-            </p>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
-              Administrator
-            </p>
-          </div>
-        ) : (
-          <span className="flex-1" />
-        )}
-        <PilihTema />
+      {/* Kaki sidebar: identitas, tema, dan tombol keluar. Sebelumnya tombol
+          keluar hanya ada di menu pengguna pada bilah atas versi ponsel,
+          sehingga di layar lebar pengelola tidak punya cara untuk keluar. */}
+      <div className="grid gap-2.5 border-t border-border/70 px-4 py-3 bg-muted/20">
+        <div className="flex items-center gap-2">
+          {namaTampilan ? (
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-semibold text-foreground">
+                {namaTampilan}
+              </p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                Administrator
+              </p>
+            </div>
+          ) : (
+            <span className="flex-1" />
+          )}
+          <PilihTema />
+        </div>
+
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full justify-start"
+          onClick={() => logout('admin_space')}
+        >
+          <LogOut />
+          Keluar
+        </Button>
       </div>
     </aside>
   );
